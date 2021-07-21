@@ -1,0 +1,28 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Asset
+    network: mumbai
+    source:
+      address: "0xF341667f7EcEE52B261A1dB70897F636aAb5A9cb"
+      abi: AssetAbi
+      startBlock: 16295860
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Asset
+      abis:
+        - name: AssetAbi
+          file: ./abis/Asset.json
+      eventHandlers:
+        # - event: Approval(indexed address,indexed address,indexed uint256)
+        #   handler: handleApproval
+        # - event: ApprovalForAll(indexed address,indexed address,bool)
+        #   handler: handleApprovalForAll
+        - event: TokenizeAsset(string,uint256,string,uint256,uint256)
+          handler: handleTokenizeAsset
+      file: ./src/mapping.ts

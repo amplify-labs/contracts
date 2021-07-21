@@ -1,0 +1,7 @@
+type Asset @entity {
+  id: ID!
+  value: BigInt!
+  uploaded_at: BigInt!
+  uri: String!
+  maturity: BigInt!
+}
