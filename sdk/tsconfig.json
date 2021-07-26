@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "outDir": "dist/nodejs/",
+    "outDir": "src/types",
     "lib": ["es6", "dom"],
+    "allowJs": true,
+    "emitDeclarationOnly": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": true
