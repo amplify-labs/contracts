@@ -4,7 +4,7 @@
  */
 
 import { ethers } from 'ethers';
-import { AbiItem, CallOptions, Provider, ProviderNetwork } from './types';
+import { AbiItem, CallOptions, Network, Provider, ProviderNetwork } from './types';
 
 enum JsonRpc {
   EthSendTransaction,
@@ -65,7 +65,7 @@ function _ethJsonRpc(
       contract = new ethers.Contract(address, abi, provider);
     } else {
       // Assumes `method` is a string of the member definition
-      abi = [ method ];
+      abi = [method];
       contract = new ethers.Contract(address, abi, provider);
       method = Object.keys(contract.functions)[1];
     }
@@ -74,8 +74,8 @@ function _ethJsonRpc(
       contract[method].apply(null, parameters).then((result) => {
         resolve(result);
       }).catch((error) => {
-        try { delete parameters[parameters.length-1].privateKey } catch(e) {}
-        try { delete parameters[parameters.length-1].mnemonic   } catch(e) {}
+        try { delete parameters[parameters.length - 1].privateKey } catch (e) { }
+        try { delete parameters[parameters.length - 1].mnemonic } catch (e) { }
         reject({
           message: 'Error occurred during [eth_sendTransaction]. See {error}.',
           error,
@@ -87,8 +87,8 @@ function _ethJsonRpc(
       contract.callStatic[method].apply(null, parameters).then((result) => {
         resolve(result);
       }).catch((error) => {
-        try { delete parameters[parameters.length-1].privateKey } catch(e) {}
-        try { delete parameters[parameters.length-1].mnemonic   } catch(e) {}
+        try { delete parameters[parameters.length - 1].privateKey } catch (e) { }
+        try { delete parameters[parameters.length - 1].mnemonic } catch (e) { }
         reject({
           message: 'Error occurred during [eth_call]. See {error}.',
           error,
@@ -143,7 +143,7 @@ export function read(
   parameters: any[] = [],
   options: CallOptions = {}
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) : Promise<any> {
+): Promise<any> {
   return _ethJsonRpc(JsonRpc.EthCall, address, method, parameters, options);
 }
 
@@ -196,7 +196,7 @@ export function trx(
   parameters: any[] = [],
   options: CallOptions = {}
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) : Promise<any> {
+): Promise<any> {
   return _ethJsonRpc(JsonRpc.EthSendTransaction, address, method, parameters, options);
 }
 
@@ -230,7 +230,7 @@ export async function getProviderNetwork(
 
 
   networkId = isNaN(networkId) ? 0 : +networkId;
-  let network: Record<string, any>;
+  let network: Partial<Network>;
   switch (true) {
     case String(networkId) === "80001": { // Deploy Matic network using goerli port
       network = { name: 'polygon_mumbai' }
@@ -279,7 +279,7 @@ export async function getProviderNetwork(
 export async function getBalance(
   address: string,
   provider: Provider | string
-) : Promise<string> {
+): Promise<string> {
   let _provider;
   if (typeof provider === 'object' && provider._isSigner) {
     _provider = provider.provider;
@@ -298,7 +298,7 @@ export async function getBalance(
   }
 
   const balance = await providerInstance.send(
-    'eth_getBalance', [ address, 'latest' ]
+    'eth_getBalance', [address, 'latest']
   );
   return balance;
 }
@@ -313,7 +313,7 @@ export async function getBalance(
  *
  * @returns {object} Returns a valid Ethereum network provider object.
  */
-export function _createProvider(options: CallOptions = {}) : Provider {
+export function _createProvider(options: CallOptions = {}): Provider {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let provider: any = options.provider || (options.network || 'mainnet');
   const isADefaultProvider = !!ethers.providers.getNetwork(provider.toString());
