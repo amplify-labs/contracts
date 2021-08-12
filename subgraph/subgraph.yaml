@@ -13,16 +13,53 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
+      file: ./src/mappings/asset.ts
       entities:
         - Asset
       abis:
         - name: AssetAbi
           file: ./abis/Asset.json
       eventHandlers:
-        # - event: Approval(indexed address,indexed address,indexed uint256)
-        #   handler: handleApproval
-        # - event: ApprovalForAll(indexed address,indexed address,bool)
-        #   handler: handleApprovalForAll
         - event: TokenizeAsset(string,uint256,string,uint256,uint256)
           handler: handleTokenizeAsset
-      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Factory
+    network: mumbai
+    source:
+      address: "0xE252Eb0AFef8c831bbA6Cf7C6222a4528554f6AF"
+      abi: FactoryAbi
+      startBlock: 17539149     
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/pool.ts
+      entities:
+        - Pool
+      abis:
+        - name: FactoryAbi
+          file: ./abis/Factory.json
+      eventHandlers:
+        - event: PoolCreated(indexed address,indexed address,string,string,address,uint256)
+          handler: handlePoolCreation
+templates:
+  - name: Pool
+    kind: "ethereum/contract"
+    network: mumbai
+    source:
+      abi: PoolAbi  
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/pool.ts
+      entities:
+        - Pool
+      abis:
+        - name: PoolAbi
+          file: ./abis/Pool.json
+      eventHandlers:
+        - event: Deposited(indexed address,uint256)
+          handler: handlePoolDeposit
+        - event: Withdrawn(indexed address,uint256)
+          handler: handlePoolWithdraw

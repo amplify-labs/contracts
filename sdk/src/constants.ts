@@ -5,13 +5,16 @@ export const constants = {
 
 export const address = {
   "mainnet": {
-    "Asset": "",
+    Asset: "",
+    Factory: "",
   },
   "polygon_mainet": {
-    "Asset": "",
+    Asset: "",
+    Factory: "",
   },
   "polygon_mumbai": {
-    "Asset": "0xF341667f7EcEE52B261A1dB70897F636aAb5A9cb",
+    Asset: "0xF341667f7EcEE52B261A1dB70897F636aAb5A9cb",
+    Factory: "0xe3F65183A24B94Dc4EC85369046a910cC3Bf8b67",
   },
 };
 
@@ -162,6 +165,17 @@ export const abi = {
     "function tokenizeAsset(address to, string tokenId, uint256 value, uint256 maturity, string tokenURI)",
     "function balanceOf(address) view returns (uint256)",
   ],
+  Factory: [
+    "function addStableCoin(address stableCoin)",
+    "function removeStableCoin(address stableCoin)",
+    "function createPool(string name, string structure, address stableCoin, uint256 minDeposit)"
+  ],
+  Pool: [
+    "function deposit() payable returns(bool success)",
+    "function withdraw(uint256 _tokenAmount) returns (bool success)",
+    "function totalDeposited() view returns (uint256)",
+    "function totalBorrowed() view returns (uint256)"
+  ]
 };
 
 export const errorCodes = {

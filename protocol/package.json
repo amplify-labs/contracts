@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "npx hardhat compile",
+    "deploy:mumbai": "npx hardhat run scripts/deploy.js --network polygon_mumbai",
+    "deploy:matic": "npx hardhat run scripts/deploy.js --network polygon_mainet",
+    "verify:mumbai": "npx hardhat verify --network polygon_mumbai ${CONTRACT_INFO}",
+    "verify:matic": "npx hardhat verify --network polygon_mainet ${CONTRACT_INFO}",
+    "test": "npx hardhat --network hardhat test"
   },
   "keywords": [],
   "author": "",

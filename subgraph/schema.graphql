@@ -1,7 +1,18 @@
 type Asset @entity {
-  id: ID!
-  value: BigInt!
-  uploaded_at: BigInt!
-  uri: String!
-  maturity: BigInt!
+    id: ID!
+    value: BigInt!
+    uploaded_at: BigInt!
+    uri: String!
+    maturity: BigInt!
+}
+
+type Pool @entity {
+    id: ID!
+    name: String!
+    structureType: String!
+    stableCoin: Bytes!
+    factor: Bytes!
+    minDeposit: BigInt!
+    totalDeposited: BigInt!
+    totalBorrowed: BigInt!
 }

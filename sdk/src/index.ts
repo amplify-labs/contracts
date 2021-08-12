@@ -8,6 +8,7 @@ import { ethers } from 'ethers';
 import * as eth from './eth';
 import * as util from './util';
 import * as asset from './asset';
+import * as factory from './factory';
 import * as constants from './constants';
 import { Provider, AmplifyOptions, AmplifyInstance } from './types';
 
@@ -57,6 +58,8 @@ const Amplify = function (
     _originalProvider: originalProvider,
     _provider: provider,
     ...asset,
+    asset,
+    factory
   };
 
   // Instance needs to know which network the provider connects to, so it can
