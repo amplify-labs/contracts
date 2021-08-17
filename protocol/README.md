@@ -95,7 +95,7 @@ const token = await asset.tokenizeAsset(
 
 ```js
 import Amplify from "@amplify-labs/amplify-js";
-const amplify = Amplify.createInstance(window.ethereum);
+const amplify = new Amplify(window.ethereum);
 
 const trx = await amplify.tokenizeAsset(
     "0x916cCC0963dEB7BEA170AF7822242A884d52d4c7",

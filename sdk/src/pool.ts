@@ -23,7 +23,7 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = Amplify.createInstance(window.ethereum);
+ * const amplify = new Amplify(window.ethereum);
  * 
  * (async function () {
  *   const trx = await amplify.pool.lend('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');

@@ -26,28 +26,28 @@ ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
  *
  * @example
  * ```
- * var amplify = Amplify.createInstance(window.ethereum); // web browser
+ * var amplify = new Amplify(window.ethereum); // web browser
  * 
- * var amplify = Amplify.createInstance('http://127.0.0.1:8545'); // HTTP provider
+ * var amplify = new Amplify('http://127.0.0.1:8545'); // HTTP provider
  * 
- * var amplify = Amplify.createInstance(); // Uses Ethers.js fallback mainnet (for testing only)
+ * var amplify = new Amplify(); // Uses Ethers.js fallback mainnet (for testing only)
  * 
- * var amplify = Amplify.createInstance('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
+ * var amplify = new Amplify('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
  * 
  * // Init with private key (server side)
- * var amplify = Amplify.createInstance('https://rpc-mumbai.maticvigil.com', {
+ * var amplify = new Amplify('https://rpc-mumbai.maticvigil.com', {
  *   privateKey: '0x_your_private_key_', // preferably with environment variable
  * });
  * 
  * // Init with HD mnemonic (server side)
- * var amplify = Amplify.createInstance('mainnet' {
+ * var amplify = new Amplify('mainnet' {
  *   mnemonic: 'clutch captain shoe...', // preferably with environment variable
  * });
  * ```
  *
  * @returns {object} Returns an instance of the Amplify.js SDK.
  */
-function createInstance(provider: types.Provider | string = 'mainnet', options: types.AmplifyOptions = {}): types.AmplifyInstance {
+const Amplify = function (provider: types.Provider | string = 'mainnet', options: types.AmplifyOptions = {}): types.AmplifyInstance {
   const originalProvider = provider;
 
   options.provider = provider || options.provider;
@@ -74,13 +74,10 @@ function createInstance(provider: types.Provider | string = 'mainnet', options: 
   return instance;
 }
 
-const Amplify = {
-  createInstance,
-  eth,
-  util,
-  constants,
-  _ethers: ethers
-}
+Amplify.eth = eth;
+Amplify.util = util;
+Amplify.constants = constants;
+Amplify._ethers = ethers;
+Amplify.types = types;
 
-export { types as Types };
-export default Amplify;
+export = Amplify;

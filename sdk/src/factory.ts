@@ -15,7 +15,7 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = Amplify.createInstance(window.ethereum);
+ * const amplify = new Amplify(window.ethereum);
  * 
  * (async function () {
  *   const trx = await amplify.factor.addStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
@@ -53,7 +53,7 @@ export async function addStableCoin(stableCoin: string, options: CallOptions = {
  *
  * @example
  * ```
- * const amplify = Amplify.createInstance(window.ethereum);
+ * const amplify = new Amplify(window.ethereum);
  * 
  * (async function () {
  *   const trx = await amplify.factor.removeStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');

@@ -28,7 +28,7 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = Amplify.createInstance(window.ethereum);
+ * const amplify = new Amplify(window.ethereum);
  * 
  * (async function () {
  *   const trx = await amplify.asset.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
