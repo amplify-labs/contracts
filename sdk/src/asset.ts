@@ -13,7 +13,6 @@ import { CallOptions, TrxResponse } from './types';
 /**
  * Tokenize a given asset
  *
- * @param {string} to Owner address.
  * @param {string} tokenId Token Id.
  * @param {string} tokenRating Token Rating.
  * @param {string | number | BigNumber} value Value of the asset in USD.
@@ -31,7 +30,7 @@ import { CallOptions, TrxResponse } from './types';
  * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
+ *   const trx = await amplify.tokenizeAsset('token-001', 20000, 1, 'asset-uri://token-001');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```

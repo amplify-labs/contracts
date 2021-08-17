@@ -162,7 +162,7 @@ export const networks = [
 export const abi = {
   Asset: [
     "function totalSupply() view returns (uint256)",
-    "function tokenizeAsset(address to, string tokenId, string tokenRating, uint256 value, uint256 maturity, string tokenURI)",
+    "function tokenizeAsset(string tokenId, string tokenRating, uint256 value, uint256 maturity, string tokenURI)",
     "function addRiskItem(string rating, uint256 interestRate, uint256 advanceRate)",
     "function removeRiskItem(string rating)",
     "function getRiskInterestRate(string rating) view returns (uint256)",
