@@ -10,10 +10,20 @@ import {
 import { Deferrable } from '@ethersproject/properties';
 import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 
+
+import * as PoolContract from '../pool';
+import * as LoanContract from '../loan';
+import * as AssetContract from '../asset';
+import * as FactoryContract from '../factory';
+
 // =-=-=-=-=-= /src/index.ts =-=-=-=-=-=
 
 export interface AmplifyInstance {
   _networkPromise: Promise<ProviderNetwork>;
+  pool: typeof PoolContract;
+  loan: typeof LoanContract;
+  asset: typeof AssetContract;
+  factory: typeof FactoryContract;
 }
 
 export interface AmplifyOptions {
@@ -98,8 +108,8 @@ export interface ProviderNetwork {
 }
 
 type GenericGetBalance = (
-    addressOrName: string | number | Promise<string | number>,
-    blockTag?: string | number | Promise<string | number>
+  addressOrName: string | number | Promise<string | number>,
+  blockTag?: string | number | Promise<string | number>
 ) => Promise<BigNumber>;
 
 type GenericGetTransactionCount = (
