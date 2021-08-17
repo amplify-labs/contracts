@@ -84,4 +84,5 @@ const Amplify = {
   _ethers: ethers
 }
 
-export { types as Types, Amplify };
+export { types as Types };
+export default Amplify;
