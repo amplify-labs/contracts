@@ -18,7 +18,7 @@ import { CallOptions, TrxResponse } from './types';
  * const amplify = new Amplify(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.addStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
+ *   const trx = await amplify.factor.addStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -56,7 +56,7 @@ export async function addStableCoin(stableCoin: string, options: CallOptions = {
  * const amplify = new Amplify(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.removeStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
+ *   const trx = await amplify.factor.removeStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -96,7 +96,7 @@ export async function removeStableCoin(stableCoin: string, options: CallOptions 
  * @example
  * ```
  * (async function () {
- *   const tokens = await amplify.createPool('USDT-1','discounting', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', 0.1);
+ *   const tokens = await amplify.factor.createPool('USDT-1','discounting', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', 0.1);
  *   console.log('Tokens:', tokens);
  * })().catch(console.error);
  * ```
@@ -123,4 +123,49 @@ export async function createPool(name: string, structureType: string, stableCoin
   };
 
   return eth.trx(factoryAddress, 'createPool', parameters, trxOptions);
+}
+
+/**
+ * Create new loan
+ *
+ * @param {string} nftAsset NFT Asset contract address.
+ * @param {string} tokenId NFT asset ID.
+ * @param {string} pool Pool address.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const loan = await amplify.factor.createLoan('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('Loan:', loan);
+ * })().catch(console.error);
+ * ```
+ */
+export async function createLoan(nftAsset: string, tokenId: string, pool: string, options: CallOptions = {}): Promise<TrxResponse> {
+  await netId(this);
+  const errorPrefix = 'Amplify [createLoan] | ';
+
+  if (
+    typeof nftAsset !== 'string' &&
+    !ethers.utils.isAddress(nftAsset)
+  ) {
+    throw Error(errorPrefix + 'Argument `nftAsset` must be an address');
+  }
+
+  if (
+    typeof pool !== 'string' &&
+    !ethers.utils.isAddress(pool)
+  ) {
+    throw Error(errorPrefix + 'Argument `pool` must be an address');
+  }
+
+  const factoryAddress = address[this._network.name].Factory;
+  const parameters = [nftAsset, tokenId, pool];
+
+  const trxOptions: CallOptions = {
+    _amplifyProvider: this._provider,
+    abi: abi.Factory,
+    ...options
+  };
+
+  return eth.trx(factoryAddress, 'createLoan', parameters, trxOptions);
 }

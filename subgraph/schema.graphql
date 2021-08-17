@@ -1,9 +1,18 @@
 type Asset @entity {
     id: ID!
+    hash: String!
     value: BigInt!
     uploaded_at: BigInt!
     uri: String!
+    rating: String!
     maturity: BigInt!
+}
+
+type RiskInfo @entity {
+    id: ID!
+    rating: String!
+    interestRate: BigInt!
+    advanceRate: BigInt!
 }
 
 type Pool @entity {
@@ -15,4 +24,14 @@ type Pool @entity {
     minDeposit: BigInt!
     totalDeposited: BigInt!
     totalBorrowed: BigInt!
+}
+
+type Loan @entity {
+    id: ID!
+    amount: BigInt!
+    debt: BigInt!
+    factor: Bytes!
+    pool: Pool!
+    asset: Asset!
+    isClosed: Boolean!
 }

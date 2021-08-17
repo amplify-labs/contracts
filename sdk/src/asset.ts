@@ -9,12 +9,13 @@ import * as eth from './eth';
 import { netId } from './helpers';
 import { address, abi } from './constants';
 import { CallOptions, TrxResponse } from './types';
- 
+
 /**
  * Tokenize a given asset
  *
  * @param {string} to Owner address.
  * @param {string} tokenId Token Id.
+ * @param {string} tokenRating Token Rating.
  * @param {string | number | BigNumber} value Value of the asset in USD.
  * @param {string | number | BigNumber} maturity Maturity of the asset.
  * @param {string} tokenURI URI for Token.
@@ -30,7 +31,7 @@ import { CallOptions, TrxResponse } from './types';
  * const amplify = new Amplify(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
+ *   const trx = await amplify.asset.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -38,11 +39,12 @@ import { CallOptions, TrxResponse } from './types';
 export async function tokenizeAsset(
   to: string,
   tokenId: string,
+  tokenRating: string,
   value: string | number | BigNumber,
   maturity: string | number | BigNumber,
   tokenURI: string,
   options: CallOptions = {}
-) : Promise<TrxResponse> {
+): Promise<TrxResponse> {
   await netId(this);
   const errorPrefix = 'Amplify [tokenizeAsset] | ';
 
@@ -65,7 +67,7 @@ export async function tokenizeAsset(
   maturity = ethers.BigNumber.from(maturity.toString());
 
   const assetAddress = address[this._network.name].Asset;
-  const parameters = [ to, tokenId, value, maturity, tokenURI ];
+  const parameters = [to, tokenId, tokenRating, value, maturity, tokenURI];
 
   const trxOptions: CallOptions = {
     _amplifyProvider: this._provider,
@@ -75,8 +77,7 @@ export async function tokenizeAsset(
 
   return eth.trx(assetAddress, 'tokenizeAsset', parameters, trxOptions);
 }
- 
- 
+
 /**
  * Get token total supply
  *
@@ -85,14 +86,14 @@ export async function tokenizeAsset(
  * @example
  * ```
  * (async function () {
- *   const total = await amplify.totalSupply();
+ *   const total = await amplify.asset.totalSupply();
  *   console.log('Total Supply:', total);
  * })().catch(console.error);
  * ```
  */
 export async function totalSupply(
   options: CallOptions = {}
-) : Promise<string> {
+): Promise<string> {
   await netId(this);
   // const errorPrefix = 'Amplify [totalSupply] | ';
 
@@ -107,6 +108,90 @@ export async function totalSupply(
   return result.toString();
 }
 
+/**
+ * Insert new risk item info
+ *
+ * @param {string} rating Rating letter.
+ * @param {number | BigNumber} interestRate Interest rate.
+ * @param {number | BigNumber} advanceRate Advance rate.
+ * 
+ * @returns {boolean} Returns a boolean of the transaction success.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const isSuccess = await amplify.asset.addRiskItem('A', 5, 90);
+ *   console.log('Success:', isSuccess);
+ * })().catch(console.error);
+ * ```
+ */
+export async function addRiskItem(
+  rating: string,
+  interestRate: number | BigNumber,
+  advanceRate: number | BigNumber,
+  options: CallOptions = {}
+): Promise<string> {
+  await netId(this);
+  const errorPrefix = 'Amplify [addRiskItem] | ';
+
+  const assetAddress = address[this._network.name].Asset;
+  const trxOptions: CallOptions = {
+    _amplifyProvider: this._provider,
+    abi: abi.Asset,
+    ...options
+  };
+
+  if (
+    typeof interestRate !== 'number' &&
+    !ethers.BigNumber.isBigNumber(interestRate)
+  ) {
+    throw Error(errorPrefix + 'Argument `interstRate` must be a number, or BigNumber.');
+  }
+  interestRate = ethers.BigNumber.from(interestRate.toString());
+
+  if (
+    typeof advanceRate !== 'number' &&
+    !ethers.BigNumber.isBigNumber(advanceRate)
+  ) {
+    throw Error(errorPrefix + 'Argument `advanceRate` must be a number, or BigNumber.');
+  }
+  advanceRate = ethers.BigNumber.from(advanceRate.toString());
+
+  const result = await eth.trx(assetAddress, 'addRiskItem', [rating, interestRate, advancedRate], trxOptions);
+  return result.toString();
+}
+
+/**
+ * Remove the risk item info
+ *
+ * @param {string} rating Rating letter.
+ * 
+ * @returns {boolean} Returns a boolean of the transaction success.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const isSuccess = await amplify.asset.removeRiskItem('A');
+ *   console.log('Success:', isSuccess);
+ * })().catch(console.error);
+ * ```
+ */
+export async function removeRiskItem(
+  rating: string,
+  options: CallOptions = {}
+): Promise<string> {
+  await netId(this);
+  const errorPrefix = 'Amplify [removeRiskItem] | ';
+
+  const assetAddress = address[this._network.name].Asset;
+  const trxOptions: CallOptions = {
+    _amplifyProvider: this._provider,
+    abi: abi.Asset,
+    ...options
+  };
+  const result = await eth.trx(assetAddress, 'removeRiskItem', [rating], trxOptions);
+  return result.toString();
+}
 
 /**
  * Get tokens for an owner
@@ -118,15 +203,15 @@ export async function totalSupply(
  * @example
  * ```
  * (async function () {
- *   const tokens = await amplify._tokensOfOwner('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   const tokens = await amplify.asset._tokensOfOwner('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
  *   console.log('Tokens:', tokens);
  * })().catch(console.error);
  * ```
  */
- export async function _tokensOfOwner(
+export async function _tokensOfOwner(
   owner: string,
   options: CallOptions = {}
-) : Promise<string> {
+): Promise<string> {
   await netId(this);
   // const errorPrefix = 'Amplify [_tokensOfOwner] | ';
 
@@ -137,6 +222,6 @@ export async function totalSupply(
     ...options
   };
 
-  const result = await eth.read(assetAddress, 'balanceOf', [ owner ], trxOptions);
+  const result = await eth.read(assetAddress, 'balanceOf', [owner], trxOptions);
   return result.toString();
 }

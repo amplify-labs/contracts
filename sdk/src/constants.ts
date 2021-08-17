@@ -13,8 +13,8 @@ export const address = {
     Factory: "",
   },
   "polygon_mumbai": {
-    Asset: "0xF341667f7EcEE52B261A1dB70897F636aAb5A9cb",
-    Factory: "0xe3F65183A24B94Dc4EC85369046a910cC3Bf8b67",
+    Asset: "0xFa2D40Fbb754E4d05C5219f7c35F1da537e32b29",
+    Factory: "0xFa3D3a67D5a9E6cedbd52b4C231E0947F8ECf946",
   },
 };
 
@@ -162,19 +162,35 @@ export const networks = [
 export const abi = {
   Asset: [
     "function totalSupply() view returns (uint256)",
-    "function tokenizeAsset(address to, string tokenId, uint256 value, uint256 maturity, string tokenURI)",
+    "function tokenizeAsset(address to, string tokenId, string tokenRating, uint256 value, uint256 maturity, string tokenURI)",
+    "function addRiskItem(string rating, uint256 interestRate, uint256 advanceRate)",
+    "function removeRiskItem(string rating)",
+    "function getRiskInterestRate(string rating) view returns (uint256)",
+    "function getRiskAdvanceRate(string rating) view returns(uint256)",
     "function balanceOf(address) view returns (uint256)",
   ],
   Factory: [
     "function addStableCoin(address stableCoin)",
     "function removeStableCoin(address stableCoin)",
-    "function createPool(string name, string structure, address stableCoin, uint256 minDeposit)"
+    "function createPool(string name, string structure, address stableCoin, uint256 minDeposit)",
+    "function createLoan(address nftAsset, uint256 tokenId, address pool)"
   ],
   Pool: [
-    "function deposit() payable returns(bool success)",
+    "function lend(uint256 amount) returns (bool success)",
     "function withdraw(uint256 _tokenAmount) returns (bool success)",
+    "function borrow(address loan, uint256 amount) returns (bool success)",
+    "function repay(address loan, uint256 amount) returns (bool success)",
+    "function unlockAsset(address loan) returns (bool success)",
     "function totalDeposited() view returns (uint256)",
-    "function totalBorrowed() view returns (uint256)"
+    "function totalBorrowed() view returns (uint256)",
+    "function totalAvailable() view returns (uint256)"
+  ],
+  Loan: [
+    "function close() returns (bool success)",
+    "function getAllowanceAmount() view returns(uint256)",
+    "function getAvailableAmount() view returns (uint256)",
+    "function getDebtAmount() view returns (uint256)",
+    "function isClosed() view returns (bool)"
   ]
 };
 

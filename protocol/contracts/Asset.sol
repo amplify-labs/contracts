@@ -2,38 +2,36 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract Asset is ERC721URIStorage {
+import "./AssetStorage.sol";
+import "./RiskModel.sol";
 
-    event TokenizeAsset(string tokenId, uint256 value, string tokenURI, uint256 maturity, uint256 uploadedAt);
-
+contract Asset is AssetStorage, RiskModel {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor() ERC721("AmplifyAsset", "AAT") {}
+    event TokenizeAsset(uint256 indexed tokenId, string tokenHash,string tokenRating, uint256 value, string tokenURI, uint256 maturity, uint256 uploadedAt);
 
-    function tokenizeAsset(address addr, string memory tokenId, uint256 value, uint256 maturity, string memory tokenURI)
-        public
-        returns (uint256)
-    {
+    constructor() ERC721("AmplifyAsset", "AAT") RiskModel(msg.sender) {}
+
+    function tokenizeAsset(string memory tokenHash, string memory tokenRating, uint256 value, uint256 maturity, string memory tokenURI) external returns (uint256) {
         _tokenIds.increment();
 
         uint256 newAssetId = _tokenIds.current();
-        _mint(addr, newAssetId);
+        _mint(msg.sender, newAssetId);
+
+        _setTokenValue(newAssetId, value);  
+        _setTokenMaturity(newAssetId, maturity);
+        _setTokenHash(newAssetId, tokenHash);
+        _setTokenRating(newAssetId, tokenRating);   
         _setTokenURI(newAssetId, tokenURI);
 
-        emit TokenizeAsset(tokenId, value, tokenURI, maturity, block.timestamp);
-
+        emit TokenizeAsset(newAssetId, tokenHash, tokenRating, value, tokenURI, maturity, block.timestamp);
         return newAssetId;
     }
 
-    function totalSupply()
-        public
-        view
-        returns (uint256)
-    {
+    function totalSupply() external view returns (uint256) {
         return _tokenIds.current();
     }
 }

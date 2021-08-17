@@ -1,58 +1,17 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { deployFakeToken } = require("./FakeErc20");
+const {
+    deployFactory,
+    deployCollectible,
+    createStableCoin,
+    deployFakeToken,
+    createNFT,
+    createPool,
+    depositInPool,
+    parseBN
+} = require("./utils");
 
-function parseBN(bn) {
-    return parseInt(bn, 10);
-}
-
-describe('FakeToken', () => {
-    it("should have a fake token", async () => {
-        let stableCoin = await deployFakeToken("MATIC", "MATIC");
-        expect(stableCoin).to.be.not.null;
-    });
-});
-
-describe("Factory stablecoin", () => {
-    let factory, stableCoin;
-
-    beforeEach(async () => {
-        factory = await deployFactory();
-    })
-
-    it("creates new stableCoin", async () => {
-        stableCoin = await createStableCoin(factory);
-        expect(await factory.supportedStableCoins(stableCoin)).to.equal(true);
-    });
-
-    it("removes the stableCoin", async () => {
-        stableCoin = await createStableCoin(factory);
-
-        let removeTx = await factory.removeStableCoin(stableCoin);
-        // wait until the transaction is mined
-        await removeTx.wait();
-        expect(await factory.supportedStableCoins(stableCoin)).to.equal(false);
-    });
-});
-
-describe("Factory pool", async () => {
-    let factory, stableCoin;
-    const minDeposit = ethers.utils.parseEther("0.1");
-
-    beforeEach(async () => {
-        factory = await deployFactory();
-        stableCoin = await createStableCoin(factory)
-    });
-
-    it("creates new Pool", async () => {
-        const [owner] = await ethers.getSigners();
-
-        let poolAddr = await createPool(factory, stableCoin, minDeposit);
-        expect(await factory.pools(owner.address, 0)).to.equal(poolAddr);
-    });
-});
-
-describe("Factory pool info", async () => {
+describe("Pool info", async () => {
     let poolAddr, stableCoin;
     const minDeposit = ethers.utils.parseEther("0.1");
 
@@ -74,7 +33,7 @@ describe("Factory pool info", async () => {
     });
 });
 
-describe("Factory pool deposit", async () => {
+describe("Pool deposit", async () => {
     let poolAddr, stableCoin;
     const minDeposit = ethers.utils.parseEther("0.1");
 
@@ -113,7 +72,7 @@ describe("Factory pool deposit", async () => {
     });
 });
 
-describe("Factory pool withdraw", async () => {
+describe("Pool withdraw", async () => {
     let poolAddr, stableCoin;
     const amountToDeposit = ethers.utils.parseEther("2");
     const amountToWithdraw = ethers.utils.parseEther("1");
@@ -174,39 +133,233 @@ describe("Factory pool withdraw", async () => {
     });
 });
 
-async function deployFactory() {
-    const Contract = await ethers.getContractFactory("Factory");
-    const factoryI = await Contract.deploy();
-    factory = await factoryI.deployed();
-    return factory;
-}
+describe("Pool borrow/repay", async () => {
+    let factory, stableCoin, poolAddr, asset, tokenId;
+    const minDeposit = ethers.utils.parseEther("0.1");
+    const assetValue = ethers.utils.parseEther("100");
 
-async function createStableCoin(factory) {
-    let stableCoin = await deployFakeToken("MATIC", "MATIC");
+    beforeEach(async () => {
+        factory = await deployFactory();
+        stableCoin = await createStableCoin(factory)
+        poolAddr = await createPool(factory, stableCoin, minDeposit);
+        asset = await deployCollectible();
 
-    let addTx = await factory.addStableCoin(stableCoin);
-    // wait until the transaction is mined
-    await addTx.wait();
-    return stableCoin;
-}
+        tokenId = await createNFT(asset, assetValue, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", 1631462793, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08.png");
+    });
+
+    it("allowing to borrow", async () => {
+        const [owner, addr1] = await ethers.getSigners();
+        const loanAmount = ethers.utils.parseEther("10");
+        const amountToDeposit = ethers.utils.parseEther("200");
+
+        let pool = await ethers.getContractAt("Pool", poolAddr);
+        let stableCoinContract = await ethers.getContractAt("FakeToken", stableCoin);
+        let ntfFactory = await ethers.getContractAt("Asset", asset);
+
+        // Mint some tokens
+        let mintTx = await stableCoinContract.mint(addr1.address, amountToDeposit);
+        await mintTx.wait();
+
+        // Approve Pool contract to use your tokens
+        let txAprove = await stableCoinContract.connect(addr1).approve(poolAddr, amountToDeposit);
+        await txAprove.wait();
+
+        // Deposit in the pool
+        await depositInPool(pool, addr1, amountToDeposit);
+
+        // Transfer NFT to the Pool contract
+        await ntfFactory.transferFrom(owner.address, poolAddr, tokenId);
+
+        // create loan
+        let tx = await factory.createLoan(asset, tokenId, poolAddr);
+        let waitTx = await tx.wait();
+        expect(await factory.loans(owner.address, 0)).to.equal(waitTx.events[0].args.loan);
+
+        // Borrow loan
+        let loanAddr = waitTx.events[0].args.loan;
+        let borrowTx = await pool.borrow(loanAddr, loanAmount);
+        await borrowTx.wait();
+
+        expect(parseBN(await pool.loans(tokenId))).to.equal(parseBN(loanAmount));
+    });
+
+    it("allowing to repay", async () => {
+        const [owner, addr1] = await ethers.getSigners();
+        const loanAmount = ethers.utils.parseEther("10");
+        const repayAmount = ethers.utils.parseEther("1");
+        const amountToDeposit = ethers.utils.parseEther("200");
+
+        let pool = await ethers.getContractAt("Pool", poolAddr);
+        let stableCoinContract = await ethers.getContractAt("FakeToken", stableCoin);
+        let ntfFactory = await ethers.getContractAt("Asset", asset);
+
+        // Mint some tokens
+        let mintTx = await stableCoinContract.mint(addr1.address, amountToDeposit);
+        await mintTx.wait();
+
+        // Approve Pool contract to use your tokens
+        let txAprove = await stableCoinContract.connect(addr1).approve(poolAddr, amountToDeposit);
+        await txAprove.wait();
+
+        // Deposit in the pool
+        await depositInPool(pool, addr1, amountToDeposit);
+
+        // Transfer NFT to the Pool contract
+        await ntfFactory.transferFrom(owner.address, poolAddr, tokenId);
+
+        // create loan
+        let tx = await factory.createLoan(asset, tokenId, poolAddr);
+        let waitTx = await tx.wait();
+        expect(await factory.loans(owner.address, 0)).to.equal(waitTx.events[0].args.loan);
+
+        // Borrow loan
+        let loanAddr = waitTx.events[0].args.loan;
+        let borrowTx = await pool.borrow(loanAddr, loanAmount);
+        await borrowTx.wait();
+        expect(parseBN(await pool.loans(tokenId))).to.equal(parseBN(loanAmount));
 
 
-async function createPool(factory, stableCoin, minDeposit) {
-    let poolTx = await factory.createPool(
-        'MATIC-1',
-        'discounting',
-        stableCoin,
-        minDeposit);
+        // Approve Pool contract to use your tokens
+        let txRepayAprove = await stableCoinContract.connect(owner).approve(poolAddr, repayAmount);
+        await txRepayAprove.wait();
 
-    // wait until the transaction is mined
-    let txWait = await poolTx.wait();
+        let currentLoanAmount = await pool.loans(tokenId);
+        // repay
+        let repayTx = await pool.repay(loanAddr, repayAmount);
+        await repayTx.wait();
 
-    return txWait.events[3].args.pool;
-}
+        expect(parseBN(await pool.loans(tokenId))).to.equal(parseBN(currentLoanAmount.sub(repayAmount)));
+    });
 
-async function depositInPool(pool, addr1, amount) {
-    let depositTx = await pool.connect(addr1).deposit(amount);
+    it("allowing to repay full", async () => {
+        const [owner, addr1] = await ethers.getSigners();
+        const loanAmount = ethers.utils.parseEther("10");
+        const amountToDeposit = ethers.utils.parseEther("200");
 
-    // wait until the transaction is mined
-    await depositTx.wait();
-}
+        let pool = await ethers.getContractAt("Pool", poolAddr);
+        let stableCoinContract = await ethers.getContractAt("FakeToken", stableCoin);
+        let ntfFactory = await ethers.getContractAt("Asset", asset);
+
+        // Mint some tokens
+        let mintTx = await stableCoinContract.mint(addr1.address, amountToDeposit);
+        await mintTx.wait();
+
+        // Approve Pool contract to use your tokens
+        let txAprove = await stableCoinContract.connect(addr1).approve(poolAddr, amountToDeposit);
+        await txAprove.wait();
+
+        // Deposit in the pool
+        await depositInPool(pool, addr1, amountToDeposit);
+
+        // Transfer NFT to the Pool contract
+        await ntfFactory.transferFrom(owner.address, poolAddr, tokenId);
+
+        // create loan
+        let tx = await factory.createLoan(asset, tokenId, poolAddr);
+        let waitTx = await tx.wait();
+        expect(await factory.loans(owner.address, 0)).to.equal(waitTx.events[0].args.loan);
+
+        // Borrow loan
+        let loanAddr = waitTx.events[0].args.loan;
+        let borrowTx = await pool.borrow(loanAddr, loanAmount);
+        await borrowTx.wait();
+        expect(parseBN(await pool.loans(tokenId))).to.equal(parseBN(loanAmount));
+
+        // Approve Pool contract to use your tokens
+        let txRepayAprove = await stableCoinContract.connect(owner).approve(poolAddr, loanAmount);
+        await txRepayAprove.wait();
+
+        // repay
+        let repayTx = await pool.repay(loanAddr, loanAmount);
+        await repayTx.wait();
+
+        expect(parseBN(await pool.loans(tokenId))).to.equal(0);
+    });
+
+    it("allowing to unlock if no borrow", async () => {
+        const [owner, addr1] = await ethers.getSigners();
+        const loanAmount = ethers.utils.parseEther("10");
+        const amountToDeposit = ethers.utils.parseEther("200");
+
+        let pool = await ethers.getContractAt("Pool", poolAddr);
+        let stableCoinContract = await ethers.getContractAt("FakeToken", stableCoin);
+        let ntfFactory = await ethers.getContractAt("Asset", asset);
+
+        // Mint some tokens
+        let mintTx = await stableCoinContract.mint(addr1.address, amountToDeposit);
+        await mintTx.wait();
+
+        // Approve Pool contract to use your tokens
+        let txAprove = await stableCoinContract.connect(addr1).approve(poolAddr, amountToDeposit);
+        await txAprove.wait();
+
+        // Deposit in the pool
+        await depositInPool(pool, addr1, amountToDeposit);
+
+        // Transfer NFT to the Pool contract
+        await ntfFactory.transferFrom(owner.address, poolAddr, tokenId);
+
+        // create loan
+        let tx = await factory.createLoan(asset, tokenId, poolAddr);
+        let waitTx = await tx.wait();
+        expect(await factory.loans(owner.address, 0)).to.equal(waitTx.events[0].args.loan);
+
+        // Unlock asset
+        let unlockTx = await pool.unlockAsset(waitTx.events[0].args.loan);
+        await unlockTx.wait();
+
+        expect(await ntfFactory.ownerOf(tokenId)).to.equal(owner.address);
+    });
+
+    it("allowing to unlock after Repay full", async () => {
+        const [owner, addr1] = await ethers.getSigners();
+        const loanAmount = ethers.utils.parseEther("10");
+        const amountToDeposit = ethers.utils.parseEther("200");
+
+        let pool = await ethers.getContractAt("Pool", poolAddr);
+        let stableCoinContract = await ethers.getContractAt("FakeToken", stableCoin);
+        let ntfFactory = await ethers.getContractAt("Asset", asset);
+
+        // Mint some tokens
+        let mintTx = await stableCoinContract.mint(addr1.address, amountToDeposit);
+        await mintTx.wait();
+
+        // Approve Pool contract to use your tokens
+        let txAprove = await stableCoinContract.connect(addr1).approve(poolAddr, amountToDeposit);
+        await txAprove.wait();
+
+        // Deposit in the pool
+        await depositInPool(pool, addr1, amountToDeposit);
+
+        // Transfer NFT to the Pool contract
+        await ntfFactory.transferFrom(owner.address, poolAddr, tokenId);
+
+        // create loan
+        let tx = await factory.createLoan(asset, tokenId, poolAddr);
+        let waitTx = await tx.wait();
+        expect(await factory.loans(owner.address, 0)).to.equal(waitTx.events[0].args.loan);
+
+        // Borrow loan
+        let loanAddr = waitTx.events[0].args.loan;
+        let borrowTx = await pool.borrow(loanAddr, loanAmount);
+        await borrowTx.wait();
+        expect(parseBN(await pool.loans(tokenId))).to.equal(parseBN(loanAmount));
+
+        // Approve Pool contract to use your tokens
+        let txRepayAprove = await stableCoinContract.connect(owner).approve(poolAddr, loanAmount);
+        await txRepayAprove.wait();
+
+        // repay
+        let repayTx = await pool.repay(loanAddr, loanAmount);
+        await repayTx.wait();
+
+        expect(parseBN(await pool.loans(tokenId))).to.equal(0);
+
+
+        // Unlock asset
+        let unlockTx = await pool.unlockAsset(waitTx.events[0].args.loan);
+        await unlockTx.wait();
+
+        expect(await ntfFactory.ownerOf(tokenId)).to.equal(owner.address);
+    });
+});

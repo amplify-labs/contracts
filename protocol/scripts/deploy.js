@@ -1,6 +1,6 @@
 // scripts/deploy.js
 async function main() {
-  // await deployAsset();
+  //await deployAsset();
   // await deployFakeToken();
   await deployFactory();
 }

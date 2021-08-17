@@ -1,48 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+import "./PoolStorage.sol";
+
 import "./PoolToken.sol";
+import "./Asset.sol";
+import "./Loan.sol";
 
-interface PoolInterface {
-    function deposit(uint256 amount) external returns (bool success);
-    function withdraw(uint256 _tokenAmount) external returns (bool success);
-    function totalDeposited() external view returns (uint256);
-    function totalBorrowed() external view returns (uint256);
-
-    event Deposited(address indexed _from, uint256 _amount);
-    event Withdrawn(address indexed _from, uint256 _amount);
-}
-
-abstract contract PoolStorage is PoolInterface, Context {
-    string public name;
-    string public structureType;
-    address public stableCoin;
-    uint256 public minDeposit;
-    PoolToken public lpToken;
-
-    mapping(address => uint256) public balances;
-    mapping(address => uint256) public lockedTokens;
-
-    function isStructured(string memory structure)
-        internal
-        pure
-        returns (bool)
-    {
-        return
-            keccak256(bytes(structure)) == keccak256(bytes("factoring")) ||
-            keccak256(bytes(structure)) == keccak256(bytes("discounting"));
-    }
-}
-
-contract Pool is PoolStorage {
+contract Pool is Loaned, Context, Structured {
     using SafeMath for uint256;
 
-    uint256 private _totalDeposited;
-    uint256 private _totalBorrowed;
+    event Lend(address indexed _from, uint256 _amount);
+    event Borrowed(address indexed loan, uint256 _amount);
+    event Repayed(address indexed loan, uint256 _amount);
+    event Withdrawn(address indexed _from, uint256 _amount);
 
     constructor(
         string memory name_,
@@ -58,59 +33,91 @@ contract Pool is PoolStorage {
         stableCoin = stableCoin_;
 
         ERC20 token = ERC20(stableCoin);
-        string memory lpTokenSymbol = createPoolTokenSymbol(
-            "lp",
-            token.symbol()
-        );
-        lpToken = new PoolToken("PoolToken", lpTokenSymbol);
+        lpToken = new PoolToken("PoolToken", token.symbol());
     }
 
-    function deposit(uint256 amount) external override returns (bool success) {
-        require(amount >= minDeposit, "deposit: Amount lower than minDeposit");
-        
-        ERC20 token = ERC20(stableCoin);
-        require(token.balanceOf(_msgSender()) >= amount, "ERC20: Insufficient funds");
-        require(token.transferFrom(_msgSender(), address(this), amount), "ERC20: Transfer failed");
+    function lend(uint256 amount) external returns (bool success) {
+        require(amount >= minDeposit, "lend: Amount lower than minDeposit");
+        require(_transferTokens(_msgSender(), address(this), amount));
 
-        balances[_msgSender()] = balances[_msgSender()].add(amount);
-        _totalDeposited = _totalDeposited.add(amount);
-        lockedTokens[_msgSender()] = lockedTokens[_msgSender()].add(amount);
-        emit Deposited( _msgSender(), amount);
+        balances[_msgSender()] += amount;
+        totalDeposited += amount;
+        lockedTokens[_msgSender()] += amount;
+        emit Lend(_msgSender(), amount);
 
         lpToken.mint(_msgSender(), amount);
         return true;
     }
 
-    function withdraw(uint256 _tokenAmount) external override returns (bool success) {
-        require(_tokenAmount > 0, "withdraw: Amount lower than 0");
-        require(lockedTokens[_msgSender()] >= _tokenAmount);
+    function borrow(address loan, uint256 amount) external isAvailable(amount) validateLoan(loan) returns (bool success) {
+        Loan loanContract = Loan(loan);
 
-        _totalDeposited = _totalDeposited.sub(_tokenAmount);
-        balances[_msgSender()] = balances[_msgSender()].sub(_tokenAmount);
-        lockedTokens[_msgSender()] = lockedTokens[_msgSender()].sub(_tokenAmount);
-        lpToken.burnFrom(_msgSender(), _tokenAmount);
+        uint256 availableAmountForLoan = loanContract.getAvailableAmount();
+        require(availableAmountForLoan >= amount, "borrow: insufficient available amount");
+        
+        uint256 lockedAsset = loanContract.getLockedAsset();
+        require(loanContract.borrow(amount), "borrow: failed to borrow");
 
-        ERC20 token = ERC20(stableCoin);
-        require(token.balanceOf(address(this)) >= _tokenAmount, "ERC20: Insufficient funds");
-        require(token.transfer(_msgSender(), _tokenAmount), "ERC20: Transfer failed");
+        totalBorrowed += amount;
+        loans[lockedAsset] += amount;
 
-        emit Withdrawn(_msgSender(), _tokenAmount);
+        emit Borrowed(loan, amount);
+        return _transferTokens(address(this), _msgSender(), amount);
+    }
+
+    function unlockAsset(address loan) external validateLoan(loan) returns (bool success) {
+        Loan loanContract = Loan(loan);
+        uint256 lockedAsset = loanContract.getLockedAsset();
+        require(loans[lockedAsset] == 0 || loanContract.isClosed(), "borrow hasn't repayed");
+
+        Asset nftFactory = loanContract.getNftFactory();
+
+        nftFactory.transferFrom(address(this), _msgSender(), lockedAsset);
         return true;
     }
 
-    function totalDeposited() external view override returns (uint256) {
-        return _totalDeposited;
+    function repay(address loan, uint256 amount) external validateLoan(loan) returns (bool success) { 
+        Loan loanContract = Loan(loan);
+        uint256 lockedAsset = loanContract.getLockedAsset();
+        address borrower = loanContract.getBorrower();
+
+        require(amount > 0, "repay: amount must be greater than 0");
+        require(loanContract.getDebtAmount() >= amount, "repay: amount higher than debt");
+
+        require(loanContract.repay(amount));
+        emit Repayed(loan, amount);
+        return repayInternal(borrower, lockedAsset, amount);
     }
 
-    function totalBorrowed() external view override returns (uint256) {
-        return _totalBorrowed;
+    function repayInternal(address borrower, uint256 lockedAsset, uint256 amount) internal returns (bool success) {
+        // Repay the loan
+        totalBorrowed = totalBorrowed.sub(amount);
+        loans[lockedAsset] = loans[lockedAsset].sub(amount);
+        return _transferTokens(borrower, address(this), amount);
     }
 
-    function createPoolTokenSymbol(string memory prefix, string memory symbol)
-        internal
-        pure
-        returns (string memory)
-    {
-        return string(abi.encodePacked(prefix, symbol));
+    function withdraw(uint256 _tokenAmount) external isAvailable(_tokenAmount) returns (bool success) {
+        require(_tokenAmount > 0, "withdraw: Amount lower than 0");
+        require(lockedTokens[_msgSender()] >= _tokenAmount, "withdraw: amount higher then owned tokens");
+
+        totalDeposited -= _tokenAmount;
+        balances[_msgSender()] -= _tokenAmount;
+        lockedTokens[_msgSender()] -= _tokenAmount;
+
+        lpToken.burnFrom(_msgSender(), _tokenAmount);
+        emit Withdrawn(_msgSender(), _tokenAmount);
+        
+        return _transferTokens(address(this), _msgSender(), _tokenAmount);
+    }
+
+    function _transferTokens(address _from, address _to, uint256 _tokenAmount) internal returns (bool success) {
+        ERC20 token = ERC20(stableCoin);
+        require(token.balanceOf(_from) >= _tokenAmount, "ERC20: Insufficient funds");
+        if (_from == address(this)) {
+            require(token.transfer(_to, _tokenAmount), "ERC20: Failed to transfer");
+        } else {
+            require(token.transferFrom(_from, _to, _tokenAmount), "ERC20: Transfer failed");
+        }
+        return true;
     }
 }
