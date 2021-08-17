@@ -37,7 +37,6 @@ import { CallOptions, TrxResponse } from './types';
  * ```
  */
 export async function tokenizeAsset(
-  to: string,
   tokenId: string,
   tokenRating: string,
   value: string | number | BigNumber,
@@ -67,7 +66,7 @@ export async function tokenizeAsset(
   maturity = ethers.BigNumber.from(maturity.toString());
 
   const assetAddress = address[this._network.name].Asset;
-  const parameters = [to, tokenId, tokenRating, value, maturity, tokenURI];
+  const parameters = [tokenId, tokenRating, value, maturity, tokenURI];
 
   const trxOptions: CallOptions = {
     _amplifyProvider: this._provider,
@@ -227,30 +226,9 @@ export async function _tokensOfOwner(
 
 
 export type AssetInterface = {
-  tokenizeAsset(
-    to: string,
-    tokenId: string,
-    tokenRating: string,
-    value: string | number | BigNumber,
-    maturity: string | number | BigNumber,
-    tokenURI: string,
-    options?: CallOptions
-  ): Promise<TrxResponse>;
-  totalSupply(
-    options?: CallOptions
-  ): Promise<string>;
-  addRiskItem(
-    rating: string,
-    interestRate: number | BigNumber,
-    advanceRate: number | BigNumber,
-    options?: CallOptions
-  ): Promise<string>;
-  removeRiskItem(
-    rating: string,
-    options?: CallOptions
-  ): Promise<string>;
-  _tokensOfOwner(
-    owner: string,
-    options?: CallOptions
-  ): Promise<string>;
+  tokenizeAsset(tokenId: string, tokenRating: string, value: string | number | BigNumber, maturity: string | number | BigNumber, tokenURI: string, options?: CallOptions): Promise<TrxResponse>;
+  totalSupply(options?: CallOptions): Promise<string>;
+  addRiskItem(rating: string, interestRate: number | BigNumber, advanceRate: number | BigNumber, options?: CallOptions): Promise<string>;
+  removeRiskItem(rating: string, options?: CallOptions): Promise<string>;
+  _tokensOfOwner(owner: string, options?: CallOptions): Promise<string>;
 }
