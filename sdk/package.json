@@ -1,9 +1,10 @@
 {
   "name": "@amplify-labs/amplify-js",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Amplify Labs",
   "description": "A JavaScript SDK for Amplify Contracts",
   "license": "BSD-3-Clause",
+  "types": "src/types/index.d.ts",
   "main": "dist/nodejs/index.js",
   "nyc": {
     "include": [
