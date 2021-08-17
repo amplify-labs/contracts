@@ -145,7 +145,7 @@ export async function addRiskItem(
     typeof interestRate !== 'number' &&
     !ethers.BigNumber.isBigNumber(interestRate)
   ) {
-    throw Error(errorPrefix + 'Argument `interstRate` must be a number, or BigNumber.');
+    throw Error(errorPrefix + 'Argument `interestRate` must be a number, or BigNumber.');
   }
   interestRate = ethers.BigNumber.from(interestRate.toString());
 
@@ -157,7 +157,7 @@ export async function addRiskItem(
   }
   advanceRate = ethers.BigNumber.from(advanceRate.toString());
 
-  const result = await eth.trx(assetAddress, 'addRiskItem', [rating, interestRate, advancedRate], trxOptions);
+  const result = await eth.trx(assetAddress, 'addRiskItem', [rating, interestRate, advanceRate], trxOptions);
   return result.toString();
 }
 
