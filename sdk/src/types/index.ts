@@ -11,13 +11,12 @@ import { Deferrable } from '@ethersproject/properties';
 import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 
 
-import * as PoolContract from '../pool';
-import * as LoanContract from '../loan';
-import * as AssetContract from '../asset';
-import * as FactoryContract from '../factory';
+import type * as PoolContract from '../pool';
+import type * as LoanContract from '../loan';
+import type * as AssetContract from '../asset';
+import type * as FactoryContract from '../factory';
 
 // =-=-=-=-=-= /src/index.ts =-=-=-=-=-=
-
 export interface AmplifyInstance {
   _networkPromise: Promise<ProviderNetwork>;
   pool: typeof PoolContract;
@@ -25,7 +24,6 @@ export interface AmplifyInstance {
   asset: typeof AssetContract;
   factory: typeof FactoryContract;
 }
-
 export interface AmplifyOptions {
   privateKey?: string;
   mnemonic?: string;

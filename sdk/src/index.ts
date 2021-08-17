@@ -12,7 +12,7 @@ import * as pool from './pool';
 import * as loan from './loan';
 import * as factory from './factory';
 import * as constants from './constants';
-import { Provider, AmplifyOptions, AmplifyInstance } from './types';
+import * as types from './types';
 
 // Turn off Ethers.js warnings
 ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
@@ -47,9 +47,7 @@ ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
  *
  * @returns {object} Returns an instance of the Amplify.js SDK.
  */
-const Amplify = function (
-  provider: Provider | string = 'mainnet', options: AmplifyOptions = {}
-): AmplifyInstance {
+function createInstance(provider: types.Provider | string = 'mainnet', options: types.AmplifyOptions = {}): types.AmplifyInstance {
   const originalProvider = provider;
 
   options.provider = provider || options.provider;
@@ -74,11 +72,16 @@ const Amplify = function (
   });
 
   return instance;
-};
+}
 
-Amplify.eth = eth;
-Amplify.util = util;
-Amplify._ethers = ethers;
-Amplify.constants = constants;
+const Amplify = {
+  create(provider: types.Provider | string = 'mainnet', options: types.AmplifyOptions = {}): types.AmplifyInstance {
+    return createInstance(provider, options);
+  },
+  eth,
+  util,
+  constants,
+  _ethers: ethers
+}
 
-export = Amplify;
+export { types as Types, Amplify };
