@@ -14,6 +14,7 @@ export function createNewPool(event: PoolCreated): void {
     pool.minDeposit = event.params.minDeposit;
     pool.totalDeposited = new BigInt(0);
     pool.totalBorrowed = new BigInt(0);
+    pool.createdAt = event.block.timestamp;
 
     pool.save();
 }

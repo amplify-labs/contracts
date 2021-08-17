@@ -26,6 +26,7 @@ type Pool @entity {
     minDeposit: BigInt!
     totalDeposited: BigInt!
     totalBorrowed: BigInt!
+    createdAt: BigInt!
 }
 
 type Loan @entity {
@@ -35,5 +36,6 @@ type Loan @entity {
     factor: Bytes!
     pool: Pool!
     asset: Asset!
+    createdAt: BigInt!
     isClosed: Boolean!
 }

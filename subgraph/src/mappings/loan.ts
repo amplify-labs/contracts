@@ -13,6 +13,7 @@ export function createNewLoan(event: LoanCreated): void {
     loan.asset = event.params.tokenId.toHex()
     loan.pool = event.params.pool.toHex();
     loan.isClosed = false;
+    loan.createdAt = event.block.timestamp;
 
     loan.save();
 }
