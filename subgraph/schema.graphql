@@ -6,6 +6,7 @@ type Asset @entity {
     uri: String!
     rating: String!
     maturity: BigInt!
+    loan: Loan @derivedFrom(field: "asset")
 }
 
 # type RiskInfo @entity {

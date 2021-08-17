@@ -1,5 +1,5 @@
 import { TokenizeAsset, AddRiskItemCall, RemoveRiskItemCall } from "../../generated/Asset/AssetAbi"
-import { Asset, RiskInfo } from "../../generated/schema"
+import { Asset } from "../../generated/schema"
 
 export function handleTokenizeAsset(event: TokenizeAsset): void {
     let asset = Asset.load(event.params.tokenId.toHex())
@@ -16,20 +16,20 @@ export function handleTokenizeAsset(event: TokenizeAsset): void {
     asset.save()
 }
 
-export function handleAddRiskItem(call: AddRiskItemCall): void {
-    let id = call.transaction.hash.toHex();
+// export function handleAddRiskItem(call: AddRiskItemCall): void {
+//     let id = call.transaction.hash.toHex();
 
-    let riskInfo = new RiskInfo(id);
-    riskInfo.rating = call.inputs.rating;
-    riskInfo.interestRate = call.inputs.interestRate;
-    riskInfo.advanceRate = call.inputs.advanceRate;
+//     let riskInfo = new RiskInfo(id);
+//     riskInfo.rating = call.inputs.rating;
+//     riskInfo.interestRate = call.inputs.interestRate;
+//     riskInfo.advanceRate = call.inputs.advanceRate;
 
-    riskInfo.save();
-}
+//     riskInfo.save();
+// }
 
-export function handleRemoveRiskItem(call: RemoveRiskItemCall): void {
-    let id = call.transaction.hash.toHex();
-    let riskInfo = RiskInfo.load(id);
+// export function handleRemoveRiskItem(call: RemoveRiskItemCall): void {
+//     let id = call.transaction.hash.toHex();
+//     let riskInfo = RiskInfo.load(id);
 
-    riskInfo.unset(id);
-}
+//     riskInfo.unset(id);
+// }
