@@ -15,21 +15,21 @@ Creates an instance of the Amplify.js SDK.
 -   `RETURN` (object) Returns an instance of the Amplify.js SDK.
 
 ```js
-var amplify = new Amplify(window.ethereum); // web browser
+var amplify = Amplify.createInstance(window.ethereum); // web browser
 
-var amplify = new Amplify('http://127.0.0.1:8545'); // HTTP provider
+var amplify = Amplify.createInstance('http://127.0.0.1:8545'); // HTTP provider
 
-var amplify = new Amplify(); // Uses Ethers.js fallback mainnet (for testing only)
+var amplify = Amplify.createInstance(); // Uses Ethers.js fallback mainnet (for testing only)
 
-var amplify = new Amplify('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
+var amplify = Amplify.createInstance('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
 
 // Init with private key (server side)
-var amplify = new Amplify('https://rpc-mumbai.maticvigil.com', {
+var amplify = Amplify.createInstance('https://rpc-mumbai.maticvigil.com', {
   privateKey: '0x_your_private_key_', // preferably with environment variable
 });
 
 // Init with HD mnemonic (server side)
-var amplify = new Amplify('mainnet' {
+var amplify = Amplify.createInstance('mainnet' {
   mnemonic: 'clutch captain shoe...', // preferably with environment variable
 });
 ```
@@ -51,7 +51,7 @@ Tokenize a given asset
 -   `RETURN` (object) Returns an Ethers.js transaction object of the tokenizeAsset transaction.
 
 ```js
-const amplify = new Amplify(window.ethereum);
+const amplify = Amplify.createInstance(window.ethereum);
 
 (async function () {
     const trx = await amplify.tokenizeAsset(

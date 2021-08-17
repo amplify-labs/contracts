@@ -15,10 +15,10 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.factor.addStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
+ *   const trx = await amplify.addStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -53,10 +53,10 @@ export async function addStableCoin(stableCoin: string, options: CallOptions = {
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.factor.removeStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
+ *   const trx = await amplify.removeStableCoin('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -96,7 +96,7 @@ export async function removeStableCoin(stableCoin: string, options: CallOptions 
  * @example
  * ```
  * (async function () {
- *   const tokens = await amplify.factor.createPool('USDT-1','discounting', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', 0.1);
+ *   const tokens = await amplify.createPool('USDT-1','discounting', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', 0.1);
  *   console.log('Tokens:', tokens);
  * })().catch(console.error);
  * ```
@@ -135,7 +135,7 @@ export async function createPool(name: string, structureType: string, stableCoin
  * @example
  * ```
  * (async function () {
- *   const loan = await amplify.factor.createLoan('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   const loan = await amplify.createLoan('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
  *   console.log('Loan:', loan);
  * })().catch(console.error);
  * ```
@@ -168,4 +168,11 @@ export async function createLoan(nftAsset: string, tokenId: string, pool: string
   };
 
   return eth.trx(factoryAddress, 'createLoan', parameters, trxOptions);
+}
+
+export interface FactoryInterface {
+  addStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
+  removeStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
+  createPool(name: string, structureType: string, stableCoin: string, minDeposit: number, options?: CallOptions): Promise<TrxResponse>;
+  createLoan(nftAsset: string, tokenId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
 }

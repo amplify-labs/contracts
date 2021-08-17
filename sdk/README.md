@@ -12,7 +12,7 @@ npm run build
 Simple methods for using Amplify Contracts.
 
 ```js
-const amplify = new Amplify(window.ethereum); // in a web browser
+const amplify = Amplify.createInstance(window.ethereum); // in a web browser
 
 // Ethers.js overrides are an optional 3rd parameter for `supply`
 // const trxOptions = { gasLimit: 250000 };
@@ -56,21 +56,21 @@ import Amplify from "@amplify-labs/amplify-js";
 The following are valid Ethereum-like providers for the initialization of the SDK.
 
 ```js
-var amplify = new Amplify(window.ethereum); // web browser
+var amplify = Amplify.createInstance(window.ethereum); // web browser
 
-var amplify = new Amplify('http://127.0.0.1:8545'); // HTTP provider
+var amplify = Amplify.createInstance('http://127.0.0.1:8545'); // HTTP provider
 
-var amplify = new Amplify(); // Uses Ethers.js fallback mainnet (for testing only)
+var amplify = Amplify.createInstance(); // Uses Ethers.js fallback mainnet (for testing only)
 
-var amplify = new Amplify('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
+var amplify = Amplify.createInstance('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
 
 // Init with private key (server side)
-var amplify = new Amplify('https://rpc-mumbai.maticvigil.com', {
+var amplify = Amplify.createInstance('https://rpc-mumbai.maticvigil.com', {
   privateKey: '0x_your_private_key_', // preferably with environment variable
 });
 
 // Init with HD mnemonic (server side)
-var amplify = new Amplify('mainnet' {
+var amplify = Amplify.createInstance('mainnet' {
   mnemonic: 'clutch captain shoe...', // preferably with environment variable
 });
 ```
@@ -146,10 +146,10 @@ const trxOptions = {
 -   In console, use following javascripts for checking behaviors, modify the owner address and asset informations to fit your requirements, and then inspect the return result
 
 ```javascript
-var amplify = new Amplify(window.ethereum);
+var amplify = Amplify.createInstance(window.ethereum);
 
 (async function () {
-    const trx = await amplify.asset.tokenizeAsset(
+    const trx = await amplify.tokenizeAsset(
         "0x916cCC0963dEB7BEA170AF7822242A884d52d4c7",
         "token-001",
         20000,
@@ -167,11 +167,11 @@ var amplify = new Amplify(window.ethereum);
 ```js
 var Amplify = require("./ContractsSDK/dist/nodejs/index.js");
 
-var amplify = new Amplify("https://rpc-mumbai.maticvigil.com", {
+var amplify = Amplify.createInstance("https://rpc-mumbai.maticvigil.com", {
     privateKey: "0x_your_private_key_", // preferably with environment variable
 });
 
-var trx = await amplify.asset.tokenizeAsset(
+var trx = await amplify.tokenizeAsset(
     "0x916cCC0963dEB7BEA170AF7822242A884d52d4c7",
     "token-002",
     20000,
@@ -181,7 +181,7 @@ var trx = await amplify.asset.tokenizeAsset(
 console.log("Ethers.js transaction object", trx);
 console.log(trx);
 
-var total = await amplify.asset.totalSupply();
+var total = await amplify.totalSupply();
 console.log(total);
 ```
 

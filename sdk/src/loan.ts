@@ -20,15 +20,15 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.loan.close('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   const trx = await amplify.closeLoan('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
  */
-export async function close(
+export async function closeLoan(
     loan: string,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
@@ -60,12 +60,12 @@ export async function close(
  * @example
  * ```
  * (async function () {
- *   const total = await amplify.loan.getAllowanceAmount('address');
+ *   const total = await amplify.loanTotalAllowed('address');
  *   console.log('Total Allowed:', total);
  * })().catch(console.error);
  * ```
  */
-export async function totalAllowed(
+export async function loanTotalAllowed(
     loan: string,
     options: CallOptions = {}
 ): Promise<string> {
@@ -88,12 +88,12 @@ export async function totalAllowed(
  * @example
  * ```
  * (async function () {
- *   const total = await amplify.loan.totalAvailable('address');
+ *   const total = await amplify.loanTotalAvailable('address');
  *   console.log('Total Borrowed:', total);
  * })().catch(console.error);
  * ```
  */
-export async function totalAvailable(
+export async function loanTotalAvailable(
     loan: string,
     options: CallOptions = {}
 ): Promise<string> {
@@ -116,12 +116,12 @@ export async function totalAvailable(
  * @example
  * ```
  * (async function () {
- *   const total = await amplify.pool.getDebtAmount('address');
+ *   const total = await amplify.loanDebtAmount('address');
  *   console.log('Total Debt:', total);
  * })().catch(console.error);
  * ```
  */
-export async function debtAmount(
+export async function loanDebtAmount(
     loan: string,
     options: CallOptions = {}
 ): Promise<string> {
@@ -144,12 +144,12 @@ export async function debtAmount(
  * @example
  * ```
  * (async function () {
- *   const isClosed = await amplify.loan.isClosed('address');
+ *   const isClosed = await amplify.isLoanClosed('address');
  *   console.log('Loan closed:', isClosed);
  * })().catch(console.error);
  * ```
  */
-export async function isClosed(
+export async function isLoanClosed(
     loan: string,
     options: CallOptions = {}
 ): Promise<boolean> {
@@ -162,4 +162,12 @@ export async function isClosed(
 
     const result = await eth.read(loan, 'isClosed', [], trxOptions);
     return result;
+}
+
+export interface LoanInterface {
+    closeLoan(loan: string, options?: CallOptions): Promise<TrxResponse>;
+    loanTotalAllowed(loan: string, options?: CallOptions): Promise<string>;
+    loanTotalAvailable(loan: string, options?: CallOptions): Promise<string>;
+    loanDebtAmount(loan: string, options?: CallOptions): Promise<string>;
+    isLoanClosed(loan: string, options?: CallOptions): Promise<string>;
 }

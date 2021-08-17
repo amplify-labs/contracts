@@ -28,10 +28,10 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.asset.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
+ *   const trx = await amplify.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -120,7 +120,7 @@ export async function totalSupply(
  * @example
  * ```
  * (async function () {
- *   const isSuccesed = await amplify.asset.addRiskItem('A', 5, 90);
+ *   const isSuccesed = await amplify.addRiskItem('A', 5, 90);
  *   console.log('Success:', isSuccesed);
  * })().catch(console.error);
  * ```
@@ -171,7 +171,7 @@ export async function addRiskItem(
  * @example
  * ```
  * (async function () {
- *   const isSuccess = await amplify.asset.removeRiskItem('A');
+ *   const isSuccess = await amplify.removeRiskItem('A');
  *   console.log('Success:', isSuccess);
  * })().catch(console.error);
  * ```
@@ -202,7 +202,7 @@ export async function removeRiskItem(
  * @example
  * ```
  * (async function () {
- *   const tokens = await amplify.asset._tokensOfOwner('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   const tokens = await amplify._tokensOfOwner('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
  *   console.log('Tokens:', tokens);
  * })().catch(console.error);
  * ```
@@ -223,4 +223,34 @@ export async function _tokensOfOwner(
 
   const result = await eth.read(assetAddress, 'balanceOf', [owner], trxOptions);
   return result.toString();
+}
+
+
+export type AssetInterface = {
+  tokenizeAsset(
+    to: string,
+    tokenId: string,
+    tokenRating: string,
+    value: string | number | BigNumber,
+    maturity: string | number | BigNumber,
+    tokenURI: string,
+    options?: CallOptions
+  ): Promise<TrxResponse>;
+  totalSupply(
+    options?: CallOptions
+  ): Promise<string>;
+  addRiskItem(
+    rating: string,
+    interestRate: number | BigNumber,
+    advanceRate: number | BigNumber,
+    options?: CallOptions
+  ): Promise<string>;
+  removeRiskItem(
+    rating: string,
+    options?: CallOptions
+  ): Promise<string>;
+  _tokensOfOwner(
+    owner: string,
+    options?: CallOptions
+  ): Promise<string>;
 }

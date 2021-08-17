@@ -23,10 +23,10 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.pool.lend('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const trx = await amplify.lend('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -79,7 +79,7 @@ export async function lend(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.pool.withdraw('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const tx = await amplify.withdraw('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
@@ -131,7 +131,7 @@ export async function withdraw(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.pool.borrow('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const tx = await amplify.borrow('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
@@ -191,7 +191,7 @@ export async function borrow(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.pool.repay('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const tx = await amplify.repay('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
@@ -250,7 +250,7 @@ export async function repay(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.pool.unlockAsset('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   const tx = await amplify.unlockAsset('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
@@ -294,12 +294,12 @@ export async function unlockAsset(
  * @example
  * ```
  * (async function () {
- *   const total = await amplify.pool.totalDeposited('address');
+ *   const total = await amplify.poolTotalDeposited('address');
  *   console.log('Total Deposited:', total);
  * })().catch(console.error);
  * ```
  */
-export async function totalDeposited(
+export async function poolTotalDeposited(
     pool: string,
     options: CallOptions = {}
 ): Promise<string> {
@@ -322,12 +322,12 @@ export async function totalDeposited(
  * @example
  * ```
  * (async function () {
- *   const total = await amplify.pool.totalBorrowed('address');
+ *   const total = await amplify.poolTotalBorrowed('address');
  *   console.log('Total Borrowed:', total);
  * })().catch(console.error);
  * ```
  */
-export async function totalBorrowed(
+export async function poolTotalBorrowed(
     pool: string,
     options: CallOptions = {}
 ): Promise<string> {
@@ -350,12 +350,12 @@ export async function totalBorrowed(
  * @example
  * ```
  * (async function () {
- *   const total = await amplify.pool.totalAvailable('address');
+ *   const total = await amplify.poolTotalAvailable('address');
  *   console.log('Total Borrowed:', total);
  * })().catch(console.error);
  * ```
  */
-export async function totalAvailable(
+export async function poolTotalAvailable(
     pool: string,
     options: CallOptions = {}
 ): Promise<string> {
@@ -368,4 +368,16 @@ export async function totalAvailable(
 
     const result = await eth.read(pool, 'totalAvailable', [], trxOptions);
     return result.toString();
+}
+
+
+export interface PoolInterface {
+    lend(pool: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    withdraw(pool: string, tokenAmount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    borrow(pool: string, loan: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    repay(pool: string, loan: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    unlockAsset(pool: string, loan: string, options?: CallOptions): Promise<TrxResponse>;
+    poolTotalDeposited(pool: string, options?: CallOptions): Promise<string>;
+    poolTotalBorrowed(pool: string, options?: CallOptions): Promise<string>;
+    poolTotalAvailable(pool: string, options?: CallOptions): Promise<string>;
 }
