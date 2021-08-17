@@ -113,7 +113,7 @@ export async function createPool(name: string, structureType: string, stableCoin
   }
 
   const factoryAddress = address[this._network.name].Factory;
-  const minDepositVal = ethers.BigNumber.from(String(minDeposit));
+  const minDepositVal = ethers.utils.parseEther(String(minDeposit));
   const parameters = [name, structureType, stableCoin, minDepositVal];
 
   const trxOptions: CallOptions = {

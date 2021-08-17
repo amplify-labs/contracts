@@ -46,7 +46,7 @@ export async function lend(
     ) {
         throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    amount = ethers.BigNumber.from(amount.toString());
+    amount = ethers.utils.parseEther(amount.toString());
 
     if (
         typeof pool !== 'string' &&
@@ -99,7 +99,7 @@ export async function withdraw(
     ) {
         throw Error(errorPrefix + 'Argument `tokenAmount` must be a string, number, or BigNumber.');
     }
-    tokenAmount = ethers.BigNumber.from(tokenAmount.toString());
+    tokenAmount = ethers.utils.parseEther(tokenAmount.toString());
 
     if (
         typeof pool !== 'string' &&
@@ -152,7 +152,7 @@ export async function borrow(
     ) {
         throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    amount = ethers.BigNumber.from(amount.toString());
+    amount = ethers.utils.parseEther(amount.toString());
 
     if (
         typeof loan !== 'string' &&
@@ -212,7 +212,7 @@ export async function repay(
     ) {
         throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    amount = ethers.BigNumber.from(amount.toString());
+    amount = ethers.utils.parseEther(amount.toString());
 
     if (
         typeof loan !== 'string' &&

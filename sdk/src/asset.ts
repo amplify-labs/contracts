@@ -53,7 +53,7 @@ export async function tokenizeAsset(
   ) {
     throw Error(errorPrefix + 'Argument `value` must be a string, number, or BigNumber.');
   }
-  value = ethers.BigNumber.from(value.toString());
+  value = ethers.utils.parseEther(value.toString());
 
   if (
     typeof maturity !== 'number' &&
