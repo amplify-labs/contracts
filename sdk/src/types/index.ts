@@ -69,27 +69,7 @@ export interface CallOptions {
   // id?: number;
 }
 
-export interface EthersTrx {
-  nonce: number;
-  gasPrice: BigNumber;
-  gasLimit: BigNumber;
-  to: string;
-  value: BigNumber;
-  data: string;
-  chainId: number;
-  from: string;
-  wait: void;
-}
-
-export interface TrxError {
-  message: string;
-  error: Error;
-  method: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parameters: any[];
-}
-
-export type TrxResponse = EthersTrx | TrxError;
+export type TrxResponse = TransactionResponse;
 
 export interface Connection {
   url?: string;

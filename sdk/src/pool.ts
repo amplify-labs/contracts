@@ -23,7 +23,7 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
  *   const trx = await amplify.pool.lend('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
@@ -88,7 +88,7 @@ export async function withdraw(
     pool: string,
     tokenAmount: string | number | BigNumber,
     options: CallOptions = {}
-): Promise<string> {
+): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [withdraw] | ';
 
@@ -141,7 +141,7 @@ export async function borrow(
     loan: string,
     amount: string | number | BigNumber,
     options: CallOptions = {}
-): Promise<string> {
+): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [borrow] | ';
 
@@ -201,7 +201,7 @@ export async function repay(
     loan: string,
     amount: string | number | BigNumber,
     options: CallOptions = {}
-): Promise<string> {
+): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [repay] | ';
 
@@ -259,7 +259,7 @@ export async function unlockAsset(
     pool: string,
     loan: string,
     options: CallOptions = {}
-): Promise<string> {
+): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [unlockAsset] | ';
 

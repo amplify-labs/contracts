@@ -28,7 +28,7 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
  *   const trx = await amplify.asset.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
@@ -120,8 +120,8 @@ export async function totalSupply(
  * @example
  * ```
  * (async function () {
- *   const isSuccess = await amplify.asset.addRiskItem('A', 5, 90);
- *   console.log('Success:', isSuccess);
+ *   const isSuccesed = await amplify.asset.addRiskItem('A', 5, 90);
+ *   console.log('Success:', isSuccesed);
  * })().catch(console.error);
  * ```
  */
@@ -181,7 +181,6 @@ export async function removeRiskItem(
   options: CallOptions = {}
 ): Promise<string> {
   await netId(this);
-  const errorPrefix = 'Amplify [removeRiskItem] | ';
 
   const assetAddress = address[this._network.name].Asset;
   const trxOptions: CallOptions = {

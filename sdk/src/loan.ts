@@ -20,7 +20,7 @@ import { CallOptions, TrxResponse } from './types';
  *
  * @example
  * ```
- * const amplify = new Amplify(window.ethereum);
+ * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
  *   const trx = await amplify.loan.close('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
@@ -152,7 +152,7 @@ export async function debtAmount(
 export async function isClosed(
     loan: string,
     options: CallOptions = {}
-): Promise<string> {
+): Promise<boolean> {
     await netId(this);
     const trxOptions: CallOptions = {
         _amplifyProvider: this._provider,

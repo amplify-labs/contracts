@@ -10,26 +10,26 @@ The SDK is currently in open beta. For bugs reports and feature requests, either
 
 Creates an instance of the Amplify.js SDK.
 
-- `[provider]` (Provider | string) Optional Ethereum network provider. Defaults to Ethers.js fallback mainnet provider.
-- `[options]` (object) Optional provider options.
-- `RETURN` (object) Returns an instance of the Amplify.js SDK.
+-   `[provider]` (Provider | string) Optional Ethereum network provider. Defaults to Ethers.js fallback mainnet provider.
+-   `[options]` (object) Optional provider options.
+-   `RETURN` (object) Returns an instance of the Amplify.js SDK.
 
 ```js
-var amplify = new Amplify(window.ethereum); // web browser
+var amplify = Amplify.createInstance(window.ethereum); // web browser
 
-var amplify = new Amplify('http://127.0.0.1:8545'); // HTTP provider
+var amplify = Amplify.createInstance('http://127.0.0.1:8545'); // HTTP provider
 
-var amplify = new Amplify(); // Uses Ethers.js fallback mainnet (for testing only)
+var amplify = Amplify.createInstance(); // Uses Ethers.js fallback mainnet (for testing only)
 
-var amplify = new Amplify('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
+var amplify = Amplify.createInstance('polygon_mumbai'); // Uses Ethers.js fallback (for testing only)
 
 // Init with private key (server side)
-var amplify = new Amplify('https://rpc-mumbai.maticvigil.com', {
+var amplify = Amplify.createInstance('https://rpc-mumbai.maticvigil.com', {
   privateKey: '0x_your_private_key_', // preferably with environment variable
 });
 
 // Init with HD mnemonic (server side)
-var amplify = new Amplify('mainnet' {
+var amplify = Amplify.createInstance('mainnet' {
   mnemonic: 'clutch captain shoe...', // preferably with environment variable
 });
 ```
@@ -42,20 +42,26 @@ These methods facilitate interactions with the Asset smart contract.
 
 Tokenize a given asset
 
-- `to` (string) Owner address.
-- `tokenId` (string) Token Id.
-- `value` (string | number | BigNumber) Value of the asset in USD.
-- `maturity` (string | number | BigNumber) Maturity of the asset.
-- `tokenURI` (string) URI for Token.
-- `[options]` (CallOptions) Call options and Ethers.js overrides for the transaction. A passed `gasLimit` will be used in both the `approve` (if not supressed) and `mint` transactions.
-- `RETURN` (object) Returns an Ethers.js transaction object of the tokenizeAsset transaction.
+-   `to` (string) Owner address.
+-   `tokenId` (string) Token Id.
+-   `value` (string | number | BigNumber) Value of the asset in USD.
+-   `maturity` (string | number | BigNumber) Maturity of the asset.
+-   `tokenURI` (string) URI for Token.
+-   `[options]` (CallOptions) Call options and Ethers.js overrides for the transaction. A passed `gasLimit` will be used in both the `approve` (if not supressed) and `mint` transactions.
+-   `RETURN` (object) Returns an Ethers.js transaction object of the tokenizeAsset transaction.
 
 ```js
-const amplify = new Amplify(window.ethereum);
+const amplify = Amplify.createInstance(window.ethereum);
 
 (async function () {
-  const trx = await amplify.tokenizeAsset('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266', 'token-001', 20000, 1, 'asset-uri://token-001');
-  console.log('Ethers.js transaction object', trx);
+    const trx = await amplify.tokenizeAsset(
+        "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+        "token-001",
+        20000,
+        1,
+        "asset-uri://token-001"
+    );
+    console.log("Ethers.js transaction object", trx);
 })().catch(console.error);
 ```
 
@@ -63,26 +69,28 @@ const amplify = new Amplify(window.ethereum);
 
 Get token total supply
 
-- `RETURN` (string) Returns a string of the numeric total for token supplied.
+-   `RETURN` (string) Returns a string of the numeric total for token supplied.
 
 ```js
 (async function () {
-  const total = await amplify.totalSupply();
-  console.log('Total Supply:', total);
+    const total = await amplify.totalSupply();
+    console.log("Total Supply:", total);
 })().catch(console.error);
 ```
 
-### _tokens Of Owner
+### \_tokens Of Owner
 
 Get tokens for an owner
 
-- `owner` (string) Owner address.
-- `RETURN` (string) Returns tokens for an owner
+-   `owner` (string) Owner address.
+-   `RETURN` (string) Returns tokens for an owner
 
 ```js
 (async function () {
-  const tokens = await amplify._tokensOfOwner('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
-  console.log('Tokens:', tokens);
+    const tokens = await amplify._tokensOfOwner(
+        "0x916cCC0963dEB7BEA170AF7822242A884d52d4c7"
+    );
+    console.log("Tokens:", tokens);
 })().catch(console.error);
 ```
 
@@ -94,26 +102,24 @@ These methods facilitate interactions with the Ethereum blockchain.
 
 This is a generic method for invoking JSON RPC's `eth_call` with Ethers.js. Use this method to execute a smart contract's constant or non-constant member without using gas. This is a read-only method intended to read a value or test a transaction for valid parameters. It does not create a transaction on the block chain.
 
-- `address` (string) The Ethereum address the transaction is directed to.
-- `method` (string) The smart contract member in which to invoke.
-- `[parameters]` (any[]) Parameters of the method to invoke.
-- `[options]` (CallOptions) Options to set for `eth_call`, optional ABI (as JSON object), and Ethers.js method overrides. The ABI can be a string of the single intended method, an array of many methods, or a JSON object of the ABI generated by a Solidity compiler.
-- `RETURN` (Promise&lt;any&gt;) Return value of the invoked smart contract member or an error object if the call failed.
+-   `address` (string) The Ethereum address the transaction is directed to.
+-   `method` (string) The smart contract member in which to invoke.
+-   `[parameters]` (any[]) Parameters of the method to invoke.
+-   `[options]` (CallOptions) Options to set for `eth_call`, optional ABI (as JSON object), and Ethers.js method overrides. The ABI can be a string of the single intended method, an array of many methods, or a JSON object of the ABI generated by a Solidity compiler.
+-   `RETURN` (Promise&lt;any&gt;) Return value of the invoked smart contract member or an error object if the call failed.
 
 ```js
 const cEthAddress = Amplify.util.getAddress(Amplify.cETH);
 
-(async function() {
+(async function () {
+    const srpb = await Amplify.eth.read(
+        cEthAddress,
+        "function supplyRatePerBlock() returns (uint256)"
+        // [], // [optional] parameters
+        // {}  // [optional] call options, provider, network, plus Ethers.js "overrides"
+    );
 
-  const srpb = await Amplify.eth.read(
-    cEthAddress,
-    'function supplyRatePerBlock() returns (uint256)',
-    // [], // [optional] parameters
-    // {}  // [optional] call options, provider, network, plus Ethers.js "overrides"
-  );
-
-  console.log('cETH market supply rate per block:', srpb.toString());
-
+    console.log("cETH market supply rate per block:", srpb.toString());
 })().catch(console.error);
 ```
 
@@ -121,34 +127,34 @@ const cEthAddress = Amplify.util.getAddress(Amplify.cETH);
 
 This is a generic method for invoking JSON RPC's `eth_sendTransaction` with Ethers.js. Use this method to create a transaction that invokes a smart contract method. Returns an Ethers.js `TransactionResponse` object.
 
-- `address` (string) The Ethereum address the transaction is directed to.
-- `method` (string) The smart contract member in which to invoke.
-- `[parameters]` (any[]) Parameters of the method to invoke.
-- `[options]` (CallOptions) Options to set for `eth_sendTransaction`, (as JSON object), and Ethers.js method overrides. The ABI can be a string optional ABI of the single intended method, an array of many methods, or a JSON object of the ABI generated by a Solidity compiler.
-- `RETURN` (Promise&lt;any&gt;) Returns an Ethers.js `TransactionResponse` object or an error object if the transaction failed.
+-   `address` (string) The Ethereum address the transaction is directed to.
+-   `method` (string) The smart contract member in which to invoke.
+-   `[parameters]` (any[]) Parameters of the method to invoke.
+-   `[options]` (CallOptions) Options to set for `eth_sendTransaction`, (as JSON object), and Ethers.js method overrides. The ABI can be a string optional ABI of the single intended method, an array of many methods, or a JSON object of the ABI generated by a Solidity compiler.
+-   `RETURN` (Promise&lt;any&gt;) Returns an Ethers.js `TransactionResponse` object or an error object if the transaction failed.
 
 ```js
-const oneEthInWei = '1000000000000000000';
-const cEthAddress = '0x4ddc2d193948926d02f9b1fe9e1daa0718270ed5';
+const oneEthInWei = "1000000000000000000";
+const cEthAddress = "0x4ddc2d193948926d02f9b1fe9e1daa0718270ed5";
 const provider = window.ethereum;
 
-(async function() {
-  console.log('Supplying ETH to the Amplify Protocol...');
+(async function () {
+    console.log("Supplying ETH to the Amplify Protocol...");
 
-  // Mint some cETH by supplying ETH to the Amplify Protocol
-  const trx = await Amplify.eth.trx(
-    cEthAddress,
-    'function mint() payable',
-    [],
-    {
-      provider,
-      value: oneEthInWei
-    }
-  );
+    // Mint some cETH by supplying ETH to the Amplify Protocol
+    const trx = await Amplify.eth.trx(
+        cEthAddress,
+        "function mint() payable",
+        [],
+        {
+            provider,
+            value: oneEthInWei,
+        }
+    );
 
-  // const result = await trx.wait(1); // JSON object of trx info, once mined
+    // const result = await trx.wait(1); // JSON object of trx info, once mined
 
-  console.log('Ethers.js transaction object', trx);
+    console.log("Ethers.js transaction object", trx);
 })().catch(console.error);
 ```
 
@@ -156,16 +162,14 @@ const provider = window.ethereum;
 
 Fetches the current Ether balance of a provided Ethereum address.
 
-- `address` (string) The Ethereum address in which to get the ETH balance.
-- `[provider]` (Provider | string) Optional Ethereum network provider. Defaults to Ethers.js fallback mainnet provider.
-- `RETURN` (BigNumber) Returns a BigNumber hexadecimal value of the ETH balance of the address.
+-   `address` (string) The Ethereum address in which to get the ETH balance.
+-   `[provider]` (Provider | string) Optional Ethereum network provider. Defaults to Ethers.js fallback mainnet provider.
+-   `RETURN` (BigNumber) Returns a BigNumber hexadecimal value of the ETH balance of the address.
 
 ```js
 (async function () {
-
-  balance = await Amplify.eth.getBalance(myAddress, provider);
-  console.log('My ETH Balance', +balance);
-
+    balance = await Amplify.eth.getBalance(myAddress, provider);
+    console.log("My ETH Balance", +balance);
 })().catch(console.error);
 ```
 
@@ -177,33 +181,32 @@ These methods are helpers for the Amplify class.
 
 Gets the contract address of the named contract. This method supports contracts used by the Amplify Protocol.
 
-- `contract` (string) The name of the contract.
-- `[network]` (string) Optional name of the Ethereum network. Main net and all the popular public test nets are supported.
-- `RETURN` (string) Returns the address of the contract.
+-   `contract` (string) The name of the contract.
+-   `[network]` (string) Optional name of the Ethereum network. Main net and all the popular public test nets are supported.
+-   `RETURN` (string) Returns the address of the contract.
 
 ```js
-console.log('cETH Address: ', Amplify.util.getAddress(Amplify.cETH));
+console.log("cETH Address: ", Amplify.util.getAddress(Amplify.cETH));
 ```
 
 ### Get ABI
 
 Gets a contract ABI as a JavaScript array. This method supports contracts used by the Amplify Protocol.
 
-- `contract` (string) The name of the contract.
-- `RETURN` (Array) Returns the ABI of the contract as a JavaScript array.
+-   `contract` (string) The name of the contract.
+-   `RETURN` (Array) Returns the ABI of the contract as a JavaScript array.
 
 ```js
-console.log('cETH ABI: ', Amplify.util.getAbi('cEther'));
+console.log("cETH ABI: ", Amplify.util.getAbi("cEther"));
 ```
 
 ### Get Network Name With Chain ID
 
 Gets the name of an Ethereum network based on its chain ID.
 
-- `chainId` (string) The chain ID of the network.
-- `RETURN` (string) Returns the name of the Ethereum network.
+-   `chainId` (string) The chain ID of the network.
+-   `RETURN` (string) Returns the name of the Ethereum network.
 
 ```js
-console.log('Mumbai : ', Amplify.util.getNetNameWithChainId(80001));
+console.log("Mumbai : ", Amplify.util.getNetNameWithChainId(80001));
 ```
-
