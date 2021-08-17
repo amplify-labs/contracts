@@ -8,7 +8,7 @@ export function handleTokenizeAsset(event: TokenizeAsset): void {
         asset = new Asset(event.params.tokenId.toHex())
         asset.hash = event.params.tokenHash;
         asset.rating = event.params.tokenRating;
-        asset.uploaded_at = event.params.uploadedAt
+        asset.uploadedAt = event.params.uploadedAt
         asset.value = event.params.value
         asset.uri = event.params.tokenURI
         asset.maturity = event.params.maturity

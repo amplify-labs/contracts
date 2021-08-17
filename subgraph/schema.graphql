@@ -2,18 +2,18 @@ type Asset @entity {
     id: ID!
     hash: String!
     value: BigInt!
-    uploaded_at: BigInt!
+    uploadedAt: BigInt!
     uri: String!
     rating: String!
     maturity: BigInt!
 }
 
-type RiskInfo @entity {
-    id: ID!
-    rating: String!
-    interestRate: BigInt!
-    advanceRate: BigInt!
-}
+# type RiskInfo @entity {
+#     id: ID!
+#     rating: String!
+#     interestRate: BigInt!
+#     advanceRate: BigInt!
+# }
 
 type Pool @entity {
     id: ID!

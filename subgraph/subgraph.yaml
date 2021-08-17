@@ -16,18 +16,17 @@ dataSources:
       file: ./src/mappings/asset.ts
       entities:
         - Asset
-        - RiskInfo
       abis:
         - name: AssetAbi
           file: ./abis/Asset.json
       eventHandlers:
         - event: TokenizeAsset(indexed uint256,string,string,uint256,string,uint256,uint256)
           handler: handleTokenizeAsset
-      callHandlers:
-        - function: addRiskItem(string,uint256,uint256)
-          handler: handleAddRiskItem
-        - function: removeRiskItem(string)
-          handler: handleRemoveRiskItem
+      # callHandlers:
+      #   - function: addRiskItem(string,uint256,uint256)
+      #     handler: handleAddRiskItem
+        # - function: removeRiskItem(string)
+        #   handler: handleRemoveRiskItem
   - kind: ethereum/contract
     name: Factory
     network: mumbai
