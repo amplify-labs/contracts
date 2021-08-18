@@ -31,9 +31,9 @@ dataSources:
     name: Factory
     network: mumbai
     source:
-      address: "0xFa3D3a67D5a9E6cedbd52b4C231E0947F8ECf946"
+      address: "0xF98B24c3f4f1d0fc671f0b238c0C62694644360a"
       abi: FactoryAbi
-      startBlock: 17743857     
+      startBlock: 17788477     
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -76,6 +76,8 @@ templates:
           handler: handlePoolBorrow
         - event: Repayed(indexed address,uint256)
           handler: handlePoolRepay
+        - event: AssetUnlocked(indexed uint256)
+          handler: handleAssetUnlock
   - name: Loan
     kind: "ethereum/contract"
     network: mumbai

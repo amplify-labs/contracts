@@ -12,27 +12,36 @@ contract Factory {
     mapping(address => Pool[]) public pools;
     mapping(address => Loan[]) public loans;
     mapping(address => bool) public supportedStableCoins;
+    mapping(address => uint) stableCoinsIds;
+    address[] stableCoins;
+    uint coinIds;
 
-    event PoolCreated(
-        address indexed pool,
-        address indexed factor,
-        string name,
-        string structureType,
-        address stableCoin,
-        uint256 minDeposit
-    );
+
+    event PoolCreated(address indexed pool, address indexed factor, string name, string structureType, address stableCoin, uint256 minDeposit);
     event LoanCreated(address indexed loan, address indexed factor, uint256 tokenId, uint256 amount, address pool);
 
     constructor() {}
 
     function addStableCoin(address stableCoin) public {
         require(!supportedStableCoins[stableCoin], "Stable coin was already added");
+
         supportedStableCoins[stableCoin] = true;
+        stableCoins.push(stableCoin);
+        stableCoinsIds[stableCoin] = coinIds;
+        coinIds++;
     }
 
     function removeStableCoin(address stableCoin) public {
         require(supportedStableCoins[stableCoin], "Stable coin was not found");
+
         supportedStableCoins[stableCoin] = false;
+        delete stableCoins[stableCoinsIds[stableCoin]];
+        delete stableCoinsIds[stableCoin];
+        coinIds--;
+    }
+
+    function getStableCoins() public view returns (address[] memory) {
+        return stableCoins;
     }
 
     function createPool(

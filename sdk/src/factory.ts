@@ -170,9 +170,36 @@ export async function createLoan(nftAsset: string, tokenId: string, pool: string
   return eth.trx(factoryAddress, 'createLoan', parameters, trxOptions);
 }
 
+/**
+ * Get factory supported stable coins
+ * @returns {array} Returns an array of addresesd.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const stableCoins = await amplify.getStableCoins();
+ *   console.log('Supported coin:', stableCoins);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getStableCoins(options: CallOptions = {}): Promise<string[]> {
+  await netId(this);
+
+  const factoryAddress = address[this._network.name].Factory;
+  const trxOptions: CallOptions = {
+    _amplifyProvider: this._provider,
+    abi: abi.Factory,
+    ...options
+  };
+
+  const result = await eth.read(factoryAddress, 'getStableCoins', [], trxOptions);
+  return result;
+}
+
 export interface FactoryInterface {
   addStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
   removeStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
   createPool(name: string, structureType: string, stableCoin: string, minDeposit: number, options?: CallOptions): Promise<TrxResponse>;
   createLoan(nftAsset: string, tokenId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
+  getStableCoins(options?: CallOptions): Promise<string[]>;
 }

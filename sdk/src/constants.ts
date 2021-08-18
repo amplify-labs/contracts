@@ -14,7 +14,7 @@ export const address = {
   },
   "polygon_mumbai": {
     Asset: "0xFa2D40Fbb754E4d05C5219f7c35F1da537e32b29",
-    Factory: "0xFa3D3a67D5a9E6cedbd52b4C231E0947F8ECf946",
+    Factory: "0xF98B24c3f4f1d0fc671f0b238c0C62694644360a",
   },
 };
 
@@ -172,6 +172,7 @@ export const abi = {
   Factory: [
     "function addStableCoin(address stableCoin)",
     "function removeStableCoin(address stableCoin)",
+    "function getStableCoins() returns (address[])",
     "function createPool(string name, string structure, address stableCoin, uint256 minDeposit)",
     "function createLoan(address nftAsset, uint256 tokenId, address pool)"
   ],

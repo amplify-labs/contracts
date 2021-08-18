@@ -30,6 +30,19 @@
         "inputs": [
             {
                 "indexed": true,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "AssetUnlocked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
                 "internalType": "address",
                 "name": "loan",
                 "type": "address"

@@ -10,13 +10,6 @@ type Asset @entity {
     loan: Loan @derivedFrom(field: "asset")
 }
 
-# type RiskInfo @entity {
-#     id: ID!
-#     rating: String!
-#     interestRate: BigInt!
-#     advanceRate: BigInt!
-# }
-
 type Pool @entity {
     id: ID!
     name: String!
@@ -27,6 +20,7 @@ type Pool @entity {
     totalDeposited: BigInt!
     totalBorrowed: BigInt!
     createdAt: BigInt!
+    assetsLocked: [Asset]!
 }
 
 type Loan @entity {

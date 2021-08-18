@@ -18,6 +18,7 @@ contract Pool is Loaned, Context, Structured {
     event Borrowed(address indexed loan, uint256 _amount);
     event Repayed(address indexed loan, uint256 _amount);
     event Withdrawn(address indexed _from, uint256 _amount);
+    event AssetUnlocked(uint256 indexed tokenId);
 
     constructor(
         string memory name_,
@@ -73,6 +74,7 @@ contract Pool is Loaned, Context, Structured {
         Asset nftFactory = loanContract.getNftFactory();
 
         nftFactory.transferFrom(address(this), _msgSender(), lockedAsset);
+        emit AssetUnlocked(lockedAsset);
         return true;
     }
 
