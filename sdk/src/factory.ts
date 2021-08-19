@@ -140,16 +140,10 @@ export async function createPool(name: string, structureType: string, stableCoin
  * })().catch(console.error);
  * ```
  */
-export async function createLoan(nftAsset: string, tokenId: string, pool: string, options: CallOptions = {}): Promise<TrxResponse> {
+export async function createLoan(tokenId: string, pool: string, options: CallOptions = {}): Promise<TrxResponse> {
   await netId(this);
   const errorPrefix = 'Amplify [createLoan] | ';
 
-  if (
-    typeof nftAsset !== 'string' &&
-    !ethers.utils.isAddress(nftAsset)
-  ) {
-    throw Error(errorPrefix + 'Argument `nftAsset` must be an address');
-  }
 
   if (
     typeof pool !== 'string' &&
@@ -159,6 +153,7 @@ export async function createLoan(nftAsset: string, tokenId: string, pool: string
   }
 
   const factoryAddress = address[this._network.name].Factory;
+  const nftAsset = address[this._network.name].Asset;
   const parameters = [nftAsset, tokenId, pool];
 
   const trxOptions: CallOptions = {
@@ -200,6 +195,6 @@ export interface FactoryInterface {
   addStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
   removeStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
   createPool(name: string, structureType: string, stableCoin: string, minDeposit: number, options?: CallOptions): Promise<TrxResponse>;
-  createLoan(nftAsset: string, tokenId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
+  createLoan(tokenId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
   getStableCoins(options?: CallOptions): Promise<string[]>;
 }
