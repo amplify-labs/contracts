@@ -28,11 +28,11 @@ jobs:
           static-checking: localIsNew
 
       - uses: actions/setup-node@v2
-        if: steps.check.outputs.changed == 'true'
         with:
           node-version: '12.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@amplify-labs'
+        if: steps.check.outputs.changed == 'true'
       - run: cd sdk && npm install
       - run: cd sdk && npm publish
         env:
