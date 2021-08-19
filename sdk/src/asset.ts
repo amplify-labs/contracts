@@ -284,8 +284,43 @@ export async function lockAssetIntoThePool(
   return result.toString();
 }
 
+/**
+ * Get owner of NFT asset
+ * @param {string | number | BigNumber} tokenId Token id.
+* @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *  transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *  not supressed) and `mint` transactions.
+ * @returns {string} Returns the owner of the NFT asset
+* 
+ * @example
+ * ```
+ * (async function () {
+ *   const tx = await amplify.ownerOfAsset(1);
+ *   console.log('Tx:', tx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function ownerOfAsset(
+  tokenId: string | number | BigNumber,
+  options: CallOptions = {}
+): Promise<string> {
+  await netId(this);
+  const errorPrefix = 'Amplify [ownerOf] | ';
+
+  const assetAddress = address[this._network.name].Asset;
+  const trxOptions: CallOptions = {
+    _amplifyProvider: this._provider,
+    abi: abi.Asset,
+    ...options
+  };
+
+  const result = await eth.read(assetAddress, 'ownerOf', [tokenId], trxOptions);
+  return result.toString();
+}
+
 
 export type AssetInterface = {
+  ownerOfAsset: (tokenId: string | number | BigNumber, options?: CallOptions) => Promise<string>;
   lockAssetIntoThePool(assetOwner: string, pool: string, tokenId: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>
   tokenizeAsset(tokenId: string, tokenRating: string, value: string | number | BigNumber, maturity: string | number | BigNumber, tokenURI: string, options?: CallOptions): Promise<TrxResponse>;
   totalSupply(options?: CallOptions): Promise<string>;

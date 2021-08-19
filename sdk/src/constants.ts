@@ -169,6 +169,7 @@ export const abi = {
     "function getRiskInterestRate(string rating) view returns (uint256)",
     "function getRiskAdvanceRate(string rating) view returns(uint256)",
     "function balanceOf(address) view returns (uint256)",
+    "function ownerOf(uint256 tokenId) view returns (address)"
   ],
   Factory: [
     "function addStableCoin(address stableCoin)",
