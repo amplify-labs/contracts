@@ -27,7 +27,7 @@ jobs:
           scope: '@amplify-labs'
 
       - id: check
-        uses: EndBug/version-check@v1.5.0
+        uses: EndBug/version-check@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           file-name: "./sdk/package.json"
