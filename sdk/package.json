@@ -30,6 +30,9 @@
     "defi",
     "ethereum"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@amplify-labs"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
