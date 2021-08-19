@@ -1,3 +1,16 @@
+type Pool @entity {
+    id: ID!
+    name: String!
+    structureType: String!
+    stableCoin: Bytes!
+    factor: Bytes!
+    minDeposit: BigInt!
+    totalDeposited: BigInt!
+    totalBorrowed: BigInt!
+    createdAt: BigInt!
+    assetsLocked: [Asset!]!
+}
+
 type Asset @entity {
     id: ID!
     hash: String!
@@ -9,19 +22,6 @@ type Asset @entity {
     factor: Bytes!
     isLocked: Boolean!
     loan: Loan @derivedFrom(field: "asset")
-}
-
-type Pool @entity {
-    id: ID!
-    name: String!
-    structureType: String!
-    stableCoin: Bytes!
-    factor: Bytes!
-    minDeposit: BigInt!
-    totalDeposited: BigInt!
-    totalBorrowed: BigInt!
-    createdAt: BigInt!
-    assetsLocked: [Asset]!
 }
 
 type Loan @entity {

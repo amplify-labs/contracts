@@ -66,33 +66,35 @@ export function handlePoolRepay(event: Repayed): void {
 
 export function handleAssetlock(event: LoanCreated): void {
     let pool = Pool.load(event.params.pool.toHex());
-    let asset = Asset.load(event.params.tokenId.toHex());
-
-    if (asset) {
-        asset.isLocked = true;
-        asset.save();
-    }
 
     if (pool) {
-        pool.assetsLocked.push(event.params.tokenId.toHex());
+        let poolAssets = pool.assetsLocked;
+        poolAssets.push(event.params.tokenId.toHex());
+        pool.assetsLocked = poolAssets;
     }
 
+    updateTokenIntoTheAsset(event.params.tokenId.toHex(), true)
     pool.save();
 }
 
 export function handleAssetUnlock(event: AssetUnlocked): void {
     let context = dataSource.context();
     let pool = Pool.load(context.getBytes("pool").toHex());
-    let asset = Asset.load(event.params.tokenId.toHex());
-
-    if (asset) {
-        asset.isLocked = false;
-        asset.save();
-    }
 
     if (pool) {
-        pool.assetsLocked.splice(pool.assetsLocked.indexOf(event.params.tokenId.toHex()), 1);
+        let poolAssets = pool.assetsLocked;
+        poolAssets.splice(poolAssets.indexOf(event.params.tokenId.toHex()), 1);
+        pool.assetsLocked = poolAssets;
     }
-
+    updateTokenIntoTheAsset(event.params.tokenId.toHex(), false)
     pool.save();
+}
+
+function updateTokenIntoTheAsset(tokenId: string, status: boolean): void {
+    let asset = Asset.load(tokenId);
+
+    if (asset) {
+        asset.isLocked = status;
+    }
+    asset.save();
 }
