@@ -80,7 +80,9 @@ export async function tokenizeAsset(
  * Get token total supply
  *
  * @returns {string} Returns a string of the numeric total for token supplied.
- *
+* @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
  * @example
  * ```
  * (async function () {
@@ -112,7 +114,9 @@ export async function totalSupply(
  * @param {string} rating Rating letter.
  * @param {number | BigNumber} interestRate Interest rate.
  * @param {number | BigNumber} advanceRate Advance rate.
- * 
+ * @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
  * @returns {boolean} Returns a boolean of the transaction success.
  *
  * @example
@@ -163,7 +167,9 @@ export async function addRiskItem(
  * Remove the risk item info
  *
  * @param {string} rating Rating letter.
- * 
+* @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
  * @returns {boolean} Returns a boolean of the transaction success.
  *
  * @example
@@ -194,7 +200,9 @@ export async function removeRiskItem(
  * Get tokens for an owner
  *
  * @param {string} owner Owner address.
- * 
+ * @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
  * @returns {string} Returns tokens for an owner
  *
  * @example
@@ -224,7 +232,61 @@ export async function _tokensOfOwner(
 }
 
 
+/**
+ * Lock asset into the pool contract
+ *
+ * @param {string} assetOwner NFT Owner address.
+ * @param {string} pool Pool address.
+ * @param {string | number | BigNumber} tokenId Token id.
+* @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *  transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *  not supressed) and `mint` transactions.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const tx = await amplify.lockAssetInThePool('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', 1);
+ *   console.log('Tx:', tx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function lockAssetIntoThePool(
+  assetOwner: string,
+  pool: string,
+  tokenId: string | number | BigNumber,
+  options: CallOptions = {}
+): Promise<string> {
+  await netId(this);
+  const errorPrefix = 'Amplify [transferFrom] | ';
+
+  const assetAddress = address[this._network.name].Asset;
+  const trxOptions: CallOptions = {
+    _amplifyProvider: this._provider,
+    abi: abi.Asset,
+    ...options
+  };
+
+  if (
+    typeof assetOwner !== 'string' &&
+    !ethers.utils.isAddress(assetOwner)
+  ) {
+    throw Error(errorPrefix + 'Argument `assetOwner` must be an address');
+  }
+
+  if (
+    typeof pool !== 'string' &&
+    !ethers.utils.isAddress(pool)
+  ) {
+    throw Error(errorPrefix + 'Argument `pool` must be an address');
+  }
+
+  const result = await eth.trx(assetAddress, 'transferFrom', [assetOwner, pool, tokenId], trxOptions);
+  return result.toString();
+}
+
+
 export type AssetInterface = {
+  lockAssetIntoThePool(assetOwner: string, pool: string, tokenId: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>
   tokenizeAsset(tokenId: string, tokenRating: string, value: string | number | BigNumber, maturity: string | number | BigNumber, tokenURI: string, options?: CallOptions): Promise<TrxResponse>;
   totalSupply(options?: CallOptions): Promise<string>;
   addRiskItem(rating: string, interestRate: number | BigNumber, advanceRate: number | BigNumber, options?: CallOptions): Promise<string>;

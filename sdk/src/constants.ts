@@ -161,6 +161,7 @@ export const networks = [
 
 export const abi = {
   Asset: [
+    "function transferFrom(address from, address to, uint256 tokenId)",
     "function totalSupply() view returns (uint256)",
     "function tokenizeAsset(string tokenId, string tokenRating, uint256 value, uint256 maturity, string tokenURI)",
     "function addRiskItem(string rating, uint256 interestRate, uint256 advanceRate)",
