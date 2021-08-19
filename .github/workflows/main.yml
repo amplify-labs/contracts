@@ -26,11 +26,12 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@amplify-labs'
 
-      - uses: EndBug/version-check@v1
+      - id: check
+        uses: EndBug/version-check@v1
         with:
           file-name: "./sdk/package.json"
           token: ${{ secrets.GITHUB_TOKEN }}
-          file-url: "https://npm.pkg.github.com/@amplify-labs/amplify-js"
+          file-url: "::before"
           static-checking: localIsNew
 
       - run: |
