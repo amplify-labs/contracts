@@ -27,11 +27,11 @@ jobs:
           scope: '@amplify-labs'
 
       - id: check
-        uses: EndBug/version-check@v1.1.0
+        uses: EndBug/version-check@v1.5.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           file-name: "./sdk/package.json"
-          file-url: "https://npm.pkg.github.com/@amplify-labs/amplify-js"
+          file-url: "::before"
           static-checking: localIsNew
 
       - run: 'echo "Version change found in commit ${{ steps }}! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
