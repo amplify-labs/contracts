@@ -25,7 +25,6 @@ jobs:
           node-version: '12.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@amplify-labs'
-      - run: cat .npmrc
 
       - uses: EndBug/version-check@v1
         with:
