@@ -26,6 +26,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@amplify-labs'
 
+      - run: cat /home/runner/work/_temp/.npmrc
       - run: 'echo "Version change found in commit ${{ steps }}! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
 
       - id: check
