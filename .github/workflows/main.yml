@@ -23,10 +23,9 @@ jobs:
       - uses: EndBug/version-check@v1
         with:
           file-name: "./sdk/package.json"
+          token: ${{ secrets.GITHUB_TOKEN }}
           file-url: "https://npm.pkg.github.com/@amplify-labs/amplify-js"
           static-checking: localIsNew
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v2
         if: steps.check.outputs.changed == 'true'
