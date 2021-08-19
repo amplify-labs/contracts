@@ -26,6 +26,8 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@amplify-labs'
 
+      - run: 'echo "Version change found in commit ${{ steps }}! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
+
       - id: check
         uses: EndBug/version-check@v1
         with:
@@ -33,10 +35,6 @@ jobs:
           file-name: "./sdk/package.json"
           file-url: "https://npm.pkg.github.com/@amplify-labs/amplify-js"
           static-checking: localIsNew
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: 'echo "Version change found in commit ${{ steps }}! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
 
       - run: |
           cd sdk
