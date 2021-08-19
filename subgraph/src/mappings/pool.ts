@@ -2,7 +2,7 @@ import { dataSource, BigInt } from '@graphprotocol/graph-ts';
 
 import { Lend, Withdrawn, Borrowed, Repayed, AssetUnlocked } from '../../generated/templates/Pool/PoolAbi';
 import { LoanCreated, PoolCreated } from '../../generated/Factory/FactoryAbi';
-import { Pool } from '../../generated/schema';
+import { Pool, Asset } from '../../generated/schema';
 
 
 export function createNewPool(event: PoolCreated): void {
@@ -66,6 +66,12 @@ export function handlePoolRepay(event: Repayed): void {
 
 export function handleAssetlock(event: LoanCreated): void {
     let pool = Pool.load(event.params.pool.toHex());
+    let asset = Asset.load(event.params.tokenId.toHex());
+
+    if (asset) {
+        asset.isLocked = true;
+        asset.save();
+    }
 
     if (pool) {
         pool.assetsLocked.push(event.params.tokenId.toHex());
@@ -77,6 +83,12 @@ export function handleAssetlock(event: LoanCreated): void {
 export function handleAssetUnlock(event: AssetUnlocked): void {
     let context = dataSource.context();
     let pool = Pool.load(context.getBytes("pool").toHex());
+    let asset = Asset.load(event.params.tokenId.toHex());
+
+    if (asset) {
+        asset.isLocked = false;
+        asset.save();
+    }
 
     if (pool) {
         pool.assetsLocked.splice(pool.assetsLocked.indexOf(event.params.tokenId.toHex()), 1);

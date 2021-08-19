@@ -13,24 +13,7 @@ export function handleTokenizeAsset(event: TokenizeAsset): void {
         asset.uri = event.params.tokenURI;
         asset.factor = event.transaction.from;
         asset.maturity = event.params.maturity;
+        asset.isLocked = false;
     }
     asset.save()
 }
-
-// export function handleAddRiskItem(call: AddRiskItemCall): void {
-//     let id = call.transaction.hash.toHex();
-
-//     let riskInfo = new RiskInfo(id);
-//     riskInfo.rating = call.inputs.rating;
-//     riskInfo.interestRate = call.inputs.interestRate;
-//     riskInfo.advanceRate = call.inputs.advanceRate;
-
-//     riskInfo.save();
-// }
-
-// export function handleRemoveRiskItem(call: RemoveRiskItemCall): void {
-//     let id = call.transaction.hash.toHex();
-//     let riskInfo = RiskInfo.load(id);
-
-//     riskInfo.unset(id);
-// }

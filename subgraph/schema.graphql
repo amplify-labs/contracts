@@ -7,6 +7,7 @@ type Asset @entity {
     rating: String!
     maturity: BigInt!
     factor: Bytes!
+    isLocked: Boolean!
     loan: Loan @derivedFrom(field: "asset")
 }
 
