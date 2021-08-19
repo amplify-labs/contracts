@@ -20,19 +20,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - uses: EndBug/version-check@v1
-        with:
-          file-name: "./sdk/package.json"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          file-url: "::before"
-          static-checking: localIsNew
-
       - uses: actions/setup-node@v2
-        if: steps.check.outputs.changed == 'true'
         with:
           node-version: '12.x'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@amplify-labs'
+
+      - uses: EndBug/version-check@v1
+        with:
+          file-name: "./sdk/package.json"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          file-url: "https://npm.pkg.github.com/@amplify-labs/amplify-js"
+          static-checking: localIsNew
 
       - run: |
           cd sdk
