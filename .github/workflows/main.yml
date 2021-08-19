@@ -29,11 +29,11 @@ jobs:
       - id: check
         uses: EndBug/version-check@v1
         with:
-          file-name: "./sdk/package.json"
           token: ${{ secrets.GITHUB_TOKEN }}
-          file-url: "::before"
+          file-url: "https://npm.pkg.github.com/@amplify-labs/amplify-js"
           static-checking: localIsNew
-      - run: 'echo "Version change found in commit ${{ steps.check.outputs.commit }}! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
+
+      - run: 'echo "Version change found in commit ${{ steps }}! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
 
       - run: |
           cd sdk
