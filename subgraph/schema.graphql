@@ -11,6 +11,22 @@ type Pool @entity {
     assetsLocked: [Asset!]!
 }
 
+enum TransactionType {
+    BORROW
+    REPAY
+    LEND
+    WITHDRAW
+}
+
+type Transaction @entity {
+    id: ID!
+    from: Bytes!
+    to: Bytes!
+    amount: BigInt!
+    createdAt: BigInt!
+    type: TransactionType!
+}
+
 type Asset @entity {
     id: ID!
     hash: String!
@@ -33,4 +49,5 @@ type Loan @entity {
     asset: Asset!
     createdAt: BigInt!
     isClosed: Boolean!
+    transactions: [Transaction!]!
 }

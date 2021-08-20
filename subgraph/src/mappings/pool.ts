@@ -1,8 +1,8 @@
-import { dataSource, BigInt } from '@graphprotocol/graph-ts';
+import { dataSource, BigInt, Bytes, Address } from '@graphprotocol/graph-ts';
 
 import { Lend, Withdrawn, Borrowed, Repayed, AssetUnlocked } from '../../generated/templates/Pool/PoolAbi';
 import { LoanCreated, PoolCreated } from '../../generated/Factory/FactoryAbi';
-import { Pool, Asset } from '../../generated/schema';
+import { Pool, Asset, Transaction } from '../../generated/schema';
 
 
 export function createNewPool(event: PoolCreated): void {
@@ -28,6 +28,13 @@ export function handlePoolLend(event: Lend): void {
         pool.totalDeposited = pool.totalDeposited.plus(event.params._amount);
     }
 
+    handleAddTransaction(
+        event.transaction.hash.toHex(),
+        "LEND",
+        event.params._from,
+        Address.fromString(pool.id),
+        event.params._amount,
+        event.block.timestamp);
     pool.save();
 }
 
@@ -39,6 +46,13 @@ export function handlePoolWithdraw(event: Withdrawn): void {
         pool.totalDeposited = pool.totalDeposited.minus(event.params._amount);
     }
 
+    handleAddTransaction(
+        event.transaction.hash.toHex(),
+        "WITHDRAW",
+        Address.fromString(pool.id),
+        event.params._from,
+        event.params._amount,
+        event.block.timestamp);
     pool.save();
 }
 
@@ -97,4 +111,16 @@ function updateTokenIntoTheAsset(tokenId: string, status: boolean): void {
         asset.isLocked = status;
     }
     asset.save();
+}
+
+function handleAddTransaction(txId: string, type: string, from: Bytes, to: Bytes, amount: BigInt, timestamp: BigInt): void {
+    let transaction = new Transaction(txId);
+    transaction.from = from;
+    transaction.to = to;
+    transaction.type = type;
+
+    transaction.amount = amount;
+    transaction.createdAt = timestamp;
+
+    transaction.save();
 }

@@ -90,6 +90,7 @@ templates:
       file: ./src/mappings/loan.ts
       entities:
         - Loan
+        - Transaction
       abis:
         - name: LoanAbi
           file: ./abis/Loan.json
