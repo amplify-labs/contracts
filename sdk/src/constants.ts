@@ -41,7 +41,7 @@ export const networks = [
     "explorers": [
       {
         "name": "etherscan",
-        "url": "https://etherscan.io",
+        "url": "https://etherscan.io/",
         "standard": "EIP3091"
       }
     ],
@@ -66,7 +66,13 @@ export const networks = [
     "faucets": [
       "https://faucet.ropsten.be?${ADDRESS}"
     ],
-    "explorers": [],
+    "explorers": [
+      {
+        "name": "etherscan",
+        "url": "https://ropsten.etherscan.io/",
+        "standard": "EIP3091"
+      }
+    ],
     "infoURL": "https://github.com/ethereum/ropsten"
   },
   {
@@ -88,7 +94,13 @@ export const networks = [
     "faucets": [
       "https://faucet.rinkeby.io"
     ],
-    "explorers": [],
+    "explorers": [
+      {
+        "name": "etherscan",
+        "url": "https://rinkeby.etherscan.io/",
+        "standard": "EIP3091"
+      }
+    ],
     "infoURL": "https://www.rinkeby.io"
   },
   {
@@ -112,7 +124,13 @@ export const networks = [
       "https://goerli-faucet.slock.it/?address=${ADDRESS}",
       "https://faucet.goerli.mudit.blog"
     ],
-    "explorers": [],
+    "explorers": [
+      {
+        "name": "etherscan",
+        "url": "https://goerli.etherscan.io/",
+        "standard": "EIP3091"
+      }
+    ],
     "infoURL": "https://goerli.net/#about"
   },
   {
@@ -132,7 +150,13 @@ export const networks = [
       "wss://ws-mainnet.matic.network"
     ],
     "faucets": [],
-    "explorers": [],
+    "explorers": [
+      {
+        "name": "polygonscan",
+        "url": "https://polygonscan.com/",
+        "standard": "EIP3091"
+      }
+    ],
     "infoURL": "https://matic.network/"
   },
   {
@@ -154,7 +178,13 @@ export const networks = [
     "faucets": [
       "https://faucet.matic.network/"
     ],
-    "explorers": [],
+    "explorers": [
+      {
+        "name": "polygonscan",
+        "url": "https://mumbai.polygonscan.com/",
+        "standard": "EIP3091"
+      }
+    ],
     "infoURL": "https://matic.network/"
   }
 ]
