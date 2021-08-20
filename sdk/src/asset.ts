@@ -159,8 +159,7 @@ export async function addRiskItem(
   }
   advanceRate = ethers.BigNumber.from(advanceRate.toString());
 
-  const result = await eth.trx(assetAddress, 'addRiskItem', [rating, interestRate, advanceRate], trxOptions);
-  return result.toString();
+  return eth.trx(assetAddress, 'addRiskItem', [rating, interestRate, advanceRate], trxOptions);
 }
 
 /**
@@ -192,8 +191,7 @@ export async function removeRiskItem(
     abi: abi.Asset,
     ...options
   };
-  const result = await eth.trx(assetAddress, 'removeRiskItem', [rating], trxOptions);
-  return result.toString();
+  return eth.trx(assetAddress, 'removeRiskItem', [rating], trxOptions);
 }
 
 /**
@@ -280,8 +278,7 @@ export async function lockAssetIntoThePool(
     throw Error(errorPrefix + 'Argument `pool` must be an address');
   }
 
-  const result = await eth.trx(assetAddress, 'transferFrom', [assetOwner, pool, tokenId], trxOptions);
-  return result.toString();
+  return eth.trx(assetAddress, 'transferFrom', [assetOwner, pool, tokenId], trxOptions);
 }
 
 /**
