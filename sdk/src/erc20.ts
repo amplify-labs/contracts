@@ -115,7 +115,7 @@ export async function checkAllowance(
         ...options
     };
 
-    let result = await eth.read(tokenAddress, 'allowance', [options.from, spender], trxOptions);
+    const result = await eth.read(tokenAddress, 'allowance', [options.from, spender], trxOptions);
     return result > 0;
 }
 
