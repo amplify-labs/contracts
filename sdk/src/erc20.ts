@@ -7,7 +7,7 @@ import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 import { ethers } from 'ethers';
 import * as eth from './eth';
 import { netId } from './helpers';
-import {  abi } from './constants';
+import { abi } from './constants';
 import { CallOptions, TrxResponse } from './types';
 
 /**
@@ -70,5 +70,5 @@ export async function approveTransfer(
 }
 
 export type Erc20Interface = {
-    approveTransfer(tokenAddress: string, spender: string, amount: string | BigNumber, options: CallOptions): Promise<TrxResponse>;
+    approveTransfer(tokenAddress: string, spender: string, amount: string | BigNumber, options?: CallOptions): Promise<TrxResponse>;
 }
