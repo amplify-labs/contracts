@@ -226,6 +226,7 @@ export const abi = {
     "function isClosed() view returns (bool)"
   ],
   ERC20: [
+    "function allowance(address spender, address spender) returns (uint256)",
     "function approve(address spender, uint256 amount) returns (bool)"
   ]
 };

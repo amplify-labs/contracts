@@ -95,7 +95,6 @@ export async function totalSupply(
   options: CallOptions = {}
 ): Promise<string> {
   await netId(this);
-  // const errorPrefix = 'Amplify [totalSupply] | ';
 
   const assetAddress = address[this._network.name].Asset;
   const trxOptions: CallOptions = {
@@ -216,7 +215,6 @@ export async function _tokensOfOwner(
   options: CallOptions = {}
 ): Promise<string> {
   await netId(this);
-  // const errorPrefix = 'Amplify [_tokensOfOwner] | ';
 
   const assetAddress = address[this._network.name].Asset;
   const trxOptions: CallOptions = {
@@ -302,7 +300,6 @@ export async function ownerOfAsset(
   options: CallOptions = {}
 ): Promise<string> {
   await netId(this);
-  const errorPrefix = 'Amplify [ownerOf] | ';
 
   const assetAddress = address[this._network.name].Asset;
   const trxOptions: CallOptions = {
