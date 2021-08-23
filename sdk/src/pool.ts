@@ -174,7 +174,7 @@ export async function borrow(
         ...options
     };
 
-    return eth.trx(pool, 'borrow', [amount], trxOptions);
+    return eth.trx(pool, 'borrow', [loan, amount], trxOptions);
 }
 
 /**
@@ -234,7 +234,7 @@ export async function repay(
         ...options
     };
 
-    return eth.trx(pool, 'repay', [amount], trxOptions);
+    return eth.trx(pool, 'repay', [loan, amount], trxOptions);
 }
 
 /**
