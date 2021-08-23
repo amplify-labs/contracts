@@ -10,6 +10,7 @@ import * as util from './util';
 import * as asset from './asset';
 import * as pool from './pool';
 import * as loan from './loan';
+import * as erc20 from './erc20';
 import * as factory from './factory';
 import * as constants from './constants';
 import * as types from './types';
@@ -60,7 +61,8 @@ function createInstance(provider: types.Provider | string = 'mainnet', options: 
     ...asset,
     ...factory,
     ...pool,
-    ...loan
+    ...loan,
+    ...erc20
   };
 
   // Instance needs to know which network the provider connects to, so it can

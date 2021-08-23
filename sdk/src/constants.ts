@@ -224,6 +224,9 @@ export const abi = {
     "function getAvailableAmount() view returns (uint256)",
     "function getDebtAmount() view returns (uint256)",
     "function isClosed() view returns (bool)"
+  ],
+  ERC20: [
+    "function approve(address spender, uint256 amount) returns (bool)"
   ]
 };
 

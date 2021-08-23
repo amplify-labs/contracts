@@ -15,9 +15,10 @@ import type { PoolInterface } from '../pool';
 import type { LoanInterface } from '../loan';
 import type { AssetInterface } from '../asset';
 import type { FactoryInterface } from '../factory';
+import type { Erc20Interface } from '../erc20';
 
 // =-=-=-=-=-= /src/index.ts =-=-=-=-=-=
-export interface AmplifyInstance extends AssetInterface, FactoryInterface, LoanInterface, PoolInterface {
+export interface AmplifyInstance extends AssetInterface, FactoryInterface, LoanInterface, PoolInterface, Erc20Interface {
   _networkPromise: Promise<ProviderNetwork>;
 };
 export interface AmplifyOptions {
