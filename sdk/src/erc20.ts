@@ -69,6 +69,57 @@ export async function approveTransfer(
     return eth.trx(tokenAddress, 'approve', [spender, amount], trxOptions);
 }
 
+
+/**
+ * Check spender allowance
+ *
+ * @param {string} tokenAddress ERC20 token address.
+ * @param {string} spender Spender address.
+* @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *  transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *  not supressed) and `mint` transactions.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const tx = await amplify.checkAllowance('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('Tx:', tx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function checkAllowance(
+    tokenAddress: string,
+    spender: string,
+    options: CallOptions = {}
+): Promise<boolean> {
+    await netId(this);
+    const errorPrefix = 'Amplify [allowance] | ';
+
+    if (
+        typeof spender !== 'string' &&
+        !ethers.utils.isAddress(spender)
+    ) {
+        throw Error(errorPrefix + 'Argument `spender` must be an address');
+    }
+
+    if (
+        typeof tokenAddress !== 'string' &&
+        !ethers.utils.isAddress(tokenAddress)
+    ) {
+        throw Error(errorPrefix + 'Argument `tokenAddress` must be an address');
+    }
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.ERC20,
+        ...options
+    };
+
+    let result = await eth.read(tokenAddress, 'allowance', [options.from, spender], trxOptions);
+    return result > 0;
+}
+
 export type Erc20Interface = {
+    checkAllowance(tokenAddress: string, spender: string, options?: CallOptions): Promise<boolean>;
     approveTransfer(tokenAddress: string, spender: string, amount: string | BigNumber, options?: CallOptions): Promise<TrxResponse>;
 }
