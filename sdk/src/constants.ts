@@ -1,14 +1,21 @@
-import networksAddress from 'protocol/networks';
-
 // Publicly revealed on the parent class
 export const constants = {
   'Asset': 'Asset',
 };
 
 export const address = {
-  "mainnet": networksAddress["mainet"],
-  "polygon_mainet": networksAddress["matic"],
-  "polygon_mumbai": networksAddress["mumbai"],
+  "mainnet": {
+    "Asset": "",
+    "Factory": ""
+  },
+  "polygon_mainet": {
+    "Asset": "",
+    "Factory": ""
+  },
+  "polygon_mumbai": {
+    "Asset": "0x43807E79dc6dA2e1649988E90899a36E56F81CCB",
+    "Factory": "0x3e1d06CeB270a1d30fE5CFe2A24d04eee4A779F8"
+  },
 };
 
 export const networks = [
