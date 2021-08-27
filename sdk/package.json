@@ -1,6 +1,6 @@
 {
   "name": "@amplify-labs/amplify-js",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "author": "Amplify Labs",
   "description": "A JavaScript SDK for Amplify Contracts",
   "license": "BSD-3-Clause",
@@ -34,6 +34,7 @@
     "registry": "https://npm.pkg.github.com/@amplify-labs"
   },
   "devDependencies": {
+    "protocol": "file:../protocol",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@rollup/plugin-json": "^4.1.0",

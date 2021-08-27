@@ -1,4 +1,4 @@
-{
+export default networks = {
     "mainet": {
         "Asset": "",
         "Factory": ""

@@ -1,4 +1,4 @@
-import networksAddress from '../../protocol/networks.json';
+import networksAddress from 'protocol/networks';
 
 // Publicly revealed on the parent class
 export const constants = {

@@ -4,8 +4,7 @@
     "lib": ["es6", "dom"],
     "resolveJsonModule": true,
     "sourceMap": true,
-    "declaration": true,
-    "esModuleInterop": true,
+    "declaration": true
   },
   "include": [
     "src/**/*.ts"
