@@ -53,7 +53,7 @@ describe("Pool", async function () {
         let tx = await pool.createLoan(asset, tokenId)
         let awaitTx = await tx.wait();
 
-        expect(parseBN(awaitTx.events[0].args.loanId)).to.equal(0);
+        expect(parseBN(awaitTx.events[0].args.loanId)).to.equal(1);
         expect(parseBN(awaitTx.events[0].args.tokenId)).to.equal(parseBN(tokenId));
 
         let creditLine = await pool.loans(awaitTx.events[0].args.loanId);

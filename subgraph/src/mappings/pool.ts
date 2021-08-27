@@ -117,24 +117,24 @@ export function handleCreateCreditLine(event: CreditLineOpened): void {
     loan.amount = event.params.amount;
     loan.debt = new BigInt(0);
     loan.factor = event.params.borrower;
-    loan.asset = event.params.tokenId.toHex()
-    loan.pool = pool;
+    loan.collateralAsset = event.params.tokenId.toHex()
+    loan.borrowingPool = pool;
     loan.createdAt = event.block.timestamp;
     loan.isClosed = false;
     loan.transactions = [];
 
-    handlePoolLockedAsset(pool, event.params.tokenId.toHex());
+    handlePoolLockedAsset(pool, event.params.tokenId.toHex(), event.params.loanId.toHex());
     loan.save();
 }
 
-export function handlePoolLockedAsset(poolAddr: string, tokenId: string): void {
+export function handlePoolLockedAsset(poolAddr: string, tokenId: string, loanId: string): void {
     let pool = Pool.load(poolAddr);
 
     let poolAssets = pool.assetsLocked;
     poolAssets.push(tokenId);
     pool.assetsLocked = poolAssets;
 
-    handleAssetLock(tokenId);
+    handleAssetLock(tokenId, loanId);
     pool.save();
 }
 
@@ -142,7 +142,7 @@ export function handleLoanClose(event: CreditLineClosed): void {
     let loan = Loan.load(event.params.loanId.toHex());
     loan.isClosed = true;
 
-    handleAssetRedeem(loan.asset);
+    handleAssetRedeem(loan.collateralAsset);
     loan.save();
 }
 

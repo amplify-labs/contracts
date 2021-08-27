@@ -45,7 +45,7 @@ type Asset @entity {
     factor: Bytes!
     isLocked: Boolean!
     isRedeemed: Boolean!
-    loan: Loan @derivedFrom(field: "asset")
+    loanInfo: Loan
 }
 
 type Loan @entity {
@@ -53,8 +53,8 @@ type Loan @entity {
     amount: BigInt!
     debt: BigInt!
     factor: Bytes!
-    pool: Pool!
-    asset: Asset!
+    borrowingPool: Pool!
+    collateralAsset: Asset!
     createdAt: BigInt!
     isClosed: Boolean!
     transactions: [Transaction!]!

@@ -35,6 +35,7 @@ abstract contract Loan {
         require(nftMaturity >= block.timestamp, "loan: Maturity date expired");
 
         uint256 creditLineValue = _calculateLoanAmount(nftFactory, tokenId);
+        loansIds++;
 
         lockedAssetsIds[tokenId] = true;
         creditLinesMap[tokenId].push(loansIds);
@@ -47,8 +48,7 @@ abstract contract Loan {
             false
         );
         emit CreditLineOpened(loansIds, tokenId, borrower, creditLineValue, nftMaturity);
-        loansIds++;
-        return loansIds - 1;
+        return loansIds;
     }
 
     function _calculateLoanAmount(Asset nftFactory, uint256 tokenId) internal view returns (uint256) {

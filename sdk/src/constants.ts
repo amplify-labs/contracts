@@ -13,8 +13,8 @@ export const address = {
     "Factory": ""
   },
   "polygon_mumbai": {
-    "Asset": "0x43807E79dc6dA2e1649988E90899a36E56F81CCB",
-    "Factory": "0x3e1d06CeB270a1d30fE5CFe2A24d04eee4A779F8"
+    "Asset": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
+    "Factory": "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD"
   },
 };
 

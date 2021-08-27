@@ -20,10 +20,11 @@ export function handleTokenizeAsset(event: TokenizeAsset): void {
     asset.save()
 }
 
-export function handleAssetLock(tokenId: string): void {
+export function handleAssetLock(tokenId: string, loanId: string): void {
     let asset = Asset.load(tokenId);
 
     asset.isLocked = true;
+    asset.loanInfo = loanId;
     asset.save();
 }
 
