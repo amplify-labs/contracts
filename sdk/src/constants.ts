@@ -1,21 +1,14 @@
+import networksAddress from '../../protocol/networks.json';
+
 // Publicly revealed on the parent class
 export const constants = {
   'Asset': 'Asset',
 };
 
 export const address = {
-  "mainnet": {
-    Asset: "",
-    Factory: "",
-  },
-  "polygon_mainet": {
-    Asset: "",
-    Factory: "",
-  },
-  "polygon_mumbai": {
-    Asset: "0xFa2D40Fbb754E4d05C5219f7c35F1da537e32b29",
-    Factory: "0xF98B24c3f4f1d0fc671f0b238c0C62694644360a",
-  },
+  "mainnet": networksAddress["mainet"],
+  "polygon_mainet": networksAddress["matic"],
+  "polygon_mumbai": networksAddress["mumbai"],
 };
 
 export const networks = [
@@ -206,24 +199,19 @@ export const abi = {
     "function removeStableCoin(address stableCoin)",
     "function getStableCoins() returns (address[])",
     "function createPool(string name, string structure, address stableCoin, uint256 minDeposit)",
-    "function createLoan(address nftAsset, uint256 tokenId, address pool)"
   ],
   Pool: [
+    "function balances(address lender) view returns (uint256)",
     "function lend(uint256 amount) returns (bool success)",
     "function withdraw(uint256 _tokenAmount) returns (bool success)",
-    "function borrow(address loan, uint256 amount) returns (bool success)",
-    "function repay(address loan, uint256 amount) returns (bool success)",
-    "function unlockAsset(address loan) returns (bool success)",
+    "function createLoan(address nftAsset, uint256 tokenId) returns (bool success)",
+    "function closeLoan(uint256 loanId) returns (bool success)",
+    "function borrow(uint256 loanId, uint256 amount) returns (bool success)",
+    "function repay(uint256 loanId, uint256 amount) returns (bool success)",
+    "function unlockAsset(uint256 loanId) returns (bool success)",
     "function totalDeposited() view returns (uint256)",
     "function totalBorrowed() view returns (uint256)",
     "function totalAvailable() view returns (uint256)"
-  ],
-  Loan: [
-    "function close() returns (bool success)",
-    "function getAllowanceAmount() view returns(uint256)",
-    "function getAvailableAmount() view returns (uint256)",
-    "function getDebtAmount() view returns (uint256)",
-    "function isClosed() view returns (bool)"
   ],
   ERC20: [
     "function allowance(address spender, address spender) returns (uint256)",

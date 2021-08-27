@@ -7,7 +7,7 @@ import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 import { ethers } from 'ethers';
 import * as eth from './eth';
 import { netId } from './helpers';
-import { abi } from './constants';
+import { abi, address } from './constants';
 import { CallOptions, TrxResponse } from './types';
 
 /**
@@ -118,9 +118,82 @@ export async function withdraw(
 }
 
 /**
+ * Create new loan
+ *
+ * @param {string} tokenId NFT asset ID.
+ * @param {string} pool Pool address.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const loan = await amplify.createLoan('1','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('Loan:', loan);
+ * })().catch(console.error);
+ * ```
+ */
+export async function createLoan(tokenId: string, pool: string, options: CallOptions = {}): Promise<TrxResponse> {
+    await netId(this);
+    const errorPrefix = 'Amplify [createLoan] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const nftAsset = address[this._network.name].Asset;
+    const parameters = [nftAsset, tokenId];
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Pool,
+        ...options
+    };
+
+    return eth.trx(pool, 'createLoan', parameters, trxOptions);
+}
+
+/**
+ * Close loan
+ *
+ * @param {string} loanId loanId ID.
+ * @param {string} pool Pool address.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const loan = await amplify.closeLoan('1','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('Loan:', loan);
+ * })().catch(console.error);
+ * ```
+ */
+export async function closeLoan(loanId: string, pool: string, options: CallOptions = {}): Promise<TrxResponse> {
+    await netId(this);
+    const errorPrefix = 'Amplify [closeLoan] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const parameters = [loanId];
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Pool,
+        ...options
+    };
+
+    return eth.trx(pool, 'closeLoan', parameters, trxOptions);
+}
+
+/**
  * Borrow tokens from the Pool.
  * @param {string} pool Pool address.
- * @param {string} loan Loan address.
+ * @param {string} loanId Loan ID.
  * @param {string | number | BigNumber} amount Amount tokens to borrow.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
@@ -131,14 +204,14 @@ export async function withdraw(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.borrow('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const tx = await amplify.borrow('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1', '100');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
  */
 export async function borrow(
     pool: string,
-    loan: string,
+    loanId: string,
     amount: string | number | BigNumber,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
@@ -155,13 +228,6 @@ export async function borrow(
     amount = ethers.utils.parseEther(amount.toString());
 
     if (
-        typeof loan !== 'string' &&
-        !ethers.utils.isAddress(loan)
-    ) {
-        throw Error(errorPrefix + 'Argument `loan` must be an address');
-    }
-
-    if (
         typeof pool !== 'string' &&
         !ethers.utils.isAddress(pool)
     ) {
@@ -174,13 +240,13 @@ export async function borrow(
         ...options
     };
 
-    return eth.trx(pool, 'borrow', [loan, amount], trxOptions);
+    return eth.trx(pool, 'borrow', [loanId, amount], trxOptions);
 }
 
 /**
  * Repay tokens into the Pool.
  * @param {string} pool Pool address.
- * @param {string} loan Loan address.
+ * @param {string} loanId Loan ID.
  * @param {string | number | BigNumber} amount Amount tokens to repay.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
@@ -191,14 +257,14 @@ export async function borrow(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.repay('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const tx = await amplify.repay('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
  */
 export async function repay(
     pool: string,
-    loan: string,
+    loanId: string,
     amount: string | number | BigNumber,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
@@ -215,13 +281,6 @@ export async function repay(
     amount = ethers.utils.parseEther(amount.toString());
 
     if (
-        typeof loan !== 'string' &&
-        !ethers.utils.isAddress(loan)
-    ) {
-        throw Error(errorPrefix + 'Argument `loan` must be an address');
-    }
-
-    if (
         typeof pool !== 'string' &&
         !ethers.utils.isAddress(pool)
     ) {
@@ -234,13 +293,13 @@ export async function repay(
         ...options
     };
 
-    return eth.trx(pool, 'repay', [loan, amount], trxOptions);
+    return eth.trx(pool, 'repay', [loanId, amount], trxOptions);
 }
 
 /**
  * Unlock NFT asset.
  * @param {string} pool Pool address.
- * @param {string} loan Loan address.
+ * @param {string} loanId Loan ID.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
  *     not supressed) and `mint` transactions.
@@ -250,25 +309,18 @@ export async function repay(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.unlockAsset('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   const tx = await amplify.unlockAsset('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
  */
 export async function unlockAsset(
     pool: string,
-    loan: string,
+    loanId: string,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [unlockAsset] | ';
-
-    if (
-        typeof loan !== 'string' &&
-        !ethers.utils.isAddress(loan)
-    ) {
-        throw Error(errorPrefix + 'Argument `loan` must be an address');
-    }
 
     if (
         typeof pool !== 'string' &&
@@ -283,7 +335,7 @@ export async function unlockAsset(
         ...options
     };
 
-    return eth.trx(pool, 'unlockAsset', [loan], trxOptions);
+    return eth.trx(pool, 'unlockAsset', [loanId], trxOptions);
 }
 
 /**
@@ -304,11 +356,19 @@ export async function poolTotalDeposited(
     options: CallOptions = {}
 ): Promise<string> {
     await netId(this);
+    const errorPrefix = 'Amplify [totalDeposited] | ';
     const trxOptions: CallOptions = {
         _amplifyProvider: this._provider,
         abi: abi.Pool,
         ...options
     };
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
 
     const result = await eth.read(pool, 'totalDeposited', [], trxOptions);
     return result.toString();
@@ -332,11 +392,20 @@ export async function poolTotalBorrowed(
     options: CallOptions = {}
 ): Promise<string> {
     await netId(this);
+    const errorPrefix = 'Amplify [totalBorrowed] | ';
+
     const trxOptions: CallOptions = {
         _amplifyProvider: this._provider,
         abi: abi.Pool,
         ...options
     };
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
 
     const result = await eth.read(pool, 'totalBorrowed', [], trxOptions);
     return result.toString();
@@ -360,23 +429,80 @@ export async function poolTotalAvailable(
     options: CallOptions = {}
 ): Promise<string> {
     await netId(this);
+    const errorPrefix = 'Amplify [totalAvailable] | ';
     const trxOptions: CallOptions = {
         _amplifyProvider: this._provider,
         abi: abi.Pool,
         ...options
     };
 
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
     const result = await eth.read(pool, 'totalAvailable', [], trxOptions);
     return result.toString();
 }
 
 
+/**
+ * Get deposited balance
+* @param {string} lender Lender address.
+* @param {string} pool Pool address.
+ * @returns {string} Returns a string of the numeric total for funds deposited.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.depositedBalance('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('Deposited:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function depositedBalance(
+    lender: string,
+    pool: string,
+    options: CallOptions = {}
+): Promise<string> {
+    await netId(this);
+    const errorPrefix = 'Amplify [balances] | ';
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Pool,
+        ...options
+    };
+
+    if (
+        typeof lender !== 'string' &&
+        !ethers.utils.isAddress(lender)
+    ) {
+        throw Error(errorPrefix + 'Argument `lender` must be an address');
+    }
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const result = await eth.read(pool, 'balances', [lender], trxOptions);
+    return result.toString();
+}
+
+
 export interface PoolInterface {
+    depositedBalance(lender: string, pool: string): Promise<string>,
     lend(pool: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
     withdraw(pool: string, tokenAmount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
-    borrow(pool: string, loan: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
-    repay(pool: string, loan: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
-    unlockAsset(pool: string, loan: string, options?: CallOptions): Promise<TrxResponse>;
+    createLoan(tokenId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
+    closeLoan(loanId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
+    borrow(pool: string, loanId: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    repay(pool: string, loanId: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    unlockAsset(pool: string, loanId: string, options?: CallOptions): Promise<TrxResponse>;
     poolTotalDeposited(pool: string, options?: CallOptions): Promise<string>;
     poolTotalBorrowed(pool: string, options?: CallOptions): Promise<string>;
     poolTotalAvailable(pool: string, options?: CallOptions): Promise<string>;

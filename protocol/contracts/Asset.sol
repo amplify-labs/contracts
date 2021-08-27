@@ -26,6 +26,7 @@ contract Asset is AssetStorage, RiskModel {
         _setTokenHash(newAssetId, tokenHash);
         _setTokenRating(newAssetId, tokenRating);   
         _setTokenURI(newAssetId, tokenURI);
+        _setTokenRedeemed(newAssetId, false);
 
         emit TokenizeAsset(newAssetId, tokenHash, tokenRating, value, tokenURI, maturity, block.timestamp);
         return newAssetId;
@@ -33,5 +34,10 @@ contract Asset is AssetStorage, RiskModel {
 
     function totalSupply() external view returns (uint256) {
         return _tokenIds.current();
+    }
+
+    function markAsRedeemed(uint256 tokenId) external {
+        require(ownerOf(tokenId) == msg.sender, "Only the owner can consume the asset");
+        _setTokenRedeemed(tokenId, true);
     }
 }

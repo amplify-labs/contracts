@@ -6,9 +6,9 @@ dataSources:
     name: Asset
     network: mumbai
     source:
-      address: "0xFa2D40Fbb754E4d05C5219f7c35F1da537e32b29"
+      address: "0x43807E79dc6dA2e1649988E90899a36E56F81CCB"
       abi: AssetAbi
-      startBlock: 17743853
+      startBlock: 18125483
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -22,18 +22,13 @@ dataSources:
       eventHandlers:
         - event: TokenizeAsset(indexed uint256,string,string,uint256,string,uint256,uint256)
           handler: handleTokenizeAsset
-      # callHandlers:
-      #   - function: addRiskItem(string,uint256,uint256)
-      #     handler: handleAddRiskItem
-        # - function: removeRiskItem(string)
-        #   handler: handleRemoveRiskItem
   - kind: ethereum/contract
     name: Factory
     network: mumbai
     source:
-      address: "0xF98B24c3f4f1d0fc671f0b238c0C62694644360a"
+      address: "0x3e1d06CeB270a1d30fE5CFe2A24d04eee4A779F8"
       abi: FactoryAbi
-      startBlock: 17788477     
+      startBlock: 18129947     
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -41,15 +36,12 @@ dataSources:
       file: ./src/mappings/factory.ts
       entities:
         - Pool
-        - Loan
       abis:
         - name: FactoryAbi
           file: ./abis/Factory.json
       eventHandlers:
         - event: PoolCreated(indexed address,indexed address,string,string,address,uint256)
           handler: handlePoolCreation
-        - event: LoanCreated(indexed address,indexed address,uint256,uint256,address)
-          handler: handleLoanCreation
 templates:
   - name: Pool
     kind: "ethereum/contract"
@@ -64,40 +56,23 @@ templates:
       entities:
         - Pool
         - Loan
+        - Transaction
+        - Balance
       abis:
         - name: PoolAbi
           file: ./abis/Pool.json
       eventHandlers:
+        - event: CreditLineOpened(indexed uint256,indexed uint256,address,uint256,uint256)
+          handler: handleCreateCreditLine
+        - event: CreditLineClosed(indexed uint256)
+          handler: handleCreateCreditLine
         - event: Lend(indexed address,uint256)
           handler: handlePoolLend
         - event: Withdrawn(indexed address,uint256)
           handler: handlePoolWithdraw
-        - event: Borrowed(indexed address,uint256)
+        - event: Borrowed(indexed uint256,uint256)
           handler: handlePoolBorrow
-        - event: Repayed(indexed address,uint256)
+        - event: Repayed(indexed uint256,uint256)
           handler: handlePoolRepay
         - event: AssetUnlocked(indexed uint256)
-          handler: handleAssetUnlock
-  - name: Loan
-    kind: "ethereum/contract"
-    network: mumbai
-    source:
-      abi: LoanAbi  
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      file: ./src/mappings/loan.ts
-      entities:
-        - Loan
-        - Transaction
-      abis:
-        - name: LoanAbi
-          file: ./abis/Loan.json
-      eventHandlers:
-        - event: Borrowed(indexed uint256)
-          handler: handleLoanBorrow
-        - event: Repayed(indexed uint256)
-          handler: handleLoanRepay
-        - event: Closed()
-          handler: handleLoanClose
+          handler: handlePoolUnlockedAsset

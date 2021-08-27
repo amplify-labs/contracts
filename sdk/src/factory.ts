@@ -126,46 +126,6 @@ export async function createPool(name: string, structureType: string, stableCoin
 }
 
 /**
- * Create new loan
- *
- * @param {string} nftAsset NFT Asset contract address.
- * @param {string} tokenId NFT asset ID.
- * @param {string} pool Pool address.
- *
- * @example
- * ```
- * (async function () {
- *   const loan = await amplify.createLoan('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
- *   console.log('Loan:', loan);
- * })().catch(console.error);
- * ```
- */
-export async function createLoan(tokenId: string, pool: string, options: CallOptions = {}): Promise<TrxResponse> {
-  await netId(this);
-  const errorPrefix = 'Amplify [createLoan] | ';
-
-
-  if (
-    typeof pool !== 'string' &&
-    !ethers.utils.isAddress(pool)
-  ) {
-    throw Error(errorPrefix + 'Argument `pool` must be an address');
-  }
-
-  const factoryAddress = address[this._network.name].Factory;
-  const nftAsset = address[this._network.name].Asset;
-  const parameters = [nftAsset, tokenId, pool];
-
-  const trxOptions: CallOptions = {
-    _amplifyProvider: this._provider,
-    abi: abi.Factory,
-    ...options
-  };
-
-  return eth.trx(factoryAddress, 'createLoan', parameters, trxOptions);
-}
-
-/**
  * Get factory supported stable coins
  * @returns {array} Returns an array of addresesd.
  *
@@ -195,6 +155,5 @@ export interface FactoryInterface {
   addStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
   removeStableCoin(stableCoin: string, options?: CallOptions): Promise<TrxResponse>;
   createPool(name: string, structureType: string, stableCoin: string, minDeposit: number, options?: CallOptions): Promise<TrxResponse>;
-  createLoan(tokenId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
   getStableCoins(options?: CallOptions): Promise<string[]>;
 }

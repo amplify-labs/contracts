@@ -11,6 +11,13 @@ type Pool @entity {
     assetsLocked: [Asset!]!
 }
 
+type Balance @entity {
+    id: ID!
+    lender: Bytes!
+    lend: BigInt!
+    earned: BigInt!
+}
+
 enum TransactionType {
     BORROW
     REPAY
@@ -33,10 +40,11 @@ type Asset @entity {
     value: BigInt!
     uploadedAt: BigInt!
     uri: String!
-    rating: String!
-    maturity: BigInt!
+    riskRating: String!
+    maturityDate: BigInt!
     factor: Bytes!
     isLocked: Boolean!
+    isRedeemed: Boolean!
     loan: Loan @derivedFrom(field: "asset")
 }
 

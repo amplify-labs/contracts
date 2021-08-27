@@ -23,6 +23,11 @@ abstract contract RiskModel {
         riskData[rating] = RiskItem(interestRate, advanceRate);
     }
 
+    function updateRiskItem(string memory rating, uint256 interestRate, uint256 advanceRate) public onlyOwner {
+        riskData[rating].interestRate = interestRate;
+        riskData[rating].advanceRate = advanceRate;
+    }
+
     function removeRiskItem(string memory rating) public onlyOwner {
         delete riskData[rating];
     }

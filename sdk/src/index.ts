@@ -9,7 +9,6 @@ import * as eth from './eth';
 import * as util from './util';
 import * as asset from './asset';
 import * as pool from './pool';
-import * as loan from './loan';
 import * as erc20 from './erc20';
 import * as factory from './factory';
 import * as constants from './constants';
@@ -61,7 +60,6 @@ function createInstance(provider: types.Provider | string = 'mainnet', options: 
     ...asset,
     ...factory,
     ...pool,
-    ...loan,
     ...erc20
   };
 

@@ -43,9 +43,9 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "address",
-                "name": "loan",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
             },
             {
                 "indexed": false,
@@ -62,8 +62,58 @@
         "inputs": [
             {
                 "indexed": true,
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
+            }
+        ],
+        "name": "CreditLineClosed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
                 "internalType": "address",
-                "name": "_from",
+                "name": "borrower",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "maturity",
+                "type": "uint256"
+            }
+        ],
+        "name": "CreditLineOpened",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "lender",
                 "type": "address"
             },
             {
@@ -81,9 +131,9 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "address",
-                "name": "loan",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
             },
             {
                 "indexed": false,
@@ -101,7 +151,7 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "_from",
+                "name": "lender",
                 "type": "address"
             },
             {
@@ -136,9 +186,9 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "loan",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
             },
             {
                 "internalType": "uint256",
@@ -155,6 +205,93 @@
             }
         ],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
+            }
+        ],
+        "name": "closeLoan",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nftAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "createLoan",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "creditLines",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "lockedAsset",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "borrower",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "maturity",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "debt",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "isClosed",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -188,8 +325,32 @@
         "outputs": [
             {
                 "internalType": "uint256",
+                "name": "borrowedAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "nftFactory",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "name": "lockedAssetsIds",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",
@@ -256,9 +417,9 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "loan",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
             },
             {
                 "internalType": "uint256",
@@ -345,9 +506,9 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "loan",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "loanId",
+                "type": "uint256"
             }
         ],
         "name": "unlockAsset",

@@ -2,22 +2,20 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "./PoolStorage.sol";
-
 import "./PoolToken.sol";
+import "./PoolLoan.sol";
 import "./Asset.sol";
-import "./Loan.sol";
 
-contract Pool is Loaned, Context, Structured {
+contract Pool is PoolStorage, Structured, Loan {
     using SafeMath for uint256;
 
-    event Lend(address indexed _from, uint256 _amount);
-    event Borrowed(address indexed loan, uint256 _amount);
-    event Repayed(address indexed loan, uint256 _amount);
-    event Withdrawn(address indexed _from, uint256 _amount);
+    event Lend(address indexed lender, uint256 _amount);
+    event Borrowed(uint256 indexed loanId, uint256 _amount);
+    event Repayed(uint256 indexed loanId, uint256 _amount);
+    event Withdrawn(address indexed lender, uint256 _amount);
     event AssetUnlocked(uint256 indexed tokenId);
 
     constructor(
@@ -39,78 +37,94 @@ contract Pool is Loaned, Context, Structured {
 
     function lend(uint256 amount) external returns (bool success) {
         require(amount >= minDeposit, "lend: Amount lower than minDeposit");
-        require(_transferTokens(_msgSender(), address(this), amount));
+        require(_transferTokens(msg.sender, address(this), amount));
 
-        balances[_msgSender()] += amount;
+        balances[msg.sender] += amount;
         totalDeposited += amount;
-        lockedTokens[_msgSender()] += amount;
-        emit Lend(_msgSender(), amount);
+        lockedTokens[msg.sender] += amount;
+        emit Lend(msg.sender, amount);
 
-        lpToken.mint(_msgSender(), amount);
+        lpToken.mint(msg.sender, amount);
         return true;
-    }
-
-    function borrow(address loan, uint256 amount) external isAvailable(amount) validateLoan(loan) returns (bool success) {
-        Loan loanContract = Loan(loan);
-
-        uint256 availableAmountForLoan = loanContract.getAvailableAmount();
-        require(availableAmountForLoan >= amount, "borrow: insufficient available amount");
-        
-        uint256 lockedAsset = loanContract.getLockedAsset();
-        require(loanContract.borrow(amount), "borrow: failed to borrow");
-
-        totalBorrowed += amount;
-        loans[lockedAsset] += amount;
-
-        emit Borrowed(loan, amount);
-        return _transferTokens(address(this), _msgSender(), amount);
-    }
-
-    function unlockAsset(address loan) external validateLoan(loan) returns (bool success) {
-        Loan loanContract = Loan(loan);
-        uint256 lockedAsset = loanContract.getLockedAsset();
-        require(loans[lockedAsset] == 0 || loanContract.isClosed(), "borrow hasn't repayed");
-
-        Asset nftFactory = loanContract.getNftFactory();
-
-        nftFactory.transferFrom(address(this), _msgSender(), lockedAsset);
-        emit AssetUnlocked(lockedAsset);
-        return true;
-    }
-
-    function repay(address loan, uint256 amount) external validateLoan(loan) returns (bool success) { 
-        Loan loanContract = Loan(loan);
-        uint256 lockedAsset = loanContract.getLockedAsset();
-        address borrower = loanContract.getBorrower();
-
-        require(amount > 0, "repay: amount must be greater than 0");
-        require(loanContract.getDebtAmount() >= amount, "repay: amount higher than debt");
-
-        require(loanContract.repay(amount));
-        emit Repayed(loan, amount);
-        return repayInternal(borrower, lockedAsset, amount);
-    }
-
-    function repayInternal(address borrower, uint256 lockedAsset, uint256 amount) internal returns (bool success) {
-        // Repay the loan
-        totalBorrowed = totalBorrowed.sub(amount);
-        loans[lockedAsset] = loans[lockedAsset].sub(amount);
-        return _transferTokens(borrower, address(this), amount);
     }
 
     function withdraw(uint256 _tokenAmount) external isAvailable(_tokenAmount) returns (bool success) {
         require(_tokenAmount > 0, "withdraw: Amount lower than 0");
-        require(lockedTokens[_msgSender()] >= _tokenAmount, "withdraw: amount higher then owned tokens");
+        require(lockedTokens[msg.sender] >= _tokenAmount, "withdraw: amount higher than owned tokens");
 
         totalDeposited -= _tokenAmount;
-        balances[_msgSender()] -= _tokenAmount;
-        lockedTokens[_msgSender()] -= _tokenAmount;
+        balances[msg.sender] -= _tokenAmount;
+        lockedTokens[msg.sender] -= _tokenAmount;
 
-        lpToken.burnFrom(_msgSender(), _tokenAmount);
-        emit Withdrawn(_msgSender(), _tokenAmount);
+        lpToken.burnFrom(msg.sender, _tokenAmount);
+        emit Withdrawn(msg.sender, _tokenAmount);
         
-        return _transferTokens(address(this), _msgSender(), _tokenAmount);
+        return _transferTokens(address(this), msg.sender, _tokenAmount);
     }
+
+    function createLoan(address nftAddress, uint256 tokenId) external returns (bool success) {
+        uint256 loanId = createCreditLineInternal(nftAddress, msg.sender, tokenId);
+
+        loans[loanId] = LoanStruct(0, nftAddress);
+        return true;
+    }
+
+    function closeLoan(uint256 loanId) external returns (bool success) {
+        Loan.CreditLine storage creditLine = creditLines[loanId];
+        require(creditLine.debt == 0, "closeLoan: Loan has debt");
+        require(creditLine.isClosed == false, "closeLoan: Loan is already closed");
+
+        require(closeCreditLineInternal(loanId));
+
+        Asset nftFactory = Asset(loans[loanId].nftFactory);
+        nftFactory.markAsRedeemed(creditLine.lockedAsset);
+        return true;
+    }
+
+    function unlockAsset(uint256 loanId) external returns (bool success) {
+        Loan.CreditLine storage creditLine = creditLines[loanId];
+        require(creditLine.isClosed, "closeLoan: Loan is not closed");
+
+        Asset nftFactory = Asset(loans[loanId].nftFactory);
+
+        nftFactory.transferFrom(address(this), msg.sender, creditLine.lockedAsset);
+        emit AssetUnlocked(creditLine.lockedAsset);
+        return true;
+    }
+
+    function borrow(uint256 loanId, uint256 amount) external isAvailable(amount) returns (bool success) {
+        Loan.CreditLine storage creditLine = creditLines[loanId];
+
+        uint256 availableAmountForLoan = creditLine.amount.sub(creditLine.debt);
+        require(availableAmountForLoan >= amount, "borrow: insufficient available amount");
+        require(borrowInternal(loanId, msg.sender, amount));
+        
+        totalBorrowed += amount;
+        loans[loanId].borrowedAmount += amount;
+
+        emit Borrowed(loanId, amount);
+        return _transferTokens(address(this), msg.sender, amount);
+    }
+
+    function repay(uint256 loanId, uint256 amount) external returns (bool success) { 
+        Loan.CreditLine storage creditLine = creditLines[loanId];
+
+        require(amount > 0, "repay: amount must be greater than 0");
+        require(creditLine.debt>= amount, "repay: amount higher than debt");
+        require(repayInternal(loanId, msg.sender, amount));
+
+        emit Repayed(loanId, amount);
+
+        totalBorrowed -= amount;
+        loans[loanId].borrowedAmount -= amount;
+
+
+        if (creditLine.debt == 0) {
+            require(this.closeLoan(loanId));
+        }
+        return _transferTokens(msg.sender, address(this), amount);
+    }
+
 
     function _transferTokens(address _from, address _to, uint256 _tokenAmount) internal returns (bool success) {
         ERC20 token = ERC20(stableCoin);

@@ -1,9 +1,8 @@
 import { DataSourceContext } from '@graphprotocol/graph-ts';
 
-import { PoolCreated, LoanCreated } from '../../generated/Factory/FactoryAbi';
-import { Pool, Loan } from '../../generated/templates';
-import { createNewPool, handleAssetlock } from './pool';
-import { createNewLoan } from './loan';
+import { PoolCreated } from '../../generated/Factory/FactoryAbi';
+import { Pool } from '../../generated/templates';
+import { createNewPool } from './pool';
 
 export function handlePoolCreation(event: PoolCreated): void {
     let context = new DataSourceContext();
@@ -13,15 +12,4 @@ export function handlePoolCreation(event: PoolCreated): void {
     Pool.createWithContext(event.params.pool, context);
 
     createNewPool(event);
-}
-
-export function handleLoanCreation(event: LoanCreated): void {
-    let context = new DataSourceContext();
-
-    context.setBytes("loan", event.params.loan);
-    context.setBytes("factor", event.params.factor);
-    Loan.createWithContext(event.params.loan, context);
-
-    handleAssetlock(event);
-    createNewLoan(event);
 }

@@ -9,13 +9,8 @@ abstract contract AssetStorage is ERC721URIStorage {
     mapping(uint256 => string) private _tokensHash;
     mapping(uint256 => string) private _tokensRating;
     mapping(uint256 => uint256) private _tokensMaturity;
+    mapping(uint256 => bool) private _tokensRedeemed;
 
-    function _setTokenValue(uint256 _tokenId, uint256 _value) internal {
-        _tokensValue[_tokenId] = _value;
-    }
-    function getTokenValue(uint256 _tokenId) public view returns (uint256) {
-        return _tokensValue[_tokenId];
-    }
     function _setTokenHash(uint256 _tokenId, string memory _hash) internal {
         _tokensHash[_tokenId] = _hash;
     }
@@ -33,5 +28,19 @@ abstract contract AssetStorage is ERC721URIStorage {
     }
     function getTokenMaturity(uint256 _tokenId) public view returns (uint256) {
         return _tokensMaturity[_tokenId];
+    }
+
+     function _setTokenValue(uint256 _tokenId, uint256 _value) internal {
+        _tokensValue[_tokenId] = _value;
+    }
+    function getTokenValue(uint256 _tokenId) public view returns (uint256) {
+        return _tokensValue[_tokenId];
+    }
+
+    function _setTokenRedeemed(uint256 _tokenId, bool status) internal {
+        _tokensRedeemed[_tokenId] = status;
+    }
+    function getRedeemStatus(uint256 _tokenId) public view returns (bool) {
+        return _tokensRedeemed[_tokenId];
     }
 }
