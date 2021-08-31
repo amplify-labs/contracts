@@ -6,6 +6,7 @@
   "scripts": {
     "compile": "npx hardhat compile",
     "deploy:mumbai": "npx hardhat run scripts/deploy.js --network polygon_mumbai",
+    "deploy:velastest": "npx hardhat run scripts/deploy.js --network velas_testnet",
     "deploy:matic": "npx hardhat run scripts/deploy.js --network polygon_mainet",
     "verify:mumbai": "npx hardhat verify --network polygon_mumbai ${CONTRACT_INFO}",
     "verify:matic": "npx hardhat verify --network polygon_mainet ${CONTRACT_INFO}",

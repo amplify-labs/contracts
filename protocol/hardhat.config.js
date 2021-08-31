@@ -20,6 +20,13 @@ module.exports = {
       gas: 2100000,
       gasPrice: 8000000000
     },
+    velas_testnet: {
+      chainId: 111,
+      url: "https://testnet.velas.com/rpc",
+      accounts: [privateKey],
+      gas: 2100000,
+      gasPrice: 8000000000
+    },
     polygon_mainet: {
       chainId: 137,
       url: "https://rpc-mainnet.maticvigil.com",

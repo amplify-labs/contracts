@@ -1,5 +1,6 @@
 /artifacts
 /cache
+/out
 /node_modules
 .secret
 .vscode

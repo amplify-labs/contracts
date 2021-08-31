@@ -35,6 +35,12 @@ npx hardhat compile
 
 ### Deploy Your Contracts
 
+### Get contract flattened code
+
+```
+npx hardhat flatten contract/MyContract.sol > out/MyContract.sol
+```
+
 #### Local Network
 
 1. Run `npx hardhat node` to setup a local blockchian node `http://127.0.0.1:8545`, several account addresses and their corresponding private keys will be listed on screen. Use them to deploy contracts or transfer tokens. Keep the terminal running in background.

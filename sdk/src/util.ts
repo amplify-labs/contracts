@@ -224,6 +224,7 @@ export function getNetNameWithChainId(chainId: number): string {
     4: 'rinkeby',
     5: 'goerli',
     42: 'kovan',
+    111: 'velas_testnet',
     137: 'polygon_mainet',
     80001: 'polygon_mumbai',
   };

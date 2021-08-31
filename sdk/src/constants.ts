@@ -16,6 +16,10 @@ export const address = {
     "Asset": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
     "Factory": "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD"
   },
+  "velas_testnet": {
+    "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
+    "Factory": "0x8E557363AC9E5cbf09A2616A302CA3c8f6ab2b7A"
+  }
 };
 
 export const networks = [
@@ -186,6 +190,33 @@ export const networks = [
       }
     ],
     "infoURL": "https://matic.network/"
+  },
+  {
+    "name": "Velas Testnet",
+    "chainId": 111,
+    "shortName": "velastest",
+    "chain": "Velas",
+    "network": "testnet",
+    "networkId": 111,
+    "nativeCurrency": {
+      "name": "Velas",
+      "symbol": "VLX",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://testnet.velas.com/rpc",
+    ],
+    "faucets": [
+      "Testnet Faucet Bot"
+    ],
+    "explorers": [
+      {
+        "name": "evmexplorer",
+        "url": "https://evmexplorer.testnet.velas.com",
+        "standard": "EIP3091"
+      }
+    ],
+    "infoURL": "https://velas.com/"
   }
 ]
 
