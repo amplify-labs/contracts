@@ -6,7 +6,7 @@ export function coins(network: number): Record<string, Partial<StableCoin>> {
     let stablecoins: Record<string, Partial<StableCoin>>;
 
     Object.entries(supportedStableCoins).forEach(([k, v]) => {
-        stablecoins[getNetNameWithChainId(address[network][k])] = v;
+        stablecoins[address[getNetNameWithChainId(network)][k]] = v;
     })
 
     return stablecoins
