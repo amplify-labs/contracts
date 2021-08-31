@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Asset
-    network: mumbai
+    network: "{{network}}"
     source:
-      address: "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8"
+      address: "{{asset_address}}"
       abi: AssetAbi
-      startBlock: 18163137
+      startBlock: {{asset_start_block}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -24,11 +24,11 @@ dataSources:
           handler: handleTokenizeAsset
   - kind: ethereum/contract
     name: Factory
-    network: mumbai
+    network: "{{network}}"
     source:
-      address: "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD"
+      address: "{{factory_address}}"
       abi: FactoryAbi
-      startBlock: 18163140     
+      startBlock: {{factory_start_block}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -45,7 +45,7 @@ dataSources:
 templates:
   - name: Pool
     kind: "ethereum/contract"
-    network: mumbai
+    network: "{{network}}"
     source:
       abi: PoolAbi  
     mapping:

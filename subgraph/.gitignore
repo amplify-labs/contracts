@@ -3,4 +3,5 @@ yarn-error.log
 /node_modules/
 /generated
 /build
+subgraph.yaml
 
