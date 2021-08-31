@@ -1,18 +1,18 @@
 import type { AmplifyInstance, StableCoin } from './types';
 import { address, supportedStableCoins } from './constants';
-import { ethAddressLowerCase } from './util';
+import { ethAddressLowerCase, getNetNameWithChainId } from './util';
 
-export function coins(network: string): Record<string, Partial<StableCoin>> {
+export function coins(network: number): Record<string, Partial<StableCoin>> {
     let stablecoins: Record<string, Partial<StableCoin>>;
 
     Object.entries(supportedStableCoins).forEach(([k, v]) => {
-        stablecoins[address[network][k]] = v;
+        stablecoins[getNetNameWithChainId(address[network][k])] = v;
     })
 
     return stablecoins
 }
 
-export async function loadStableCoins(sdk: AmplifyInstance, networkId: string): Promise<StableCoin[]> {
+export async function loadStableCoins(sdk: AmplifyInstance, networkId: number): Promise<StableCoin[]> {
     let stableCoins: StableCoin[] = [];
 
     try {
