@@ -3,10 +3,15 @@ import { address, supportedStableCoins } from './constants';
 import { ethAddressLowerCase, getNetNameWithChainId } from './util';
 
 export function coins(network: number): Record<string, Partial<StableCoin>> {
-    let stablecoins: Record<string, Partial<StableCoin>>;
+    let stablecoins: Record<string, Partial<StableCoin>> = { };
 
     Object.entries(supportedStableCoins).forEach(([k, v]) => {
-        stablecoins[address[getNetNameWithChainId(network)][k]] = v;
+        const networkAddr = address[getNetNameWithChainId(network)];
+        if (networkAddr && networkAddr[k].length) {
+            stablecoins = Object.assign(stablecoins, {
+                [networkAddr[k]]: v
+            });
+        }
     })
 
     return stablecoins
