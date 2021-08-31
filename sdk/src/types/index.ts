@@ -107,3 +107,10 @@ export interface Provider extends AbstractSigner, FallbackProvider {
   send?: (method: string, parameters: string[]) => any;
 }
 
+export type StableCoin = {
+  address: string,
+  symbol: string,
+  decimals: number,
+  logoUrl: string
+}
+

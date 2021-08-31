@@ -96,7 +96,7 @@ function _webBrowserRequest(options: any) {
     xhr.open(method, url);
 
     for (const header in options.headers) {
-      if ({}.hasOwnProperty.call(options.headers, header)) {
+      if ({ }.hasOwnProperty.call(options.headers, header)) {
         const lcHeader = header.toLowerCase();
         contentTypeIsSet = lcHeader === "content-type" ? true : contentTypeIsSet;
         xhr.setRequestHeader(header, options.headers[header]);
@@ -229,4 +229,8 @@ export function getNetNameWithChainId(chainId: number): string {
     80001: 'polygon_mumbai',
   };
   return networks[chainId];
+}
+
+export function ethAddressLowerCase(address: string): string {
+  return address.toLowerCase();
 }

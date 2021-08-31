@@ -6,21 +6,51 @@ export const constants = {
 export const address = {
   "mainnet": {
     "Asset": "",
-    "Factory": ""
+    "Factory": "",
+    "DAI": "",
+    "USDC": "",
+    "USDT": ""
   },
   "polygon_mainet": {
     "Asset": "",
-    "Factory": ""
+    "Factory": "",
+    "DAI": "",
+    "USDC": "",
+    "USDT": ""
   },
   "polygon_mumbai": {
     "Asset": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
-    "Factory": "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD"
+    "Factory": "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD",
+    "DAI": "0x86321ca156c655d151474a054f25970acb5b42a8",
+    "USDC": "0xeb80b946d57902d92c5b90bd8f4968ce3c8c4f9e",
+    "USDT": "0x6861fa406ff83036fb127c7f462a1906f776c3c1"
   },
   "velas_testnet": {
     "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
-    "Factory": "0x8E557363AC9E5cbf09A2616A302CA3c8f6ab2b7A"
+    "Factory": "0x8E557363AC9E5cbf09A2616A302CA3c8f6ab2b7A",
+    "DAI": "",
+    "USDC": "",
+    "USDT": ""
   }
 };
+
+export const supportedStableCoins = {
+  DAI: {
+    symbol: "DAI",
+    decimals: 18,
+    logoUrl: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png?v=002",
+  },
+  USDC: {
+    symbol: "USDC",
+    decimals: 18,
+    logoUrl: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=002",
+  },
+  USDT: {
+    symbol: "USDT",
+    decimals: 18,
+    logoUrl: "https://cryptologos.cc/logos/tether-usdt-logo.png?v=002",
+  }
+}
 
 export const networks = [
   {

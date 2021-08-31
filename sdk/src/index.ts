@@ -10,6 +10,7 @@ import * as util from './util';
 import * as asset from './asset';
 import * as pool from './pool';
 import * as erc20 from './erc20';
+import * as stablecoins from './stablecoins';
 import * as factory from './factory';
 import * as constants from './constants';
 import * as types from './types';
@@ -47,7 +48,7 @@ ethers.utils.Logger.setLogLevel(ethers.utils.Logger.levels.ERROR);
  *
  * @returns {object} Returns an instance of the Amplify.js SDK.
  */
-function createInstance(provider: types.Provider | string = 'mainnet', options: types.AmplifyOptions = {}): types.AmplifyInstance {
+function createInstance(provider: types.Provider | string = 'mainnet', options: types.AmplifyOptions = { }): types.AmplifyInstance {
   const originalProvider = provider;
 
   options.provider = provider || options.provider;
@@ -79,6 +80,7 @@ const Amplify = {
   eth,
   util,
   constants,
+  stablecoins,
   _ethers: ethers,
 }
 

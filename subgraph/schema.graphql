@@ -57,5 +57,5 @@ type Loan @entity {
     collateralAsset: Asset!
     createdAt: BigInt!
     isClosed: Boolean!
-    transactions: [Transaction!]!
+    transactions: [Transaction]!
 }

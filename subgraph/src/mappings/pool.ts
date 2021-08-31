@@ -70,7 +70,7 @@ export function handlePoolBorrow(event: Borrowed): void {
         Address.fromString(pool.id),
         event.params._amount,
         event.block.timestamp);
-
+    handleLoanAddDebt(event.params.loanId.toHex(), event.params._amount);
     handleAddLoanTx(event.params.loanId.toHex(), event.transaction.hash.toHex());
     pool.save();
 }
@@ -90,6 +90,7 @@ export function handlePoolRepay(event: Repayed): void {
         event.params._amount,
         event.block.timestamp);
 
+    handleLoanSubDebt(event.params.loanId.toHex(), event.params._amount);
     handleAddLoanTx(event.params.loanId.toHex(), event.transaction.hash.toHex());
     pool.save();
 }
@@ -105,7 +106,6 @@ export function handlePoolUnlockedAsset(event: AssetUnlocked): void {
     handleAssetUnlock(event.params.tokenId.toHex())
     pool.save();
 }
-
 
 // Loan
 export function handleCreateCreditLine(event: CreditLineOpened): void {
@@ -124,6 +124,20 @@ export function handleCreateCreditLine(event: CreditLineOpened): void {
     loan.transactions = [];
 
     handlePoolLockedAsset(pool, event.params.tokenId.toHex(), event.params.loanId.toHex());
+    loan.save();
+}
+
+export function handleLoanAddDebt(loanId: string, amount: BigInt): void {
+    let loan = Loan.load(loanId);
+
+    loan.debt = loan.debt.plus(amount);
+    loan.save();
+}
+
+export function handleLoanSubDebt(loanId: string, amount: BigInt): void {
+    let loan = Loan.load(loanId);
+
+    loan.debt = loan.debt.minus(amount);
     loan.save();
 }
 
@@ -160,7 +174,7 @@ function handleAddTransaction(txId: string, type: string, from: Bytes, to: Bytes
 }
 
 export function handleAddLoanTx(loanId: string, txId: string): void {
-    let loan = new Loan(loanId);
+    let loan = Loan.load(loanId);
 
     let currentTx = loan.transactions;
     currentTx.push(txId);
@@ -176,6 +190,7 @@ function handleBalance(id: string, lender: Bytes, type: string, amount: BigInt):
     if (balance == null) {
         balance = new Balance(id);
         balance.lender = lender;
+        balance.earned = new BigInt(0);
 
         switch (true) {
             case type === "LEND":
