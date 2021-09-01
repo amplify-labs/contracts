@@ -76,7 +76,7 @@ function _webBrowserRequest(options: any) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     let contentTypeIsSet = false;
-    options = options || {};
+    options = options || { };
     const method = options.method || "GET";
     let url = options.url || options.hostname;
     url += typeof options.path === "string" ? options.path : "";
@@ -213,7 +213,7 @@ export function getAbi(contract: string): AbiType[] {
  * ```
  */
 
-export function getNetworkInfo(chainId: string): Partial<Network> {
+export function getNetworkInfo(chainId: string): Network {
   return networks.find(n => n.chainId === parseInt(chainId));
 }
 

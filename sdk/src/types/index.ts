@@ -70,10 +70,26 @@ export type TrxResponse = TransactionResponse;
 export interface Connection {
   url?: string;
 }
-
 export interface Network {
+  name: string,
+  shortName: string,
+  chain: string,
   chainId: number,
-  name: string
+  network: string,
+  networkId: number,
+  nativeCurrency: {
+    name: string,
+    symbol: string
+    decimals: number
+  },
+  rpc: string[],
+  faucets: string[],
+  explorers: {
+    name: string,
+    url: string,
+    standard: string
+  }[],
+  infoURL: string
 }
 
 export interface ProviderNetwork {

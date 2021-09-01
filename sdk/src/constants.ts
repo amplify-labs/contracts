@@ -1,3 +1,5 @@
+import { Network } from "./types";
+
 // Publicly revealed on the parent class
 export const constants = {
   'Asset': 'Asset',
@@ -52,12 +54,12 @@ export const supportedStableCoins = {
   }
 }
 
-export const networks = [
+export const networks: Network[] = [
   {
     "name": "Ethereum Mainnet",
     "chainId": 1,
     "shortName": "eth",
-    "chain": "ETH",
+    "chain": "Ethereum",
     "network": "mainnet",
     "networkId": 1,
     "nativeCurrency": {
@@ -85,7 +87,7 @@ export const networks = [
     "name": "Ethereum Testnet Ropsten",
     "chainId": 3,
     "shortName": "rop",
-    "chain": "ETH",
+    "chain": "Ethereum",
     "network": "ropsten",
     "networkId": 3,
     "nativeCurrency": {
@@ -113,7 +115,7 @@ export const networks = [
     "name": "Ethereum Testnet Rinkeby",
     "chainId": 4,
     "shortName": "rin",
-    "chain": "ETH",
+    "chain": "Ethereum",
     "network": "rinkeby",
     "networkId": 4,
     "nativeCurrency": {
@@ -141,7 +143,7 @@ export const networks = [
     "name": "Ethereum Testnet Görli",
     "chainId": 5,
     "shortName": "gor",
-    "chain": "ETH",
+    "chain": "Ethereum",
     "network": "goerli",
     "networkId": 5,
     "nativeCurrency": {
@@ -171,7 +173,7 @@ export const networks = [
     "name": "Matic Mainnet",
     "chainId": 137,
     "shortName": "matic",
-    "chain": "Matic",
+    "chain": "Polygon",
     "network": "mainnet",
     "networkId": 137,
     "nativeCurrency": {
@@ -197,12 +199,12 @@ export const networks = [
     "name": "Matic Testnet Mumbai",
     "chainId": 80001,
     "shortName": "maticmum",
-    "chain": "Matic",
+    "chain": "Polygon",
     "network": "testnet",
     "networkId": 80001,
     "nativeCurrency": {
       "name": "Matic",
-      "symbol": "tMATIC",
+      "symbol": "MATIC",
       "decimals": 18
     },
     "rpc": [
