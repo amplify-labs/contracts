@@ -109,8 +109,7 @@ export function handlePoolUnlockedAsset(event: AssetUnlocked): void {
 
 // Loan
 export function handleCreateCreditLine(event: CreditLineOpened): void {
-    let context = dataSource.context();
-    let pool = context.getBytes("pool").toHex();
+    let pool = event.transaction.to.toHex();
 
     let loan = new Loan(event.params.loanId.toHex());
 
@@ -130,34 +129,40 @@ export function handleCreateCreditLine(event: CreditLineOpened): void {
 export function handleLoanAddDebt(loanId: string, amount: BigInt): void {
     let loan = Loan.load(loanId);
 
-    loan.debt = loan.debt.plus(amount);
-    loan.save();
+    if (loan !== null) {
+        loan.debt = loan.debt.plus(amount);
+        loan.save();
+    }
 }
 
 export function handleLoanSubDebt(loanId: string, amount: BigInt): void {
     let loan = Loan.load(loanId);
-
-    loan.debt = loan.debt.minus(amount);
-    loan.save();
+    if (loan !== null) {
+        loan.debt = loan.debt.minus(amount);
+        loan.save();
+    }
 }
 
 export function handlePoolLockedAsset(poolAddr: string, tokenId: string, loanId: string): void {
     let pool = Pool.load(poolAddr);
 
-    let poolAssets = pool.assetsLocked;
-    poolAssets.push(tokenId);
-    pool.assetsLocked = poolAssets;
+    if (pool !== null) {
+        let poolAssets = pool.assetsLocked;
+        poolAssets.push(tokenId);
+        pool.assetsLocked = poolAssets;
 
-    handleAssetLock(tokenId, loanId);
-    pool.save();
+        handleAssetLock(tokenId, loanId);
+        pool.save();
+    }
 }
 
 export function handleLoanClose(event: CreditLineClosed): void {
     let loan = Loan.load(event.params.loanId.toHex());
-    loan.isClosed = true;
-
-    handleAssetRedeem(loan.collateralAsset);
-    loan.save();
+    if (loan !== null) {
+        loan.isClosed = true;
+        handleAssetRedeem(loan.collateralAsset);
+        loan.save();
+    }
 }
 
 // Transaction
@@ -176,11 +181,12 @@ function handleAddTransaction(txId: string, type: string, from: Bytes, to: Bytes
 export function handleAddLoanTx(loanId: string, txId: string): void {
     let loan = Loan.load(loanId);
 
-    let currentTx = loan.transactions;
-    currentTx.push(txId);
-    loan.transactions = currentTx;
-
-    loan.save();
+    if (loan !== null) {
+        let currentTx = loan.transactions;
+        currentTx.push(txId);
+        loan.transactions = currentTx;
+        loan.save();
+    }
 }
 
 // Balance

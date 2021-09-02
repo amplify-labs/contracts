@@ -65,7 +65,7 @@ templates:
         - event: CreditLineOpened(indexed uint256,indexed uint256,address,uint256,uint256)
           handler: handleCreateCreditLine
         - event: CreditLineClosed(indexed uint256)
-          handler: handleCreateCreditLine
+          handler: handleLoanClose
         - event: Lend(indexed address,uint256)
           handler: handlePoolLend
         - event: Withdrawn(indexed address,uint256)
