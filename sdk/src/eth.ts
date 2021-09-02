@@ -242,9 +242,11 @@ export async function getProviderNetwork(
     }
     case String(networkId) === "111": { // Deploy Velas Testnet
       network = { name: 'velas_testnet' }
+      break;
     }
     case String(networkId) === "106": { // Deploy Velas Mainet
       network = { name: 'velas_mainet' }
+      break;
     }
     case ethers.providers.getNetwork(networkId) !== undefined: {
       network = ethers.providers.getNetwork(networkId);
