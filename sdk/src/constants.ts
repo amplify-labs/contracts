@@ -30,9 +30,9 @@ export const address = {
   "velas_testnet": {
     "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
     "Factory": "0x8E557363AC9E5cbf09A2616A302CA3c8f6ab2b7A",
-    "DAI": "",
-    "USDC": "",
-    "USDT": ""
+    "DAI": "0xBdf5575Ec1cC0a14Bd3e94648a2453fdC7B56943",
+    "USDC": "0x78539503451048575ee5d003f1CAaE66d1cd9552",
+    "USDT": "0x281Af75C2919A1F579b507F4Ab8ce77fcAcD4197"
   }
 };
 
