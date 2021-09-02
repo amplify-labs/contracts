@@ -9,7 +9,7 @@ export function coins(network: number): Record<string, Partial<StableCoin>> {
         const networkAddr = address[getNetNameWithChainId(network)];
         if (networkAddr && networkAddr[k].length) {
             stablecoins = Object.assign(stablecoins, {
-                [networkAddr[k]]: v
+                [ethAddressLowerCase(networkAddr[k])]: v
             });
         }
     })
