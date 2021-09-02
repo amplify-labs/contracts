@@ -244,7 +244,7 @@ export const networks: Network[] = [
     "explorers": [
       {
         "name": "evmexplorer",
-        "url": "https://evmexplorer.testnet.velas.com/",
+        "url": "https://explorer.testnet.velas.com/",
         "standard": "EIP3091"
       }
     ],
