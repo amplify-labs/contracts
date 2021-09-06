@@ -18,6 +18,7 @@ import type { Erc20Interface } from '../erc20';
 
 // =-=-=-=-=-= /src/index.ts =-=-=-=-=-=
 export interface AmplifyInstance extends AssetInterface, FactoryInterface, PoolInterface, Erc20Interface {
+  _provider: Provider;
   _networkPromise: Promise<ProviderNetwork>;
 };
 export interface AmplifyOptions {

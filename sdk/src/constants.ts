@@ -279,6 +279,7 @@ export const abi = {
     "function borrow(uint256 loanId, uint256 amount) returns (bool success)",
     "function repay(uint256 loanId, uint256 amount) returns (bool success)",
     "function unlockAsset(uint256 loanId) returns (bool success)",
+    "function lpToken() view returns (address)",
     "function totalDeposited() view returns (uint256)",
     "function totalBorrowed() view returns (uint256)",
     "function totalAvailable() view returns (uint256)"

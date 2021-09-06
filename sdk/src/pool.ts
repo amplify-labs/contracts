@@ -494,6 +494,41 @@ export async function depositedBalance(
 }
 
 
+/**
+ * Get Pool LP token address
+* @param {string} pool Pool address.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const addr = await amplify.poolLpToken('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('Address:', addr);
+ * })().catch(console.error);
+ * ```
+ */
+export async function poolLpToken(
+    pool: string,
+    options: CallOptions = {}
+): Promise<string> {
+    await netId(this);
+    const errorPrefix = 'Amplify [lpToken] | ';
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Pool,
+        ...options
+    };
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const result = await eth.read(pool, 'lpToken', [], trxOptions);
+    return result.toString();
+}
+
 export interface PoolInterface {
     depositedBalance(lender: string, pool: string): Promise<string>,
     lend(pool: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
@@ -504,6 +539,7 @@ export interface PoolInterface {
     repay(pool: string, loanId: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
     unlockAsset(pool: string, loanId: string, options?: CallOptions): Promise<TrxResponse>;
     poolTotalDeposited(pool: string, options?: CallOptions): Promise<string>;
+    poolLpToken(pool: string, options?: CallOptions): Promise<string>;
     poolTotalBorrowed(pool: string, options?: CallOptions): Promise<string>;
     poolTotalAvailable(pool: string, options?: CallOptions): Promise<string>;
 }
