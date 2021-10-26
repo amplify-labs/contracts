@@ -44,7 +44,7 @@ module.exports = {
     apiKey: "T5EE3A81HMYUJYZE7TH2RQBKPQY2FRBGD3"
   },
   solidity: {
-    version: "0.8.0",
+    version: "0.8.4",
     settings: {
       evmVersion: "istanbul",
       optimizer: {
