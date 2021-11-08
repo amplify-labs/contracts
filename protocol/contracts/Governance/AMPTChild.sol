@@ -32,7 +32,7 @@ contract AMPTChild {
 
     // keeping it for checking, whether deposit being called by valid address or not
     address public childChainManagerProxy;
-    address deployer;
+    address immutable deployer;
 
     /// @notice A record of votes checkpoints for each account, by index
     mapping (address => mapping (uint256 => Checkpoint)) public checkpoints;
@@ -61,6 +61,9 @@ contract AMPTChild {
     /// @notice The standard EIP-20 approval event
     event Approval(address indexed owner, address indexed spender, uint256 amount);
 
+    /// @notice An event that's emitted when ChainManager is changed
+    event ChildChainManagerChanged(address oldManager, address newManager);
+
     /// @dev A constant to be used in comparing
     uint256 internal constant MAX_UINT256 = 2**256 - 1;
 
@@ -77,10 +80,13 @@ contract AMPTChild {
     // being proxified smart contract, most probably childChainManagerProxy contract's address
     // is not going to change ever, but still, lets keep it 
     function updateChildChainManager(address newChildChainManagerProxy) external {
-        require(newChildChainManagerProxy != address(0), "Bad ChildChainManagerProxy address");
+        address currentChainManager = childChainManagerProxy;
         require(msg.sender == deployer, "You're not allowed");
+        require(newChildChainManagerProxy != currentChainManager, "Address already exists");
+        require(newChildChainManagerProxy != address(0), "Bad ChildChainManagerProxy address");
 
         childChainManagerProxy = newChildChainManagerProxy;
+        emit ChildChainManagerChanged(currentChainManager, newChildChainManagerProxy);
     }
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
@@ -102,6 +108,7 @@ contract AMPTChild {
         balances[user] += amount;
         
         emit Transfer(address(0), user, amount);
+        _moveDelegates(delegates[address(0)], delegates[user], amount);
     }
 
     /**
@@ -118,9 +125,10 @@ contract AMPTChild {
         require(amount > 0, "Amount must be greater than 0");
 
         balances[msg.sender] = safeSub(balances[msg.sender], amount, "ERC20: burn amount exceeds balance");
-        totalSupply = safeSub(totalSupply, amount, "AMPT::withdraw: update total suply failed");
+        totalSupply = safeSub(totalSupply, amount, "AMPT::withdraw: update total supply failed");
         
         emit Transfer(msg.sender, address(0), amount);
+        _moveDelegates(delegates[msg.sender], delegates[address(0)], amount);
     }
 
     /**
@@ -328,7 +336,7 @@ contract AMPTChild {
         require(src != address(0), "AMPT::_transferTokens: cannot transfer from the zero address");
         require(dst != address(0), "AMPT::_transferTokens: cannot transfer to the zero address");
 
-        balances[src] -= safeSub(balances[src], amount, "AMPT::_transferTokens: transfer amount exceeds balance");
+        balances[src] = safeSub(balances[src], amount, "AMPT::_transferTokens: transfer amount exceeds balance");
         balances[dst] += amount;
         emit Transfer(src, dst, amount);
 
