@@ -3,5 +3,7 @@
     "asset_address": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
     "asset_start_block": 18163137,
     "factory_address": "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD",
-    "factory_start_block": 18163140
+    "factory_start_block": 18163140,
+    "voting_address": "0x5Cb40e39510EBA1e660540942c8624AB991e6fB4",
+    "voting_start_block": 21246553
 }

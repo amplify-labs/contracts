@@ -15,9 +15,10 @@ import type { PoolInterface } from '../pool';
 import type { AssetInterface } from '../asset';
 import type { FactoryInterface } from '../factory';
 import type { Erc20Interface } from '../erc20';
+import type { VotingEscrowInterface } from '../votingEscrow';
 
 // =-=-=-=-=-= /src/index.ts =-=-=-=-=-=
-export interface AmplifyInstance extends AssetInterface, FactoryInterface, PoolInterface, Erc20Interface {
+export interface AmplifyInstance extends AssetInterface, FactoryInterface, PoolInterface, Erc20Interface, VotingEscrowInterface {
   _provider: Provider;
   _networkPromise: Promise<ProviderNetwork>;
 };

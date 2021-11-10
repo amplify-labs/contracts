@@ -59,3 +59,15 @@ type Loan @entity {
     isClosed: Boolean!
     transactions: [Transaction]!
 }
+
+type VotingInfo @entity {
+    id: ID!
+    locked: BigInt!
+}
+
+type Lock @entity {
+    id: ID!
+    amount: BigInt!
+    start: BigInt!
+    end: BigInt!
+}

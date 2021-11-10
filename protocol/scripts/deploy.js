@@ -1,8 +1,11 @@
 // scripts/deploy.js
 async function main() {
-  await deployAsset();
+  // await deployAsset();
   // await deployFakeToken();
-  await deployFactory();
+  // await deployFactory();
+  const amptToken = await deployAMPTToken();
+  const sw = await deploySmartChecker();
+  await deployVotingEscrow(amptToken, sw, 'Vote-escrowed AMPT', 'veAMPT');
 }
 
 async function deployAsset() {
@@ -30,6 +33,36 @@ async function deployFakeToken() {
   const fakeToken = await FakeToken.deploy();
   await fakeToken.deployed();
   console.log("FakeToken deployed to:", fakeToken.address);
+}
+
+async function deployAMPTToken() {
+  // We get the contract to deploy
+  const [owner] = await ethers.getSigners();
+  const AMPT = await ethers.getContractFactory("AMPT");
+  console.log("Deploying AMPT...");
+  const contract = await AMPT.deploy(owner.address);
+  await contract.deployed();
+  console.log("AMPT deployed to:", contract.address);
+  return contract.address;
+}
+
+async function deploySmartChecker() {
+  const SW = await ethers.getContractFactory("SmartWalletWhitelist");
+  console.log("Deploying SmartWalletWhitelist...");
+  const contract = await SW.deploy();
+  await contract.deployed();
+  console.log("SmartWalletWhitelist deployed to:", contract.address);
+  return contract.address;
+}
+
+
+async function deployVotingEscrow(amptToken, sw, name, symbol) {
+  // We get the contract to deploy
+  const VotingEscrow = await ethers.getContractFactory("VotingEscrow");
+  console.log("Deploying VotingEscrow...");
+  const contract = await VotingEscrow.deploy(amptToken, sw, name, symbol);
+  await contract.deployed();
+  console.log("VotingEscrow deployed to:", contract.address);
 }
 
 main()

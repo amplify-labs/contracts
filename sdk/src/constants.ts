@@ -1,38 +1,44 @@
 import { Network } from "./types";
 
-// Publicly revealed on the parent class
-export const constants = {
-  'Asset': 'Asset',
-};
-
 export const address = {
   "mainnet": {
     "Asset": "",
     "Factory": "",
     "DAI": "",
     "USDC": "",
-    "USDT": ""
+    "USDT": "",
+    "AMPT": "",
+    "VotingEscrow": ""
   },
   "polygon_mainet": {
     "Asset": "",
     "Factory": "",
     "DAI": "",
     "USDC": "",
-    "USDT": ""
+    "USDT": "",
+    "AMPT": "",
+    "VotingEscrow": "",
+    "SmartWalletChecker": ""
   },
   "polygon_mumbai": {
     "Asset": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
     "Factory": "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD",
     "DAI": "0x86321ca156c655d151474a054f25970acb5b42a8",
     "USDC": "0xeb80b946d57902d92c5b90bd8f4968ce3c8c4f9e",
-    "USDT": "0x6861fa406ff83036fb127c7f462a1906f776c3c1"
+    "USDT": "0x6861fa406ff83036fb127c7f462a1906f776c3c1",
+    "AMPT": "0x9aa783f5d43877578D2A840Bd1303dD3307BB76f",
+    "VotingEscrow": "0x5Cb40e39510EBA1e660540942c8624AB991e6fB4",
+    "SmartWalletChecker": "0x413E7F1F104D1094F834419E8eB2a0943066283D"
   },
   "velas_testnet": {
     "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
     "Factory": "0x8E557363AC9E5cbf09A2616A302CA3c8f6ab2b7A",
     "DAI": "0xBdf5575Ec1cC0a14Bd3e94648a2453fdC7B56943",
     "USDC": "0x78539503451048575ee5d003f1CAaE66d1cd9552",
-    "USDT": "0x281Af75C2919A1F579b507F4Ab8ce77fcAcD4197"
+    "USDT": "0x281Af75C2919A1F579b507F4Ab8ce77fcAcD4197",
+    "AMPT": "0x79740Bcd9aAe3A15A36736E896CD77368aC58690",
+    "VotingEscrow": "0x246Df152BDc6ba317Be8799f3F531FB3F4eF50E0",
+    "SmartWalletChecker": "0xb4546c6e2c69BBF5F29EaEAB3De3768D5Bb009df"
   }
 };
 
@@ -51,7 +57,12 @@ export const supportedStableCoins = {
     symbol: "USDT",
     decimals: 18,
     logoUrl: "https://cryptologos.cc/logos/tether-usdt-logo.png?v=002",
-  }
+  },
+  AMPT: {
+    symbol: "AMPT",
+    decimals: 18,
+    logoUrl: "https://ampt.finance/logo-small.png",
+  },
 }
 
 export const networks: Network[] = [
@@ -287,6 +298,23 @@ export const abi = {
   ERC20: [
     "function allowance(address spender, address spender) returns (uint256)",
     "function approve(address spender, uint256 amount) returns (bool)"
+  ],
+  AMPT: [
+    "function transfer(address to, uint256 amount) returns (bool)",
+    "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+    "function allowance(address owner, address spender) returns (uint256)"
+  ],
+  VotingEscrow: [
+    "function symbol() view returns (string)",
+    "function createLock(uint256 value, uint256 unlockTime)",
+    "function increaseLockAmount(uint256 value)",
+    "function increaseLockTime(uint256 newUnlockTime)",
+    "function withdraw()",
+    "function balanceOf(address addr) view returns(uint256)", // user votePower
+    "function votePower() view returns (uint256)", // total votePower
+    "function locked(address addr) view returns(LockedBalance)", // user balance struct
+    "function totalSupply() view returns (uint256)", // total locked amount
   ]
 };
 

@@ -23,6 +23,29 @@ dataSources:
         - event: TokenizeAsset(indexed uint256,string,string,uint256,string,uint256,uint256)
           handler: handleTokenizeAsset
   - kind: ethereum/contract
+    name: VotingEscrow
+    network: "{{network}}"
+    source:
+      address: "{{voting_address}}"
+      abi: VotingAbi
+      startBlock: {{voting_start_block}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/voting.ts
+      entities:
+        - VotingInfo
+        - Lock
+      abis:
+        - name: VotingAbi
+          file: ./abis/Voting.json
+      eventHandlers:
+        - event: Deposited(indexed address,uint256,indexed uint256,uint256)
+          handler: handleLockDeposit
+        - event: Withdrawn(indexed address,uint256)
+          handler: handleLockWithdraw
+  - kind: ethereum/contract
     name: Factory
     network: "{{network}}"
     source:

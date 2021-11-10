@@ -71,6 +71,56 @@ function parseBN(bn) {
     return parseInt(bn, 10);
 }
 
+async function call(contract, method, args = [], callOptions = {}) {
+    [args, options] = allowUndefinedArgs(args, callOptions);
+
+    return contract.functions[method](...args, options).then(r => {
+        switch (typeof r[0]) {
+            case "string":
+            case "number":
+            case "object":
+                return r[0];
+                return r[0];
+            default:
+                return r;
+        }
+    });
+}
+
+async function send(contract, method, args = [], sendOptions = {}) {
+    [args, options] = allowUndefinedArgs(args, sendOptions);
+
+    return contract.functions[method](...args, options)
+        .then((r) => r.wait())
+        .then(r => {
+            return r;
+        }).catch(err => {
+            return err.message;
+        });
+}
+
+async function connect(contract, signer) {
+    let newContract = await contract.connect(signer);
+    return newContract;
+}
+
+function allowUndefinedArgs(args, sendOptions) {
+    if (!Array.isArray(args)) {
+        if (sendOptions !== undefined) {
+            throw new Error(`Args expected to be an array, got ${args}`);
+        }
+        return [[], args];
+    } else {
+        return [args, sendOptions]
+    }
+}
+
+function vmError(err) {
+    return `VM Exception while processing transaction: reverted with reason string '${err}'`;
+}
+
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+
 module.exports = {
     deployFactory,
     createStableCoin,
@@ -79,5 +129,10 @@ module.exports = {
     deployCollectible,
     depositInPool,
     deployFakeToken,
-    parseBN
+    parseBN,
+    call,
+    send,
+    connect,
+    vmError,
+    zeroAddress
 }
