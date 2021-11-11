@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts';
+import { BigInt, store } from '@graphprotocol/graph-ts';
 
 import { Withdrawn, Deposited } from '../../generated/VotingEscrow/VotingAbi';
 import { VotingInfo, Lock } from '../../generated/schema';
@@ -25,8 +25,7 @@ export function handleLockWithdraw(event: Withdrawn): void {
     }
 
     votingInfo.locked = votingInfo.locked.minus(event.params.value);
-    handleLock(event.params.provider.toHex(), BigInt.fromI32(0), event.block.timestamp, BigInt.fromI32(0), BigInt.fromI32(4));
-
+    store.remove('Lock', event.params.provider.toHex());
     votingInfo.save();
 }
 
@@ -48,7 +47,7 @@ function handleLock(id: string, value: BigInt, startTime: BigInt, time: BigInt, 
                 lock.start = startTime;
                 lock.end = time;
                 break;
-            default: // withdrawn
+            default: // should not happen
                 lock.amount = value;
                 lock.start = time;
                 lock.end = time;
