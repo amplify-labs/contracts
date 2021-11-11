@@ -25,7 +25,7 @@ export function handleLockWithdraw(event: Withdrawn): void {
     }
 
     votingInfo.locked = votingInfo.locked.minus(event.params.value);
-    handleLock(event.params.provider.toHex(), new BigInt(0), event.block.timestamp, new BigInt(0), new BigInt(4));
+    handleLock(event.params.provider.toHex(), BigInt.fromI32(0), event.block.timestamp, BigInt.fromI32(0), BigInt.fromI32(4));
 
     votingInfo.save();
 }
@@ -33,18 +33,18 @@ export function handleLockWithdraw(event: Withdrawn): void {
 function handleLock(id: string, value: BigInt, startTime: BigInt, time: BigInt, eventType: BigInt): void {
     let lock = Lock.load(id);
 
-    if (lock == null) { // create new lock
+    if (lock === null) { // create new lock
         lock = new Lock(id);
         lock.amount = value;
         lock.start = startTime;
         lock.end = time;
     } else {
         switch (true) {
-            case eventType == new BigInt(2): // increase lock amount
-            case eventType == new BigInt(0): // deposit
+            case eventType.equals(BigInt.fromI32(2)): // increase lock amount
+            case eventType.equals(BigInt.fromI32(0)): // deposit
                 lock.amount = lock.amount.plus(value);
                 break;
-            case eventType == new BigInt(3): // increase unlock time
+            case eventType.equals(BigInt.fromI32(3)): // increase unlock time
                 lock.start = startTime;
                 lock.end = time;
                 break;

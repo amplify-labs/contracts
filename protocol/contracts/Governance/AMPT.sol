@@ -275,7 +275,7 @@ contract AMPT {
         require(src != address(0), "AMPT::_transferTokens: cannot transfer from the zero address");
         require(dst != address(0), "AMPT::_transferTokens: cannot transfer to the zero address");
 
-        balances[src] -= safeSub(balances[src], amount, "AMPT::_transferTokens: transfer amount exceeds balance");
+        balances[src] = safeSub(balances[src], amount, "AMPT::_transferTokens: transfer amount exceeds balance");
         balances[dst] += amount;
         emit Transfer(src, dst, amount);
 
