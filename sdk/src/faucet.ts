@@ -36,7 +36,7 @@ export async function faucetBalanceOf(options: CallOptions = {}): Promise<string
         ...options
     };
 
-    let result = await eth.read(contractAddr, 'balanceOf', [], trxOptions);
+    const result = await eth.read(contractAddr, 'balanceOf', [], trxOptions);
     return result.toString();
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@amplify-labs/amplify-js",
-  "version": "0.1.50",
+  "version": "0.1.51",
   "author": "Amplify Labs",
   "description": "A JavaScript SDK for Amplify Contracts",
   "license": "BSD-3-Clause",
