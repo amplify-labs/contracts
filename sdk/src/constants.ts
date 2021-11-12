@@ -8,7 +8,8 @@ export const address = {
     "USDC": "",
     "USDT": "",
     "AMPT": "",
-    "VotingEscrow": ""
+    "VotingEscrow": "",
+    "Faucet": ""
   },
   "polygon_mainet": {
     "Asset": "",
@@ -18,7 +19,8 @@ export const address = {
     "USDT": "",
     "AMPT": "",
     "VotingEscrow": "",
-    "SmartWalletChecker": ""
+    "SmartWalletChecker": "",
+    "Faucet": ""
   },
   "polygon_mumbai": {
     "Asset": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
@@ -28,7 +30,8 @@ export const address = {
     "USDT": "0x6861fa406ff83036fb127c7f462a1906f776c3c1",
     "AMPT": "0xBd6bfE86C3d4E10E0f2f12E480f7fd293640E7f2",
     "SmartWalletChecker": "0x7fDd86264C1A9212cB74Fea48BE93c105A7813f5",
-    "VotingEscrow": "0xd8d193853AF5b70B8Eff61bE038CfDe90C83204B"
+    "VotingEscrow": "0xd8d193853AF5b70B8Eff61bE038CfDe90C83204B",
+    "Faucet": "0xe7F2C52f1Dd2732EadAdD0a9523081fd3d216D07"
   },
   "velas_testnet": {
     "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
@@ -38,7 +41,8 @@ export const address = {
     "USDT": "0x281Af75C2919A1F579b507F4Ab8ce77fcAcD4197",
     "AMPT": "0x428d561f82bbb9322e5a634490722F26714d4DcA",
     "SmartWalletChecker": "0x7593E8fC59cB7fB3839A2B4815576C68b3df23FF",
-    "VotingEscrow": "0x7A05280940A23749106D8Fb2cA4b10B9D1C89067"
+    "VotingEscrow": "0x7A05280940A23749106D8Fb2cA4b10B9D1C89067",
+    "Faucet": "0xF3f43F5490D1d86CF186d5B3474E21FD96BD4395"
   }
 };
 
@@ -248,8 +252,8 @@ export const networks: Network[] = [
       "decimals": 18
     },
     "rpc": [
+      "https://testnet.velas.com/rpc",
       "https://evmexplorer.testnet.velas.com/rpc",
-      "https://testnet.velas.com/rpc"
     ],
     "faucets": [
       "Testnet Faucet Bot"
@@ -317,6 +321,11 @@ export const abi = {
     "function votePower() view returns (uint256)", // total votePower
     "function locked(address addr) view returns(LockedBalance)", // user balance struct
     "function totalSupply() view returns (uint256)", // total locked amount
+  ],
+  Faucet: [
+    "function balanceOf() view returns (uint2567)",
+    "function getTokens() returns (bool)",
+    "function distributions(address addr) view returns (bool)",
   ]
 };
 

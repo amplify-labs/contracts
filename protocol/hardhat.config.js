@@ -22,7 +22,7 @@ module.exports = {
     },
     velas_testnet: {
       chainId: 111,
-      url: "https://evmexplorer.testnet.velas.com/rpc",
+      url: "https://testnet.velas.com/rpc",
       accounts: [privateKey],
       gas: 2100000,
       gasPrice: 8000000000

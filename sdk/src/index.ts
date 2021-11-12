@@ -14,6 +14,7 @@ import * as stablecoins from './stablecoins';
 import * as factory from './factory';
 import * as votingEscrow from './votingEscrow';
 import * as constants from './constants';
+import * as faucet from './faucet';
 import * as types from './types';
 
 // Turn off Ethers.js warnings
@@ -63,7 +64,8 @@ function createInstance(provider: types.Provider | string = 'mainnet', options: 
     ...factory,
     ...pool,
     ...votingEscrow,
-    ...erc20
+    ...erc20,
+    ...faucet
   };
 
   // Instance needs to know which network the provider connects to, so it can

@@ -3,9 +3,10 @@ async function main() {
   // await deployAsset();
   // await deployFakeToken();
   // await deployFactory();
-  const amptToken = await deployAMPTToken();
+  // const amptToken = await deployAMPTToken();
+  //await deployFaucet("0x428d561f82bbb9322e5a634490722F26714d4DcA");
   //const sw = await deploySmartChecker();
- // await deployVotingEscrow(amptToken, sw, 'Vote-escrowed AMPT', 'veAMPT');
+  // await deployVotingEscrow(amptToken, sw, 'Vote-escrowed AMPT', 'veAMPT');
 }
 
 async function deployAsset() {
@@ -43,6 +44,18 @@ async function deployAMPTToken() {
   const contract = await AMPT.deploy(owner.address);
   await contract.deployed();
   console.log("AMPT deployed to:", contract.address);
+  return contract.address;
+}
+
+async function deployFaucet(amptToken) {
+  console.log('ampt', amptToken);
+  if (!amptToken) return;
+  // We get the contract to deploy
+  const Faucet = await ethers.getContractFactory("Faucet");
+  console.log("Deploying Faucet...");
+  const contract = await Faucet.deploy(amptToken);
+  await contract.deployed();
+  console.log("Faucet deployed to:", contract.address);
   return contract.address;
 }
 
