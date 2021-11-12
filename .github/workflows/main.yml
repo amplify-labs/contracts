@@ -40,3 +40,4 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}

@@ -79,8 +79,8 @@ export const networks: Network[] = [
       "decimals": 18
     },
     "rpc": [
-      "https://mainnet.infura.io/v3/${INFURA_API_KEY}",
-      "wss://mainnet.infura.io/ws/v3/${INFURA_API_KEY}",
+      `https://mainnet.infura.io/v3/9db365cb1fb444c4afbe9a3a3f1e7faf`,
+      `wss://mainnet.infura.io/ws/v3/9db365cb1fb444c4afbe9a3a3f1e7faf`,
       "https://api.mycryptoapi.com/eth",
       "https://cloudflare-eth.com"
     ],
@@ -107,8 +107,8 @@ export const networks: Network[] = [
       "decimals": 18
     },
     "rpc": [
-      "https://ropsten.infura.io/v3/${INFURA_API_KEY}",
-      "wss://ropsten.infura.io/ws/v3/${INFURA_API_KEY}"
+      `https://ropsten.infura.io/v3/9db365cb1fb444c4afbe9a3a3f1e7faf`,
+      `wss://ropsten.infura.io/ws/v3/9db365cb1fb444c4afbe9a3a3f1e7faf`
     ],
     "faucets": [
       "https://faucet.ropsten.be?${ADDRESS}"
@@ -135,8 +135,8 @@ export const networks: Network[] = [
       "decimals": 18
     },
     "rpc": [
-      "https://rinkeby.infura.io/v3/${INFURA_API_KEY}",
-      "wss://rinkeby.infura.io/ws/v3/${INFURA_API_KEY}"
+      `https://rinkeby.infura.io/v3/9db365cb1fb444c4afbe9a3a3f1e7faf`,
+      `wss://rinkeby.infura.io/ws/v3/9db365cb1fb444c4afbe9a3a3f1e7faf`
     ],
     "faucets": [
       "https://faucet.rinkeby.io"
@@ -219,6 +219,7 @@ export const networks: Network[] = [
       "decimals": 18
     },
     "rpc": [
+      "https://rpc-mumbai.maticvigil.com/",
       "https://rpc-mumbai.matic.today",
       "wss://ws-mumbai.matic.today"
     ],
@@ -247,7 +248,8 @@ export const networks: Network[] = [
       "decimals": 18
     },
     "rpc": [
-      "https://testnet.velas.com/rpc",
+      "https://evmexplorer.testnet.velas.com/rpc",
+      "https://testnet.velas.com/rpc"
     ],
     "faucets": [
       "Testnet Faucet Bot"

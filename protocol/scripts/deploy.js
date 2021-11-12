@@ -4,8 +4,8 @@ async function main() {
   // await deployFakeToken();
   // await deployFactory();
   const amptToken = await deployAMPTToken();
-  const sw = await deploySmartChecker();
-  await deployVotingEscrow(amptToken, sw, 'Vote-escrowed AMPT', 'veAMPT');
+  //const sw = await deploySmartChecker();
+ // await deployVotingEscrow(amptToken, sw, 'Vote-escrowed AMPT', 'veAMPT');
 }
 
 async function deployAsset() {
