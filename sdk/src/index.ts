@@ -13,6 +13,7 @@ import * as erc20 from './erc20';
 import * as stablecoins from './stablecoins';
 import * as factory from './factory';
 import * as votingEscrow from './votingEscrow';
+import * as vesting from './vesting';
 import * as constants from './constants';
 import * as faucet from './faucet';
 import * as types from './types';
@@ -65,7 +66,8 @@ function createInstance(provider: types.Provider | string = 'mainnet', options: 
     ...pool,
     ...votingEscrow,
     ...erc20,
-    ...faucet
+    ...faucet,
+    ...vesting
   };
 
   // Instance needs to know which network the provider connects to, so it can

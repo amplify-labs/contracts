@@ -71,20 +71,31 @@ function parseBN(bn) {
     return parseInt(bn, 10);
 }
 
+async function deployAMPTToken(admin) {
+    const Contract = await ethers.getContractFactory("AMPT");
+    const token = await Contract.deploy(admin);
+    await token.deployed();
+
+    return token;
+}
+
+async function deployVestingLib() {
+    const Contract = await ethers.getContractFactory("VestingHarness");
+
+    let contract = await Contract.deploy();
+    await contract.deployed();
+    return contract;
+}
+
 async function call(contract, method, args = [], callOptions = {}) {
     [args, options] = allowUndefinedArgs(args, callOptions);
 
     return contract.functions[method](...args, options).then(r => {
-        switch (typeof r[0]) {
-            case "string":
-            case "number":
-            case "object":
-                return r[0];
-                return r[0];
-            default:
-                return r;
+        if (r.length > 1) {
+            return r;
         }
-    });
+        return r[0];
+    }).catch(err => vmError("failed to call fuction"));
 }
 
 async function send(contract, method, args = [], sendOptions = {}) {
@@ -123,6 +134,8 @@ const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 module.exports = {
     deployFactory,
+    deployAMPTToken,
+    deployVestingLib,
     createStableCoin,
     createPool,
     createNFT,

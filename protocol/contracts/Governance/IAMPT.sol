@@ -14,3 +14,8 @@ interface IAMPT {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
+
+
+// TODO: replace with the interface from ERC20 folder
+interface IERC20 is IAMPT {
+}

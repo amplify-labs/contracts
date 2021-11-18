@@ -11,6 +11,10 @@ const {
     parseBN
 } = require("./utils");
 
+const day = 60 * 60 * 24;
+const timestamp = Math.floor(Date.now() / 1000);
+const maturity = timestamp + 7 * day;
+
 describe("Pool", async function () {
     let poolAddr, stableCoin;
     const minDeposit = ethers.utils.parseEther("0.1");
@@ -43,7 +47,7 @@ describe("Pool", async function () {
         let asset = await deployCollectible();
 
         // create nft
-        tokenId = await createNFT(asset, assetValue, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", 1631462793, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08.png");
+        tokenId = await createNFT(asset, assetValue, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", maturity, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08.png");
 
         // Transfer NFT to the Pool contract
         let ntfFactory = await ethers.getContractAt("Asset", asset);
@@ -168,7 +172,7 @@ describe("Pool", async function () {
                     asset = await deployCollectible();
 
                     // create nft
-                    tokenId = await createNFT(asset, assetValue, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", 1631462793, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08.png");
+                    tokenId = await createNFT(asset, assetValue, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", maturity, "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08.png");
 
                     // Transfer NFT to the Pool contract
                     ntfFactory = await ethers.getContractAt("Asset", asset);

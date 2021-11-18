@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { call, send, connect, vmError, zeroAddress } = require("./utils");
+const { call, send, connect, vmError, zeroAddress, deployAMPTToken } = require("./utils");
 
 const day = 24 * 60 * 60;
 const timestamp = Math.floor(Date.now() / 1000);
@@ -594,14 +594,6 @@ async function deployVotingContract(admin) {
     const ve = await Contract.deploy(amptToken.address, sw.address, "Voting-escrowed AMPT", "veAMPT", 1, timestamp);
     await ve.deployed();
     return [ve, amptToken, sw];
-}
-
-async function deployAMPTToken(admin) {
-    const Contract = await ethers.getContractFactory("AMPT");
-    const token = await Contract.deploy(admin);
-    await token.deployed();
-
-    return token;
 }
 
 async function deploySmartWalletChecker() {

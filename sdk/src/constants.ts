@@ -9,7 +9,9 @@ export const address = {
     "USDT": "",
     "AMPT": "",
     "VotingEscrow": "",
-    "Faucet": ""
+    "Faucet": "",
+    "VestingFactory": "",
+    "VestingEscrow": ""
   },
   "polygon_mainet": {
     "Asset": "",
@@ -20,7 +22,9 @@ export const address = {
     "AMPT": "",
     "VotingEscrow": "",
     "SmartWalletChecker": "",
-    "Faucet": ""
+    "Faucet": "",
+    "VestingFactory": "",
+    "VestingEscrow": ""
   },
   "polygon_mumbai": {
     "Asset": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
@@ -31,7 +35,10 @@ export const address = {
     "AMPT": "0xBd6bfE86C3d4E10E0f2f12E480f7fd293640E7f2",
     "SmartWalletChecker": "0x7fDd86264C1A9212cB74Fea48BE93c105A7813f5",
     "VotingEscrow": "0xd8d193853AF5b70B8Eff61bE038CfDe90C83204B",
-    "Faucet": "0xe7F2C52f1Dd2732EadAdD0a9523081fd3d216D07"
+    "Faucet": "0xe7F2C52f1Dd2732EadAdD0a9523081fd3d216D07",
+    "VestingFactory": "0x100dE7c586f9B0932487426F208bd8B8E8eD8994",
+    "VestingLibrary": "0x0D654d6C51DA05F1AF530223D58bb301f1894B96",
+    "VestingEscrow": "0xdA6d0aa8d945F048d61Ef423071D62Bb0C6E68b2"
   },
   "velas_testnet": {
     "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
@@ -42,7 +49,10 @@ export const address = {
     "AMPT": "0x428d561f82bbb9322e5a634490722F26714d4DcA",
     "SmartWalletChecker": "0x7593E8fC59cB7fB3839A2B4815576C68b3df23FF",
     "VotingEscrow": "0x7A05280940A23749106D8Fb2cA4b10B9D1C89067",
-    "Faucet": "0xF3f43F5490D1d86CF186d5B3474E21FD96BD4395"
+    "Faucet": "0xF3f43F5490D1d86CF186d5B3474E21FD96BD4395",
+    "VestingFactory": "0xD5279eEC28361352F644c800BaE754cC353E8FBb",
+    "VestingLibrary": "0xD70307659Ef7870F452Ee01031f45A2f66b65243",
+    "VestingEscrow": "0x3723a8F55431aB3175F83D25fEE68715E8f86f73"
   }
 };
 
@@ -326,6 +336,14 @@ export const abi = {
     "function balanceOf() view returns (uint2567)",
     "function getTokens() returns (bool)",
     "function distributions(address addr) view returns (bool)",
+  ],
+  VestingEscrow: [
+    "function createEntry(EntryVars entry) returns(bool)",
+    "function createEntries(EntryVars[] _entries) returns(bool)",
+    "function fireEntry(uint256 entryId) returns(bool)",
+    "function claim()",
+    "function balanceOf(address account) view returns(uint256 amount)",
+    "function getSnapshot(address account) view returns(Snapshot[])"
   ]
 };
 
