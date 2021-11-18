@@ -37,7 +37,7 @@ function _ethJsonRpc(
   method: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parameters: any[] = [],
-  options: CallOptions = { }
+  options: CallOptions = {}
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,7 +141,7 @@ export function read(
   method: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parameters: any[] = [],
-  options: CallOptions = { }
+  options: CallOptions = {}
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   return _ethJsonRpc(JsonRpc.EthCall, address, method, parameters, options);
@@ -194,7 +194,7 @@ export function trx(
   method: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parameters: any[] = [],
-  options: CallOptions = { }
+  options: CallOptions = {}
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   return _ethJsonRpc(JsonRpc.EthSendTransaction, address, method, parameters, options);
@@ -321,7 +321,7 @@ export async function getBalance(
  *
  * @returns {object} Returns a valid Ethereum network provider object.
  */
-export function _createProvider(options: CallOptions = { }): Provider {
+export function _createProvider(options: CallOptions = {}): Provider {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let provider: any = options.provider || (options.network || 'mainnet');
   const isADefaultProvider = !!ethers.providers.getNetwork(provider.toString());

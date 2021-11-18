@@ -3,7 +3,6 @@
  * @desc These methods facilitate interactions with the Vesting smart contract.
  */
 
-import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 import { ethers } from 'ethers';
 import * as eth from './eth';
 import { netId } from './helpers';
@@ -45,7 +44,7 @@ export async function claimAMPT(options: CallOptions = {}): Promise<TrxResponse>
 * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  * transaction. A passed `gasLimit` will be used in both the `approve` (if
  * not supressed) and `mint` transactions.
- * @returns {string} Returns a string.
+ * @returns {array} Returns an array of elements.
  *
  * @example
  * ```
@@ -55,7 +54,7 @@ export async function claimAMPT(options: CallOptions = {}): Promise<TrxResponse>
  * })().catch(console.error);
  * ```
  */
-export async function vestingSnapshot(addr: string, options?: CallOptions): Promise<string> {
+export async function vestingSnapshot(addr: string, options?: CallOptions): Promise<string[]> {
     await netId(this);
     const errorPrefix = 'Amplify [getSnapshot] | ';
 
@@ -73,13 +72,13 @@ export async function vestingSnapshot(addr: string, options?: CallOptions): Prom
     }
 
     const _contract = address[this._network.name].VestingEscrow;
-    return await eth.read(_contract, 'getSnapshot', [addr], trxOptions);
+    return eth.read(_contract, 'getSnapshot', [addr], trxOptions);
 }
 
 
 export interface VestingEscrowInterface {
     claimAMPT(options?: CallOptions): Promise<TrxResponse>;
-    vestingSnapshot(addr: string, options?: CallOptions): Promise<any[]>;
+    vestingSnapshot(addr: string, options?: CallOptions): Promise<string[]>;
 
     // TODO: add more methods when needed
 }
