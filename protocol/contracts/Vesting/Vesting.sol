@@ -162,6 +162,15 @@ contract Vesting {
 
     /**
      * @notice Currently available amount (based on the block timestamp)
+     * @param entryId ID of the entry
+     * @return amount tokens due from vesting entry
+     */
+    function balanceOf(uint256 entryId) external view returns (uint256 amount) {
+        return _balanceOf(entryId);
+    }
+
+    /**
+     * @notice Currently available amount (based on the block timestamp)
      * @param account beneficiary of the vested tokens
      * @return amount tokens due from vesting entry
      */
@@ -172,7 +181,10 @@ contract Vesting {
         return amount;
     }
 
+
+
     struct Snapshot {
+        uint256 entryId;
         uint256 amount;
         uint256 start;
         uint256 end;
@@ -193,6 +205,7 @@ contract Vesting {
         for(uint8 i=0; i < entryIdsByRecipient[account].length; i++) {
             Entry memory entry = entries[entryIdsByRecipient[account][i]];
             snapshot[i] = Snapshot({
+                entryId: entryIdsByRecipient[account][i],
                 amount: entry.amount,
                 start: entry.start,
                 end: entry.end,
@@ -203,6 +216,15 @@ contract Vesting {
             });
         }
         return snapshot;
+    }
+
+    /**
+     * @notice Balance remaining in vesting entry
+     * @param entryId ID of the entry
+     * @return amount tokens still due (and currently locked) from vesting entry
+    */
+    function lockedOf(uint256 entryId) external view returns (uint256 amount) {
+        return _lockedOf(entryId);
     }
 
     /**
@@ -224,6 +246,10 @@ contract Vesting {
     function _balanceOf(uint256 _entryId) public view returns (uint256) {
         Entry storage entry = entries[_entryId];
 
+        if (entry.amount == 0) { // entry not found
+            return 0;
+        }
+
         uint256 currentTimestamp = getBlockTimestamp();
         if (currentTimestamp <= entry.start + entry.cliff) {
             return 0;
@@ -239,6 +265,9 @@ contract Vesting {
 
     function _lockedOf(uint256 _entryId) public view returns (uint256) {
         Entry storage entry = entries[_entryId];
+        if (entry.amount == 0) { // entry not found
+            return 0;
+        }
         return entry.amount - entry.claimed;
     }
 

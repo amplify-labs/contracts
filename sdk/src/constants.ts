@@ -278,7 +278,7 @@ export const networks: Network[] = [
     "infoURL": "https://velas.com/"
   }
 ]
-
+// TODO: Should be updated after each deploy
 export const abi = {
   Asset: [
     "function transferFrom(address from, address to, uint256 tokenId)",

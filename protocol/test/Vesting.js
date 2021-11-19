@@ -550,6 +550,35 @@ describe('Vesting', function () {
         });
     });
 
+    describe('balanceOf entry', () => {
+        let vesting;
+
+        const vestingAmount = ethers.utils.parseEther("1");
+
+        beforeEach(async () => {
+            let connectedFactory = await connect(factory, signer1);
+            let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
+            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+
+            let connectedAmptToken = await connect(amptToken, signer1);
+            await send(connectedAmptToken, "transfer", [vesting.address, ethers.utils.parseEther("100")]);
+
+            await send(vesting, "setBlockTimestamp", [timestamp]);
+        });
+
+        it("should return correct value", async () => {
+            let connectedVesting = await connect(vesting, signer1);
+            await send(connectedVesting, "createEntry", [
+                [signer2.address, vestingAmount, start, end, cliff, 0, false]
+            ]);
+
+            await send(vesting, "fastTimestamp", [4 * 365 * day + 1]);
+
+            expect((await call(vesting, "balanceOf(uint256)", [100])).toString()).to.equal("0");
+            expect((await call(vesting, "balanceOf(uint256)", [0])).toString()).to.equal(vestingAmount.toString());
+        });
+    });
+
     describe('balanceOf recipient', () => {
         let vesting;
 
@@ -684,6 +713,45 @@ describe('Vesting', function () {
             expect((await call(vesting, "balanceOf(address)", [signer2.address])).toString()).to.equal(
                 entry1.amount.sub(entry1.claimed).add(entry2.amount.sub(entry2.claimed)).toString()
             );
+        });
+    })
+
+    describe('getSnapshot', () => {
+        let vesting;
+
+        const vestingAmount = ethers.utils.parseEther("2");
+
+        beforeEach(async () => {
+            let connectedFactory = await connect(factory, signer1);
+            let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
+            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+
+            await send(vesting, "setBlockTimestamp", [timestamp]);
+
+            let connectedVesting = await connect(vesting, signer1);
+            await send(connectedVesting, "createEntries", [
+                [
+                    [signer2.address, vestingAmount, start, end, cliff, 0, false],
+                    [signer2.address, vestingAmount, start, end, cliff, 0, false]
+                ]
+            ]);
+        });
+
+        it("should return snapshot", async () => {
+            await send(vesting, "fastTimestamp", [1461]); // vesting ends;
+
+            let snapshot = await call(vesting, "getSnapshot", [signer2.address]);
+
+            snapshot.forEach((entry, i) => {
+                expect(entry[0].toString()).to.equal(i.toString());
+                expect(entry[1].toString()).to.equal(vestingAmount.toString());
+                expect(entry[2].toString()).to.equal(start.toString());
+                expect(entry[3].toString()).to.equal(end.toString());
+                expect(entry[4].toString()).to.equal(cliff.toString());
+                expect(entry[5].toString()).to.equal("0");
+                expect(entry[6].toString()).to.equal(vestingAmount.toString());
+                expect(entry[7].toString()).to.equal("false");
+            });
         });
     })
 });
