@@ -1,6 +1,7 @@
 // hardhat.config.js
 require('@nomiclabs/hardhat-ethers');
 require("@nomiclabs/hardhat-etherscan");
+require('hardhat-contract-sizer');
 
 const fs = require('fs');
 const privateKey = fs.readFileSync(".secret").toString().trim();
@@ -42,6 +43,12 @@ module.exports = {
     // Your API key for Polygon
     // Obtain one at https://polygonscan.com/myaccount
     apiKey: "T5EE3A81HMYUJYZE7TH2RQBKPQY2FRBGD3"
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
   },
   solidity: {
     version: "0.8.4",

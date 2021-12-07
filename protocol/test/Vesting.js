@@ -1,8 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { call, send, connect, vmError, zeroAddress, deployAMPTToken } = require("./utils");
+const { call, send, connect, init, vmError, zeroAddress, wrongOwner, zeroAddressError } = require("./utils");
 
-const { getFactoryContract } = require("./VestingFactory");
+const { getFactoryContract } = require("./_vesting");
 
 const day = 24 * 60 * 60;
 const timestamp = Math.floor(Date.now() / 1000);
@@ -21,14 +21,14 @@ describe('Vesting', function () {
         signer2 = signers[2];
         signer3 = signers[3];
 
-        [factory, amptToken] = await getFactoryContract(signer1.address);
+        [factory, amptToken] = await getFactoryContract(signer1);
     });
 
     describe('initialize', () => {
         it("succeeds when setting owner through constructor", async () => {
             let { events } = await send(factory, "createVestingContract", [amptToken.address]);
 
-            let vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            let vesting = await init("VestingHarness", events[0].args.instance);
 
             expect(await call(vesting, "owner")).to.equal(root.address);
         });
@@ -36,7 +36,7 @@ describe('Vesting', function () {
         it("succeeds when setting token address through constructor", async () => {
             let { events } = await send(factory, "createVestingContract", [amptToken.address]);
 
-            let vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            let vesting = await init("VestingHarness", events[0].args.instance);
 
             expect(await call(vesting, "token")).to.equal(amptToken.address);
         });
@@ -54,14 +54,14 @@ describe('Vesting', function () {
         it("should fails because of wrong owner", async () => {
             expect(
                 await send(vesting, "transferOwnership", [zeroAddress])
-            ).to.equal(vmError("Only owner can call this function"));
+            ).to.equal(wrongOwner);
         });
 
         it("should fails because of zero value", async () => {
             let connectedVesting = await connect(vesting, signer1);
             expect(
                 await send(connectedVesting, "transferOwnership", [zeroAddress])
-            ).to.equal(vmError("Address must be non-zero"));
+            ).to.equal(zeroAddressError);
         });
 
         it("should fails because of the same owner", async () => {
@@ -78,8 +78,8 @@ describe('Vesting', function () {
             let { events } = await send(connectedVesting, "transferOwnership", [signer2.address]);
             expect(await call(connectedVesting, "owner")).to.equal(signer2.address);
 
-            expect(events[0].args.oldAdmin).to.equal(signer1.address);
-            expect(events[0].args.newAdmin).to.equal(signer2.address);
+            expect(events[0].args.previousOwner).to.equal(signer1.address);
+            expect(events[0].args.newOwner).to.equal(signer2.address);
         });
     });
 
@@ -89,13 +89,13 @@ describe('Vesting', function () {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
 
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
         });
 
         it("should fails because of wrong owner", async () => {
             expect(
                 await send(vesting, "withdraw", [zeroAddress])
-            ).to.equal(vmError("Only owner can call this function"));
+            ).to.equal(wrongOwner);
         });
 
         it("succeeds when withdrawing tokens", async () => {
@@ -118,7 +118,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
 
 
             let connectedAmptToken = await connect(amptToken, signer1);
@@ -138,7 +138,7 @@ describe('Vesting', function () {
 
             expect(
                 await send(connectedVesting, "createEntry", [[signer2.address, vestingAmount, start, end, cliff, 0, false]])
-            ).to.equal(vmError("Only owner can call this function"));
+            ).to.equal(wrongOwner);
         });
 
         it("should fails because of zero value", async () => {
@@ -227,7 +227,7 @@ describe('Vesting', function () {
 
             await send(connectedVesting, "createEntry", [[signer2.address, vestingAmount, start, end, cliff, vestingAmount, false]]);
 
-            expect(await call(vesting, "entryIdsByRecipient", [signer2.address, 0])).to.equal(vmError("failed to call fuction"));
+            expect(await call(vesting, "entryIdsByRecipient", [signer2.address, 0])).to.equal(vmError("failed to call function"));
         });
     });
 
@@ -239,7 +239,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
 
 
             let connectedAmptToken = await connect(amptToken, signer1);
@@ -269,7 +269,7 @@ describe('Vesting', function () {
                         [signer3.address, vestingAmount, start, end, cliff, 0, false]
                     ]
                 ])
-            ).to.equal(vmError("Only owner can call this function"));
+            ).to.equal(wrongOwner);
         });
 
         it("should fails because of zero value", async () => {
@@ -433,7 +433,7 @@ describe('Vesting', function () {
                 ]
             ]);
 
-            expect(await call(vesting, "entryIdsByRecipient", [signer2.address, 0])).to.equal(vmError("failed to call fuction"));
+            expect(await call(vesting, "entryIdsByRecipient", [signer2.address, 0])).to.equal(vmError("failed to call function"));
 
             let entryId = await call(vesting, "entryIdsByRecipient", [signer3.address, 0]);
             let entry = await call(vesting, "entries", [entryId]);
@@ -458,7 +458,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
 
 
             let connectedAmptToken = await connect(amptToken, signer1);
@@ -539,7 +539,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
         });
 
         it("should return correct value", async () => {
@@ -558,7 +558,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
 
             let connectedAmptToken = await connect(amptToken, signer1);
             await send(connectedAmptToken, "transfer", [vesting.address, ethers.utils.parseEther("100")]);
@@ -587,7 +587,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
 
             let connectedAmptToken = await connect(amptToken, signer1);
             await send(connectedAmptToken, "transfer", [vesting.address, ethers.utils.parseEther("100")]);
@@ -679,7 +679,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
 
             await send(vesting, "setBlockTimestamp", [timestamp]);
 
@@ -724,7 +724,7 @@ describe('Vesting', function () {
         beforeEach(async () => {
             let connectedFactory = await connect(factory, signer1);
             let { events } = await send(connectedFactory, "createVestingContract", [amptToken.address]);
-            vesting = await ethers.getContractAt("VestingHarness", events[0].args.instance);
+            vesting = await init("VestingHarness", events[0].args.instance);
 
             await send(vesting, "setBlockTimestamp", [timestamp]);
 

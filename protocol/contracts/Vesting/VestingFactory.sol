@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
+/// @dev size: 1.793 Kbytes
 pragma solidity 0.8.4;
 
 import "./Vesting.sol";
-import "../utils/CloneFactory.sol";
+import "../proxy/Clones.sol";
+import "../security/Ownable.sol";
 
-contract VestingFactory is CloneFactory {
-    address public immutable owner;
-    
+contract VestingFactory is Ownable {
     struct Instance {
         address instanceAddr;
         address owner;
@@ -29,11 +29,6 @@ contract VestingFactory is CloneFactory {
 
         owner = msg.sender;
         libraryAddress = _libraryAddress;
-    } 
-
-    modifier onlyOwner {
-        require(msg.sender == owner, "Only owner can call this function");
-        _;
     }
 
     /**
@@ -53,7 +48,7 @@ contract VestingFactory is CloneFactory {
      * @param _token Address of the ERC20 token being distributed
     */
     function createVestingContract(IERC20 _token) external virtual {
-        address _contract = createClone(libraryAddress);
+        address _contract = Clones.createClone(libraryAddress);
 
         Vesting(_contract).initialize(msg.sender, _token);
         instances.push(Instance(_contract, msg.sender, address(_token)));

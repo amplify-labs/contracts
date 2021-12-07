@@ -1,6 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { call, send, connect, vmError, zeroAddress, deployAMPTToken } = require("./utils");
+const { call, send, connect, vmError, zeroAddress, deploy } = require("./utils");
+
+const { deployAMPTToken } = require("./_controller")
 
 const day = 24 * 60 * 60;
 const timestamp = Math.floor(Date.now() / 1000);
@@ -21,17 +23,17 @@ describe('Voting Escrow', function () {
 
     describe('constructor', () => {
         it("succeeds when setting amptToken instance", async () => {
-            let [voting, amptToken] = await getVotingContract(root.address);
+            let [voting, amptToken] = await getVotingContract(root);
             expect(await call(voting, "amptToken")).to.equal(amptToken.address);
         });
 
         it("succeeds when setting admin to contructor argument", async () => {
-            let [voting] = await getVotingContract(root.address);
+            let [voting] = await getVotingContract(root);
             expect(await call(voting, 'admin')).to.equal(root.address);
         });
 
         it("succeeds when setting smartChecker to contructor argument", async () => {
-            let [voting, _, sw] = await getVotingContract(root.address);
+            let [voting, _, sw] = await getVotingContract(root);
             expect(await call(voting, 'smartWalletChecker')).to.equal(sw.address);
         });
     })
@@ -40,7 +42,7 @@ describe('Voting Escrow', function () {
         let voting;
 
         beforeEach(async () => {
-            [voting] = await getVotingContract(root.address);
+            [voting] = await getVotingContract(root);
         });
 
         it('should return correct name', async () => {
@@ -60,7 +62,7 @@ describe('Voting Escrow', function () {
         let voting, swOld, swNew;
 
         beforeEach(async () => {
-            [voting, _, swOld] = await getVotingContract(root.address);
+            [voting, _, swOld] = await getVotingContract(root);
             swNew = await deploySmartWalletChecker();
         });
 
@@ -88,7 +90,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -148,7 +150,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -175,7 +177,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -228,7 +230,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -286,7 +288,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -339,7 +341,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -430,7 +432,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -472,7 +474,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -520,7 +522,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -544,7 +546,7 @@ describe('Voting Escrow', function () {
         let voting, amptToken;
 
         beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root.address);
+            [voting, amptToken] = await getVotingContract(root);
 
             await send(voting, 'setBlockNumber', [1]);
             await send(voting, 'setBlockTimestamp', [timestamp]);
@@ -589,17 +591,11 @@ async function deployVotingContract(admin) {
     let amptToken = await deployAMPTToken(admin);
     let sw = await deploySmartWalletChecker();
 
-    let Contract = await ethers.getContractFactory("VotingEscrowHarness")
-
-    const ve = await Contract.deploy(amptToken.address, sw.address, "Voting-escrowed AMPT", "veAMPT", 1, timestamp);
-    await ve.deployed();
+    let ve = await deploy("VotingEscrowHarness", [amptToken.address, sw.address, "Voting-escrowed AMPT", "veAMPT", 1, timestamp]);
     return [ve, amptToken, sw];
 }
 
 async function deploySmartWalletChecker() {
-    const Contract = await ethers.getContractFactory("SmartWalletWhitelist");
-    const sw = await Contract.deploy();
-    await sw.deployed();
-
+    const sw = await deploy("SmartWalletWhitelist");
     return sw;
 }

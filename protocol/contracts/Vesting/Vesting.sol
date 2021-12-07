@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT
+/// @dev size: 6.856 Kbytes
 pragma solidity 0.8.4;
 
-import { IERC20 } from "../Governance/IAMPT.sol";
+import { IERC20 } from "../ERC20/IERC20.sol";
+import "../security/ReentrancyGuard.sol";
 import "../utils/Counters.sol";
+import "../utils/NonZeroAddressGuard.sol";
+import "../security/Ownable.sol";
 
-contract Vesting {
+contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
     using Counters for Counters.Counter;
 
     /// @dev Counter for the number of entries in the vesting schedule.
@@ -12,9 +16,6 @@ contract Vesting {
 
     /// @notice ERC20 token we are vesting
     IERC20 public token;
-
-    /// @notice owner address set on construction
-    address public owner;
 
     struct Entry {
         uint256 amount;
@@ -40,24 +41,6 @@ contract Vesting {
     event EntryCreated(uint256 indexed entryId, address recipient, uint256 amount, uint256 start, uint256 end, uint256 cliff);
     event EntryFired(uint256 indexed entryId);
     event Claimed(address indexed recipient, uint256 amount);
-    event AdminChanged(address oldAdmin, address newAdmin);
-
-    modifier onlyOwner {
-        require(msg.sender == owner, "Only owner can call this function");
-        _;
-    }
-
-    modifier nonZeroAddress(address _address) {
-        require(_address != address(0), "Address must be non-zero");
-        _;
-    }
-
-    modifier nonReentrant() {
-        require(!_entered, "reentrant call");
-        _entered = true;
-        _;
-        _entered = false;
-    }
 
     /**
      * @notice Init a new vesting contract
@@ -69,19 +52,6 @@ contract Vesting {
         token = token_;
 
         _entered = false;
-    }
-
-    /**
-     * @notice Transfers ownership role
-     * @notice Changes the owner of this contract to a new address
-     * @dev Only owner
-     * @param _newOwner beneficiary to vest remaining tokens to
-     */
-    function transferOwnership(address _newOwner) external onlyOwner nonZeroAddress(_newOwner) {
-        address currentOwner = owner;
-        require(_newOwner != currentOwner, "New owner cannot be the current owner");
-        owner = _newOwner;
-        emit AdminChanged(currentOwner, _newOwner);
     }
 
     struct EntryVars {

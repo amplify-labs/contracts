@@ -1,6 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { call, send, connect, vmError, zeroAddress, deployAMPTToken, deployVestingLib } = require("./utils");
+
+const { call, send, connect, vmError, zeroAddress } = require("./utils");
+const { getFactoryContract } = require("./_vesting");
 
 const day = 24 * 60 * 60;
 const timestamp = Math.floor(Date.now() / 1000);
@@ -20,12 +22,12 @@ describe('Vesting Factory', function () {
 
     describe('constructor', () => {
         it("succeeds when setting owner to contructor argument", async () => {
-            let [factory, _, vestingContract] = await getFactoryContract(root.address);
+            let [factory, _, vestingContract] = await getFactoryContract(root);
             expect(await call(factory, 'owner'), [vestingContract.address]).to.equal(root.address);
         });
 
         it("succeeds when setting libraryAddress to contructor argument", async () => {
-            let [factory, _, vestingContract] = await getFactoryContract(root.address);
+            let [factory, _, vestingContract] = await getFactoryContract(root);
             expect(await call(factory, 'libraryAddress'), [vestingContract.address]).to.equal(vestingContract.address);
         });
     })
@@ -34,7 +36,7 @@ describe('Vesting Factory', function () {
         let factory, amptToken, vestingContract;
 
         beforeEach(async () => {
-            [factory, amptToken, vestingContract] = await getFactoryContract(signer1.address);
+            [factory, amptToken, vestingContract] = await getFactoryContract(signer1);
 
             await send(factory, 'setBlockTimestamp', [timestamp]);
         });
@@ -50,25 +52,4 @@ describe('Vesting Factory', function () {
             expect(vesting[2]).to.equal(amptToken.address);
         });
     });
-})
-
-async function getFactoryContract(admin) {
-    let vestingContract = await deployVestingLib();
-    let factory = await deployFactoryContract(vestingContract.address);
-    let amptToken = await deployAMPTToken(admin);
-
-    return [factory, amptToken, vestingContract];
-}
-
-async function deployFactoryContract(vestingContractAddress) {
-    let Contract = await ethers.getContractFactory("VestingFactoryHarness")
-
-    const factory = await Contract.deploy(vestingContractAddress);
-    await factory.deployed();
-    return factory;
-}
-
-
-module.exports = {
-    getFactoryContract,
-}
+});

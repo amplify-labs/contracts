@@ -14,10 +14,11 @@ pragma solidity 0.8.4;
 # 0 +--------+------> time
 #       maxtime (4 years?)
 */
-import "./IAMPT.sol";
+import { IERC20 } from "../ERC20/IERC20.sol";
 import { SmartWalletChecker } from "../utils/SmartWalletWhitelist.sol";
+import "../security/ReentrancyGuard.sol";
 
-contract VotingEscrow {
+contract VotingEscrow is ReentrancyGuard {
     struct Point {
         int256 bias;
         int256 slope;
@@ -43,10 +44,8 @@ contract VotingEscrow {
     /// @notice EIP-20 token symbol for this token
     string private _symbol;
 
-    bool private _entered;
-
     address public admin;
-    IAMPT public amptToken;
+    IERC20 public amptToken;
     SmartWalletChecker public smartWalletChecker;
 
     mapping(address => Balance) private _lockedBalances;
@@ -91,7 +90,7 @@ contract VotingEscrow {
      * @param name_ Token name
      * @param symbol_ Token symbol
     */
-    constructor(IAMPT amptToken_, SmartWalletChecker smartWalletChecker_, string memory name_, string memory symbol_) {
+    constructor(IERC20 amptToken_, SmartWalletChecker smartWalletChecker_, string memory name_, string memory symbol_) {
         amptToken = amptToken_;
         _name = name_;
         _symbol = symbol_;
@@ -102,8 +101,6 @@ contract VotingEscrow {
 
         pointHistory[0].block = getBlockNumber();
         pointHistory[0].ts = getBlockTimestamp();
-
-        _entered = false;
     }
 
     modifier onlyAllowed(address addr) {
@@ -111,13 +108,6 @@ contract VotingEscrow {
             require(smartWalletChecker.check(addr), "Smart contract depositors not allowed");
         }
         _;
-    }
-
-    modifier nonReentrant() {
-        require(!_entered, "reentrant call");
-        _entered = true;
-        _;
-        _entered = false;
     }
 
     /**

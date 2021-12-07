@@ -1,90 +1,7 @@
 const { ethers } = require("hardhat");
 
-async function deployFactory() {
-    const Contract = await ethers.getContractFactory("Factory");
-    const factory = await Contract.deploy();
-    await factory.deployed();
-    return factory;
-}
-
-async function deployCollectible() {
-    const Contract = await ethers.getContractFactory("Asset");
-    const asset = await Contract.deploy();
-    await asset.deployed();
-    return asset.address;
-}
-
-async function deployFakeToken(name, symbol) {
-    const Contract = await ethers.getContractFactory("FakeToken");
-    const factory = await Contract.deploy(name, symbol);
-    await factory.deployed();
-
-    return factory.address;
-}
-
-async function createStableCoin(factory) {
-    let stableCoin = await deployFakeToken("MATIC", "MATIC");
-
-    let addTx = await factory.addStableCoin(stableCoin);
-    // wait until the transaction is mined
-    await addTx.wait();
-    return stableCoin;
-}
-
-async function createNFT(assetFactoryAddr, value, tokenHash, maturity, tokenURI) {
-    let assetFactory = await ethers.getContractAt("Asset", assetFactoryAddr);
-
-    let riskTx = await assetFactory.addRiskItem("A", 5, 90);
-    // wait until the transaction is mined
-    await riskTx.wait();
-
-    let tx = await assetFactory.tokenizeAsset(tokenHash, "A", value, maturity, tokenURI);
-
-    // wait until the transaction is mined
-    let waitTx = await tx.wait();
-    return waitTx.events[0].args.tokenId;
-}
-
-
-async function createPool(factory, stableCoin, minDeposit) {
-    let poolTx = await factory.createPool(
-        'MATIC-1',
-        'discounting',
-        stableCoin,
-        minDeposit);
-
-    // wait until the transaction is mined
-    let txWait = await poolTx.wait();
-
-    return txWait.events[3].args.pool;
-}
-
-async function depositInPool(pool, addr1, amount) {
-    let depositTx = await pool.connect(addr1).lend(amount);
-
-    // wait until the transaction is mined
-    await depositTx.wait();
-}
-
-
-function parseBN(bn) {
-    return parseInt(bn, 10);
-}
-
-async function deployAMPTToken(admin) {
-    const Contract = await ethers.getContractFactory("AMPT");
-    const token = await Contract.deploy(admin);
-    await token.deployed();
-
-    return token;
-}
-
-async function deployVestingLib() {
-    const Contract = await ethers.getContractFactory("VestingHarness");
-
-    let contract = await Contract.deploy();
-    await contract.deployed();
-    return contract;
+async function init(contractName, contractAddress) {
+    return await ethers.getContractAt(contractName, contractAddress);
 }
 
 async function call(contract, method, args = [], callOptions = {}) {
@@ -95,7 +12,7 @@ async function call(contract, method, args = [], callOptions = {}) {
             return r;
         }
         return r[0];
-    }).catch(err => vmError("failed to call fuction"));
+    }).catch(err => vmError("failed to call function"));
 }
 
 async function send(contract, method, args = [], sendOptions = {}) {
@@ -108,6 +25,13 @@ async function send(contract, method, args = [], sendOptions = {}) {
         }).catch(err => {
             return err.message;
         });
+}
+
+async function deploy(contractName, args = [], libs = {}, sendOptions = {}) {
+    const Contract = await ethers.getContractFactory(contractName, { libraries: libs });
+    const contract = await Contract.deploy(...args, sendOptions);
+    await contract.deployed();
+    return contract;
 }
 
 async function connect(contract, signer) {
@@ -130,22 +54,39 @@ function vmError(err) {
     return `VM Exception while processing transaction: reverted with reason string '${err}'`;
 }
 
+function vmError2(err) {
+    return `VM Exception while processing transaction: revert with reason "${err}"`;
+}
+
+function uuidv4() {
+    return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 const zeroAddress = "0x0000000000000000000000000000000000000000";
+const fakeAddress = "0x0000000000000000000000000000000000000000";
+
+const double = ethers.utils.parseUnits("1", 36);
+const exp = ethers.utils.parseUnits("1", 18);
+
+const wrongOwner = vmError("Only owner can call this function");
+const zeroAddressError = vmError("Address must be non-zero");
 
 module.exports = {
-    deployFactory,
-    deployAMPTToken,
-    deployVestingLib,
-    createStableCoin,
-    createPool,
-    createNFT,
-    deployCollectible,
-    depositInPool,
-    deployFakeToken,
-    parseBN,
+    init,
     call,
     send,
+    deploy,
     connect,
     vmError,
+    vmError2,
+    wrongOwner,
+    zeroAddressError,
+    uuidv4,
+    exp,
+    double,
+    fakeAddress,
     zeroAddress
 }
