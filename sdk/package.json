@@ -1,6 +1,6 @@
 {
   "name": "@amplify-labs/amplify-js",
-  "version": "0.1.54",
+  "version": "0.1.55",
   "author": "Amplify Labs",
   "description": "A JavaScript SDK for Amplify Contracts",
   "license": "BSD-3-Clause",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/amplify-labs/contracts.git"
+    "url": "https://github.com/amplify-labs/contracts-private.git"
   },
   "keywords": [
     "amplify",
