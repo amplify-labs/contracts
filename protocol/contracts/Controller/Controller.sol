@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 20.333 Kbytes
+/// @dev size: 20.378 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -21,7 +21,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     StableCoin.Data private _stableCoins;
     address internal _poolLibrary;
 
-    event PoolCreated(address indexed pool, address indexed owner, address stableCoin, uint256 minDeposit, uint8 access);
+    event PoolCreated(address indexed pool, address indexed owner, address stableCoin, string name, uint256 minDeposit, uint8 access);
     
     event NewProvisionPool(LossProvisionInterface oldProvisionPool, LossProvisionInterface newProvisionPool);
     event NewInterestRateModel(InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel);
@@ -119,7 +119,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         rewardPools.push(pool);
         rewardsState[pool] = PoolState(true, 0, 0, 0, 0);
 
-        emit PoolCreated(pool, msg.sender, stableCoin, minDeposit, uint8(poolAccess));
+        emit PoolCreated(pool, msg.sender, stableCoin, name, minDeposit, uint8(poolAccess));
     }
 
     function getPoolUtilizationRate(address pool) external view returns (uint256) {

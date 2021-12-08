@@ -91,7 +91,7 @@ export async function checkAllowance(
     tokenAddress: string,
     spender: string,
     options: CallOptions = {}
-): Promise<boolean> {
+): Promise<string> {
     await netId(this);
     const errorPrefix = 'Amplify [allowance] | ';
 
@@ -116,10 +116,10 @@ export async function checkAllowance(
     };
 
     const result = await eth.read(tokenAddress, 'allowance', [options.from, spender], trxOptions);
-    return result > 0;
+    return result.toString();
 }
 
 export type Erc20Interface = {
-    checkAllowance(tokenAddress: string, spender: string, options?: CallOptions): Promise<boolean>;
+    checkAllowance(tokenAddress: string, spender: string, options?: CallOptions): Promise<string>;
     approveTransfer(tokenAddress: string, spender: string, amount: string | BigNumber, options?: CallOptions): Promise<TrxResponse>;
 }

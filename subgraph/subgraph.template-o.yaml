@@ -46,24 +46,24 @@ dataSources:
         - event: Withdrawn(indexed address,uint256)
           handler: handleLockWithdraw
   - kind: ethereum/contract
-    name: Controller
+    name: Factory
     network: "{{network}}"
     source:
-      address: "{{controller_address}}"
-      abi: ControllerAbi
-      startBlock: {{controller_start_block}}
+      address: "{{factory_address}}"
+      abi: FactoryAbi
+      startBlock: {{factory_start_block}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
-      file: ./src/mappings/controller.ts
+      file: ./src/mappings/factory.ts
       entities:
         - Pool
       abis:
-        - name: ControllerAbi
-          file: ./abis/Controller.json
+        - name: FactoryAbi
+          file: ./abis/Factory.json
       eventHandlers:
-        - event: PoolCreated(indexed address,indexed address,address,string,uint256,uint8)
+        - event: PoolCreated(indexed address,indexed address,string,string,address,uint256)
           handler: handlePoolCreation
 templates:
   - name: Pool
@@ -78,12 +78,24 @@ templates:
       file: ./src/mappings/pool.ts
       entities:
         - Pool
+        - Loan
+        - Transaction
         - Balance
       abis:
         - name: PoolAbi
           file: ./abis/Pool.json
       eventHandlers:
-        - event: Lend(indexed address,uint256,uint256)
+        - event: CreditLineOpened(indexed uint256,indexed uint256,address,uint256,uint256)
+          handler: handleCreateCreditLine
+        - event: CreditLineClosed(indexed uint256)
+          handler: handleLoanClose
+        - event: Lend(indexed address,uint256)
           handler: handlePoolLend
-        - event: Redeem(indexed address,uint256,uint256)
-          handler: handlePoolRedeem
+        - event: Withdrawn(indexed address,uint256)
+          handler: handlePoolWithdraw
+        - event: Borrowed(indexed uint256,uint256)
+          handler: handlePoolBorrow
+        - event: Repayed(indexed uint256,uint256)
+          handler: handlePoolRepay
+        - event: AssetUnlocked(indexed uint256)
+          handler: handlePoolUnlockedAsset

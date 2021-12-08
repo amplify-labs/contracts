@@ -1,37 +1,28 @@
 type Pool @entity {
     id: ID!
     name: String!
-    structureType: String!
+    access: PoolAccess!
     stableCoin: Bytes!
-    factor: Bytes!
+    owner: Bytes!
     minDeposit: BigInt!
     totalDeposited: BigInt!
     totalBorrowed: BigInt!
     createdAt: BigInt!
     assetsLocked: [Asset!]!
+    balances: [Balance!]! @derivedFrom(field: "pool")
+}
+
+enum PoolAccess {
+    PUBLIC
+    PRIVATE
 }
 
 type Balance @entity {
     id: ID!
+    pool: Pool!
     lender: Bytes!
     lend: BigInt!
     earned: BigInt!
-}
-
-enum TransactionType {
-    BORROW
-    REPAY
-    LEND
-    WITHDRAW
-}
-
-type Transaction @entity {
-    id: ID!
-    from: Bytes!
-    to: Bytes!
-    amount: BigInt!
-    createdAt: BigInt!
-    type: TransactionType!
 }
 
 type Asset @entity {
@@ -42,22 +33,9 @@ type Asset @entity {
     uri: String!
     riskRating: String!
     maturityDate: BigInt!
-    factor: Bytes!
+    owner: Bytes!
     isLocked: Boolean!
     isRedeemed: Boolean!
-    loanInfo: Loan
-}
-
-type Loan @entity {
-    id: ID!
-    amount: BigInt!
-    debt: BigInt!
-    factor: Bytes!
-    borrowingPool: Pool!
-    collateralAsset: Asset!
-    createdAt: BigInt!
-    isClosed: Boolean!
-    transactions: [Transaction]!
 }
 
 type VotingInfo @entity {

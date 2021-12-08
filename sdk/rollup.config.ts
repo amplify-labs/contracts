@@ -26,7 +26,7 @@ export default [{
       preferBuiltins: true,
       jsnext: true,
       main: true,
-      browser: true,
+      browser: true
     }),
     commonjs({
       namedExports: { Amplify: ['Amplify'] },

@@ -1,5 +1,10 @@
 import { Network } from "./types";
 
+import * as ControllerAbi from "./abis/Controller";
+import * as ERC20Abi from "./abis/ERC20";
+import * as PoolAbi from "./abis/Pool";
+import * as AssetAbi from "./abis/Asset";
+
 export const address = {
   "mainnet": {
     "Asset": "",
@@ -27,8 +32,8 @@ export const address = {
     "VestingEscrow": ""
   },
   "polygon_mumbai": {
-    "Asset": "0x4fb9c488cF82BaEBC828BDd1621D1BCB24410CC8",
-    "Factory": "0xF1258EBe0C742bf52Db273494c0f750a6B5fd7dD",
+    "Controller": "0xFBDFe48cA863B298A1D440f8287b1492E94c69D6",
+    "Asset": "0xd162A73b29fbb3BE9f13e6e4777072e9b40971BC",
     "DAI": "0x86321ca156c655d151474a054f25970acb5b42a8",
     "USDC": "0xeb80b946d57902d92c5b90bd8f4968ce3c8c4f9e",
     "USDT": "0x6861fa406ff83036fb127c7f462a1906f776c3c1",
@@ -42,7 +47,6 @@ export const address = {
   },
   "velas_testnet": {
     "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
-    "Factory": "0x8E557363AC9E5cbf09A2616A302CA3c8f6ab2b7A",
     "DAI": "0xBdf5575Ec1cC0a14Bd3e94648a2453fdC7B56943",
     "USDC": "0x78539503451048575ee5d003f1CAaE66d1cd9552",
     "USDT": "0x281Af75C2919A1F579b507F4Ab8ce77fcAcD4197",
@@ -280,41 +284,16 @@ export const networks: Network[] = [
 ]
 // TODO: Should be updated after each deploy
 export const abi = {
-  Asset: [
-    "function transferFrom(address from, address to, uint256 tokenId)",
-    "function totalSupply() view returns (uint256)",
-    "function tokenizeAsset(string tokenId, string tokenRating, uint256 value, uint256 maturity, string tokenURI)",
-    "function addRiskItem(string rating, uint256 interestRate, uint256 advanceRate)",
-    "function removeRiskItem(string rating)",
-    "function getRiskInterestRate(string rating) view returns (uint256)",
-    "function getRiskAdvanceRate(string rating) view returns(uint256)",
-    "function balanceOf(address) view returns (uint256)",
-    "function ownerOf(uint256 tokenId) view returns (address)"
-  ],
+  Asset: AssetAbi.abi,
   Factory: [
     "function addStableCoin(address stableCoin)",
     "function removeStableCoin(address stableCoin)",
     "function getStableCoins() returns (address[])",
     "function createPool(string name, string structure, address stableCoin, uint256 minDeposit)",
   ],
-  Pool: [
-    "function balances(address lender) view returns (uint256)",
-    "function lend(uint256 amount) returns (bool success)",
-    "function withdraw(uint256 _tokenAmount) returns (bool success)",
-    "function createLoan(address nftAsset, uint256 tokenId) returns (bool success)",
-    "function closeLoan(uint256 loanId) returns (bool success)",
-    "function borrow(uint256 loanId, uint256 amount) returns (bool success)",
-    "function repay(uint256 loanId, uint256 amount) returns (bool success)",
-    "function unlockAsset(uint256 loanId) returns (bool success)",
-    "function lpToken() view returns (address)",
-    "function totalDeposited() view returns (uint256)",
-    "function totalBorrowed() view returns (uint256)",
-    "function totalAvailable() view returns (uint256)"
-  ],
-  ERC20: [
-    "function allowance(address spender, address spender) returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)"
-  ],
+  Pool: PoolAbi.abi,
+  Controller: ControllerAbi.abi,
+  ERC20: ERC20Abi.abi,
   AMPT: [
     "function transfer(address to, uint256 amount) returns (bool)",
     "function transferFrom(address from, address to, uint256 amount) returns (bool)",
@@ -888,17 +867,4 @@ export const abi = {
       "type": "function"
     }
   ]
-};
-
-export const errorCodes = {
-  'asset': {
-    'codes': {
-      '0': { 'error': 'NO_ERROR', 'description': 'Not a failure.', 'hint': '', },
-      '1': { 'error': 'UNAUTHORIZED', 'description': 'The sender is not authorized to perform this action.', 'hint': '', },
-    },
-    'info': {
-      '0': { 'error': 'ACCEPT_ADMIN_PENDING_ADMIN_CHECK', 'description': '', 'hint': '', },
-      '1': { 'error': 'ACCEPT_PENDING_IMPLEMENTATION_ADDRESS_CHECK', 'description': '', 'hint': '', },
-    }
-  }
 };

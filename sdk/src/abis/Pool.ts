@@ -1,4 +1,4 @@
-[
+export const abi: Array<any> = [
     {
         "inputs": [],
         "stateMutability": "nonpayable",
@@ -872,4 +872,4 @@
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+];

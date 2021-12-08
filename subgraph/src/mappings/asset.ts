@@ -11,7 +11,7 @@ export function handleTokenizeAsset(event: TokenizeAsset): void {
         asset.uploadedAt = event.params.uploadedAt;
         asset.value = event.params.value;
         asset.uri = event.params.tokenURI;
-        asset.factor = event.transaction.from;
+        asset.owner = event.transaction.from;
         asset.maturityDate = event.params.maturity;
 
         asset.isLocked = false;
@@ -20,11 +20,10 @@ export function handleTokenizeAsset(event: TokenizeAsset): void {
     asset.save()
 }
 
-export function handleAssetLock(tokenId: string, loanId: string): void {
+export function handleAssetLock(tokenId: string): void {
     let asset = Asset.load(tokenId);
 
     asset.isLocked = true;
-    asset.loanInfo = loanId;
     asset.save();
 }
 

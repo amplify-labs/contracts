@@ -9,9 +9,9 @@ import * as eth from './eth';
 import * as util from './util';
 import * as asset from './asset';
 import * as pool from './pool';
+import * as controller from './controller';
 import * as erc20 from './erc20';
 import * as stablecoins from './stablecoins';
-import * as factory from './factory';
 import * as votingEscrow from './votingEscrow';
 import * as vesting from './vesting';
 import * as constants from './constants';
@@ -62,7 +62,7 @@ function createInstance(provider: types.Provider | string = 'mainnet', options: 
     _originalProvider: originalProvider,
     _provider: provider,
     ...asset,
-    ...factory,
+    ...controller,
     ...pool,
     ...votingEscrow,
     ...erc20,

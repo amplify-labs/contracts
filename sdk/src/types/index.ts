@@ -13,14 +13,14 @@ import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 
 import type { PoolInterface } from '../pool';
 import type { AssetInterface } from '../asset';
-import type { FactoryInterface } from '../factory';
 import type { Erc20Interface } from '../erc20';
 import type { VotingEscrowInterface } from '../votingEscrow';
 import type { FaucetInterface } from '../faucet';
 import type { VestingEscrowInterface } from '../vesting';
+import type { ControllerInterface } from '../controller';
 
 // =-=-=-=-=-= /src/index.ts =-=-=-=-=-=
-export interface AmplifyInstance extends AssetInterface, FactoryInterface, PoolInterface, Erc20Interface, VotingEscrowInterface, FaucetInterface, VestingEscrowInterface {
+export interface AmplifyInstance extends AssetInterface, ControllerInterface, PoolInterface, Erc20Interface, VotingEscrowInterface, FaucetInterface, VestingEscrowInterface {
   _provider: Provider;
   _networkPromise: Promise<ProviderNetwork>;
 };
