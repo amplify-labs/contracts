@@ -35,6 +35,10 @@ async function deployLossProvision(controller) {
     const contract = await Contract.deploy(controller);
     await contract.deployed();
     console.log("LossProvisionPool deployed to:", contract.address);
+
+    const Controller = await ethers.getContractAt("Controller", controller);
+    await Controller._setProvisionPool(contract.address);
+    console.log("LossProvisionPool set to:", contract.address);
 }
 
 main()

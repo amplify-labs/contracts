@@ -12,7 +12,7 @@ abstract contract ControllerInterface {
     function redeemAllowed(address pool, address redeemer, uint256 tokens) external virtual returns (uint256);
     function borrowAllowed(address pool, address borrower, uint256 amount) external virtual returns (uint256);
     function repayAllowed(address pool, address payer, address borrower, uint256 amount) external virtual returns (uint256);
-    function createCreditLineAllowed(address pool, address borrower, uint256 collateralAsset) external virtual returns (uint256);
+    function createCreditLineAllowed(address pool, address borrower, uint256 collateralAsset) external virtual returns (uint256, uint256, uint256, uint256, uint256);
 
 
     function provisionPool() external virtual view returns (LossProvisionInterface);

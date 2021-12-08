@@ -388,6 +388,11 @@ export const abi: Array<any> = [
             },
             {
                 "internalType": "uint256",
+                "name": "interestRate",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
                 "name": "accrualBlockNumber",
                 "type": "uint256"
             },
@@ -752,6 +757,25 @@ export const abi: Array<any> = [
         "inputs": [
             {
                 "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "redeemUnderlying",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
                 "name": "loanId",
                 "type": "uint256"
             },
@@ -809,6 +833,19 @@ export const abi: Array<any> = [
                 "internalType": "contract IERC20Metadata",
                 "name": "",
                 "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalInterestRate",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",

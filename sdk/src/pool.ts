@@ -69,7 +69,7 @@ export async function lend(
 /**
  * Redeem tokens from the Pool deposit.
  * @param {string} pool Pool address.
- * @param {string | number | BigNumber} tokenAmount Amount of LP tokens available in the balance.
+ * @param {string | number | BigNumber} amount Amount of tokens available in the balance.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
  *     not supressed) and `mint` transactions.
@@ -86,20 +86,20 @@ export async function lend(
  */
 export async function redeem(
     pool: string,
-    tokenAmount: string | number | BigNumber,
+    amount: string | number | BigNumber,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [redeem] | ';
 
     if (
-        typeof tokenAmount !== 'number' &&
-        typeof tokenAmount !== 'string' &&
-        !ethers.BigNumber.isBigNumber(tokenAmount)
+        typeof amount !== 'number' &&
+        typeof amount !== 'string' &&
+        !ethers.BigNumber.isBigNumber(amount)
     ) {
-        throw Error(errorPrefix + 'Argument `tokenAmount` must be a string, number, or BigNumber.');
+        throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    tokenAmount = ethers.utils.parseEther(tokenAmount.toString());
+    amount = ethers.utils.parseEther(amount.toString());
 
     if (
         typeof pool !== 'string' &&
@@ -114,7 +114,7 @@ export async function redeem(
         ...options
     };
 
-    return eth.trx(pool, 'redeem', [tokenAmount], trxOptions);
+    return eth.trx(pool, 'redeemUnderlying', [amount], trxOptions);
 }
 
 /**

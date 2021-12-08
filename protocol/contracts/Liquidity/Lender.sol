@@ -48,30 +48,41 @@ abstract contract Lendable is ReentrancyGuard, NonZeroAddressGuard, Exponential,
     struct RedeemLocalVars {
         MathError mathErr;
         uint256 exchangeRateMantissa;
-        uint256 _cashAmount;
+        uint256 redeemTokens;
+        uint256 redeemAmount;
     }
 
-    function redeemInternal(address redeemer, uint256 _tokenAmount) internal nonReentrant returns(uint256) {
-        require(_tokenAmount > 0, toString(Error.AMOUNT_LOWER_THAN_0));
-        require(balanceOf(redeemer) >= _tokenAmount, toString(Error.AMOUNT_HIGHER));
+    function redeemInternal(address redeemer, uint256 _amount, uint256 _tokenAmount) internal nonReentrant returns(uint256) {
+        require(_amount == 0 || _tokenAmount == 0, "one of _amount or _tokenAmount must be zero");
 
         RedeemLocalVars memory vars;
 
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateInternal();
         ErrorReporter.check(uint256(vars.mathErr));
 
-        (vars.mathErr, vars._cashAmount) = mulScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), _tokenAmount);
-        ErrorReporter.check(uint256(vars.mathErr));
 
-        uint256 allowed = redeemAllowed(address(this), redeemer, _tokenAmount);
+        if (_tokenAmount > 0) {
+            vars.redeemTokens = _tokenAmount;
+
+            (vars.mathErr, vars.redeemAmount) = mulScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), _tokenAmount);
+            ErrorReporter.check(uint256(vars.mathErr));
+        } else {
+            (vars.mathErr, vars.redeemTokens) = divScalarByExpTruncate(_amount, Exp({mantissa: vars.exchangeRateMantissa}));
+            ErrorReporter.check(uint256(vars.mathErr));
+
+            vars.redeemAmount = _amount;
+        }
+
+        uint256 allowed = redeemAllowed(address(this), redeemer, vars.redeemTokens);
         require(allowed == 0, ErrorReporter.uint2str(allowed));
 
-        require(this.getCash() >= vars._cashAmount, toString(Error.NOT_ENOUGH_CASH));
+        require(balanceOf(redeemer) >= vars.redeemTokens, toString(Error.AMOUNT_HIGHER));
+        require(this.getCash() >= vars.redeemAmount, toString(Error.NOT_ENOUGH_CASH));
 
-        lpToken.burnFrom(redeemer, _tokenAmount);
-        _transferTokens(address(this), redeemer, vars._cashAmount);
+        lpToken.burnFrom(redeemer, vars.redeemTokens);
+        _transferTokens(address(this), redeemer, vars.redeemAmount);
 
-        emit Redeem(redeemer, vars._cashAmount, _tokenAmount);
+        emit Redeem(redeemer, vars.redeemAmount, vars.redeemTokens);
         return uint256(Error.NO_ERROR);
     }
 

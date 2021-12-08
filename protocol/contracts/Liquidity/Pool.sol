@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 23.841 Kbytes
+/// @dev size: 23.563 Kbytes
 pragma solidity ^0.8.0;
 
 import "./Lender.sol";
@@ -51,7 +51,6 @@ contract Pool is Ownable, Lendable, Borrowable {
         stableCoin = IERC20Metadata(_stableCoin);
 
         lpToken = new PoolToken("PoolToken", stableCoin.symbol());
-
     }
 
     function changeAccess(Access _access) external onlyOwner {
@@ -65,7 +64,11 @@ contract Pool is Ownable, Lendable, Borrowable {
     }
 
     function redeem(uint256 tokens) external returns (uint256) {
-        return redeemInternal(msg.sender, tokens);
+        return redeemInternal(msg.sender, 0, tokens);
+    }
+
+    function redeemUnderlying(uint256 amount) external returns (uint256) {
+        return redeemInternal(msg.sender, amount, 0);
     }
 
     function _transferTokens(address from, address to, uint256 amount) internal override returns (bool) {
@@ -92,30 +95,28 @@ contract Pool is Ownable, Lendable, Borrowable {
 
     // borrower override methods
     struct CreditLineLocalVars {
+        uint256 allowed;
         uint256 assetValue;
         uint256 borrowCap;
+        uint256 interestRate;
         uint256 advanceRate;
         uint256 maturity;
     }
     function createCreditLine(uint256 tokenId) external nonReentrant returns (uint256) {
-        uint256 allowed = controller.createCreditLineAllowed(address(this), msg.sender, tokenId);
-        if (allowed != 0) {
+        CreditLineLocalVars memory vars;
+        (
+            vars.allowed, 
+            vars.assetValue, 
+            vars.maturity, 
+            vars.interestRate, 
+            vars.advanceRate
+        ) = controller.createCreditLineAllowed(address(this), msg.sender, tokenId);
+        if (vars.allowed != 0) {
             return uint256(Error.CONTROLLER_CREATE_REJECTION);
         }
 
-        CreditLineLocalVars memory vars;
-        (
-            vars.assetValue,
-            vars.maturity,
-            /** interestRate */, 
-            vars.advanceRate,
-            /** rating */ ,
-            /** hash */,
-            /** redeemed */
-        ) = controller.assetsFactory().getTokenInfo(tokenId);
-
         vars.borrowCap = vars.assetValue * vars.advanceRate / 100;
-        return createCreditLineInternal(msg.sender, tokenId, vars.borrowCap, vars.maturity);
+        return createCreditLineInternal(msg.sender, tokenId, vars.borrowCap, vars.interestRate, vars.maturity);
     }
 
     function closeCreditLine(uint256 loanId) external nonReentrant returns (uint256) {
@@ -167,7 +168,6 @@ contract Pool is Ownable, Lendable, Borrowable {
         uint256 accrualBlockNumber;
         uint256 priorBorrowIndex;
         uint256 newBorrowIndex;
-        uint256 interestRate;
         uint256 borrowRateMantissa;
         uint256 blockDelta;
         Exp interestFactor;
@@ -185,17 +185,7 @@ contract Pool is Ownable, Lendable, Borrowable {
             return vars.priorBorrowIndex;
         }
 
-        (
-            /** value */,
-            /** maturity */,
-            vars.interestRate, 
-            /** advanceRate */,
-            /** rating */ ,
-            /** hash */,
-            /** redeemed */
-        ) = controller.assetsFactory().getTokenInfo(creditLine.lockedAsset);
-        vars.borrowRateMantissa = controller.interestRateModel().getBorrowRate(vars.interestRate);
-
+        vars.borrowRateMantissa = controller.interestRateModel().getBorrowRate(creditLine.interestRate);
         (vars.mathErr, vars.blockDelta) = subUInt(vars.blockNumber, vars.accrualBlockNumber);
         ErrorReporter.check((uint256(vars.mathErr)));
 
@@ -213,6 +203,7 @@ contract Pool is Ownable, Lendable, Borrowable {
         uint256 fee;
         uint256 principal;
         uint256 daysDelta;
+        uint256 interestBlocksPerYear;
         uint256 penaltyIndex;
         uint256 penaltyAmount;
         uint256 accrualTimestamp;
@@ -226,6 +217,7 @@ contract Pool is Ownable, Lendable, Borrowable {
         }
 
         PenaltyIndexLocalVars memory vars;
+        InterestRateModel.GracePeriod[] memory _gracePeriod;
 
         uint256 day = 24 * 60 * 60;
         vars.principal = creditLines[loanId].principal;
@@ -233,7 +225,7 @@ contract Pool is Ownable, Lendable, Borrowable {
         vars.penaltyIndex = _penaltyInfo.index;
         vars.timestamp = getBlockTimestamp();
 
-        InterestRateModel.GracePeriod[] memory _gracePeriod = controller.interestRateModel().getGracePeriod();
+        (_gracePeriod, vars.interestBlocksPerYear) = controller.interestRateModel().getGracePeriodSnapshot();
         for(uint8 i=0; i < _gracePeriod.length; i++) {
             uint256 _start = _gracePeriod[i].start * day + _penaltyInfo.maturity;
             uint256 _end = _gracePeriod[i].end * day + _penaltyInfo.maturity;
@@ -245,7 +237,7 @@ contract Pool is Ownable, Lendable, Borrowable {
                     vars.daysDelta = _calculateDaysDelta(vars.timestamp, vars.accrualTimestamp, _start, day);
                 }
 
-                vars.penaltyIndex = calculatePenaltyIndexPerPeriod(controller.interestRateModel().getPenaltyFee(i), vars.daysDelta, vars.penaltyIndex);
+                vars.penaltyIndex = calculatePenaltyIndexPerPeriod(_gracePeriod[i].fee, vars.interestBlocksPerYear, vars.daysDelta, vars.penaltyIndex);
                 (vars.mathErr, vars.fee) = mulScalarTruncateAddUInt(Exp({mantissa: vars.penaltyIndex }), vars.principal, vars.fee);
                 ErrorReporter.check((uint256(vars.mathErr)));
             }
@@ -271,12 +263,12 @@ contract Pool is Ownable, Lendable, Borrowable {
         return daysDelta;
     }
 
-    function calculatePenaltyIndexPerPeriod(uint256 borrowRateMantissa, uint256 daysDelta, uint256 currentPenaltyIndex) internal pure returns (uint256) {
+    function calculatePenaltyIndexPerPeriod(uint fee, uint256 blockPerYear, uint256 daysDelta, uint256 currentPenaltyIndex) internal pure returns (uint256) {
         Exp memory simpleInterestFactor;
         MathError mathErr;
         uint256 penaltyIndex;
 
-        (mathErr, simpleInterestFactor) = mulScalar(Exp({mantissa: borrowRateMantissa}), daysDelta);
+        (mathErr, simpleInterestFactor) = mulScalar(Exp({mantissa: fee / blockPerYear }), daysDelta);
         ErrorReporter.check((uint256(mathErr)));
 
         (mathErr, penaltyIndex) = mulScalarTruncateAddUInt(simpleInterestFactor, currentPenaltyIndex, currentPenaltyIndex);

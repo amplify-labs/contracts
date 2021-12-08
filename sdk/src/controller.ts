@@ -241,10 +241,49 @@ export async function getSupplyRewardAmount(
 }
 
 
+/**
+ * Get pool APY
+* @param {string} pool Pool address.
+ * @returns {string} Returns a string of the numeric total for funds deposited.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.getPoolAPY('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('APY:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getPoolAPY(
+    pool: string,
+    options: CallOptions = {}
+): Promise<string> {
+    await netId(this);
+    const errorPrefix = 'Amplify [getPoolAPY] | ';
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+    const result = await eth.read(controllerAddr, 'getPoolAPY', [pool], trxOptions);
+    return result.toString();
+}
+
+
 export type ControllerInterface = {
     submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, options?: CallOptions) => Promise<TrxResponse>;
     withdrawLenderDeposit: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
     createPool: (name: string, minDeposit: string | number | BigNumber, stableCoin: string, poolAccess: 0 | 1, options?: CallOptions) => Promise<TrxResponse>;
     getStableCoins(options?: CallOptions): Promise<string[]>;
     getSupplyRewardAmount(lender: string, pool: string, options?: CallOptions): Promise<string>;
+    getPoolAPY(pool: string, options?: CallOptions): Promise<string>;
 }

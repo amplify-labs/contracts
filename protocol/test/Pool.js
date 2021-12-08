@@ -146,13 +146,13 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "lend", [minDeposit.div(2)])
-            ).to.equal(vmError(poolError.AMOUNT_LOWER_THAN_MIN_DEPOSIT));
+            ).to.equal(vmError2(poolError.AMOUNT_LOWER_THAN_MIN_DEPOSIT));
         });
 
         it('should fails because of not whitelisted', async () => {
             let connectedPool = await connect(pool, signer2);
 
-            expect(await send(connectedPool, "lend", [lendAmount])).to.equal(vmError(controllerError.LENDER_NOT_WHITELISTED));
+            expect(await send(connectedPool, "lend", [lendAmount])).to.equal(vmError2(controllerError.LENDER_NOT_WHITELISTED));
         });
 
         it('should lend from signer', async () => {
@@ -216,12 +216,6 @@ describe("Pool", () => {
             await send(connectedPool, "lend", [lendAmount]);
         });
 
-        it('should fails because of zero value', async () => {
-            let connectedPool = await connect(pool, signer1);
-
-            expect(await send(connectedPool, "redeem", [0])).to.equal(vmError(poolError.AMOUNT_LOWER_THAN_0));
-        });
-
         it('should fails because of lower balance', async () => {
             let connectedPool = await connect(pool, signer1);
 
@@ -268,7 +262,87 @@ describe("Pool", () => {
             await send(connectedPoolToken, "approve", [pool.address, tokenAmount]);
 
             connectedPool = await connect(pool, signer1);
-            expect(await send(connectedPool, "redeem", [tokenAmount])).to.equal(vmError(poolError.NOT_ENOUGH_CASH));
+            expect(await send(connectedPool, "redeem", [tokenAmount])).to.equal(vmError2(poolError.NOT_ENOUGH_CASH));
+        });
+    });
+
+    describe("redeemUnderlying", () => {
+        let pool, borrower;
+
+        const lendAmount = ethers.utils.parseEther("100");
+        beforeEach(async () => {
+            borrower = signer3;
+            let connectedController = await connect(controller, borrower);
+
+            // transfer tokens to the signer
+            await send(amptToken, "transfer", [borrower.address, lendAmount]);
+            let connectedAmptToken = await connect(amptToken, borrower);
+            await send(connectedAmptToken, "approve", [controller.address, lendAmount]);
+            await send(connectedController, "submitBorrower");
+
+            await send(controller, "whitelistBorrower", [borrower.address, 0, 1]);
+            pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
+
+            // transfer some tokens to the signer for lending
+            await send(stableCoin, "mint", [signer1.address, ethers.utils.parseEther("2000")]);
+
+            // approve some tokens to the pool for lending
+            let connectedStableCoin = await connect(stableCoin, signer1);
+            await send(connectedStableCoin, "approve", [pool.address, lendAmount]);
+
+            let connectedPool = await connect(pool, signer1);
+            await send(connectedPool, "lend", [lendAmount]);
+        });
+
+        it('should fails because of lower balance', async () => {
+            let connectedPool = await connect(pool, signer1);
+
+            let amount = await call(pool, "balanceOfUnderlying", [signer1.address]);
+
+            expect(await send(connectedPool, "redeemUnderlying", [amount.add(2)])).to.equal(vmError(poolError.AMOUNT_HIGHER));
+        });
+
+        it('should redeem signer tokens', async () => {
+            let connectedPool = await connect(pool, signer1);
+
+            let amount = await call(pool, "balanceOfUnderlying", [signer1.address]);
+            let tokensAmount = await call(pool, "balanceOf", [signer1.address]);
+
+            // allow pool to burn your tokens
+            let poolTokenAddr = await call(pool, "lpToken", []);
+            let poolToken = await init("PoolToken", poolTokenAddr);
+
+            let connectedPoolToken = await connect(poolToken, signer1);
+            await send(connectedPoolToken, "approve", [pool.address, tokensAmount]);
+
+            await send(connectedPool, "redeemUnderlying", [amount]);
+
+            expect((await call(pool, "getCash")).toString()).to.equal("0");
+            expect((await call(pool, "totalSupply")).toString()).to.equal("0");
+
+            expect((await call(pool, "balanceOf", [signer1.address])).toString()).to.equal("0");
+
+            expect((await call(pool, "balanceOfUnderlying", [signer1.address])).toString()).to.equal("0");
+        });
+
+        it('should fails because of lower cash', async () => {
+            let [loanId] = await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, borrower, lendAmount, maturity);
+
+            let connectedPool = await connect(pool, borrower);
+            await send(connectedPool, "borrow", [loanId, lendAmount]);
+
+            // allow pool to burn your tokens
+            let amount = await call(pool, "balanceOfUnderlying", [signer1.address]);
+            let tokensAmount = await call(pool, "balanceOf", [signer1.address]);
+
+            let poolTokenAddr = await call(pool, "lpToken", []);
+            let poolToken = await init("PoolToken", poolTokenAddr);
+
+            let connectedPoolToken = await connect(poolToken, signer1);
+            await send(connectedPoolToken, "approve", [pool.address, tokensAmount]);
+
+            connectedPool = await connect(pool, signer1);
+            expect(await send(connectedPool, "redeemUnderlying", [amount])).to.equal(vmError2(poolError.NOT_ENOUGH_CASH));
         });
     });
 
@@ -674,7 +748,7 @@ describe("Pool", () => {
             let connectedPool = await connect(pool, lender);
             expect(
                 await send(connectedPool, "borrow", [loanId, borrowAmount])
-            ).to.equal(vmError(poolError.WRONG_BORROWER));
+            ).to.equal(vmError2(poolError.WRONG_BORROWER));
         });
 
         it("should fails because loan is overdue", async () => {
@@ -684,7 +758,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "borrow", [loanId, borrowAmount])
-            ).to.equal(vmError(poolError.LOAN_IS_OVERDUE));
+            ).to.equal(vmError2(poolError.LOAN_IS_OVERDUE));
         });
 
         it("should fails because cap exceeds", async () => {
@@ -692,7 +766,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "borrow", [loanId, lendAmount.mul(2)])
-            ).to.equal(vmError(controllerError.BORROW_CAP_EXCEEDED));
+            ).to.equal(vmError2(controllerError.BORROW_CAP_EXCEEDED));
         });
 
         it("should fails because of insuficient funds", async () => {
@@ -700,7 +774,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "borrow", [loanId, lendAmount])
-            ).to.equal(vmError(controllerError.BORROW_CAP_EXCEEDED));
+            ).to.equal(vmError2(controllerError.BORROW_CAP_EXCEEDED));
         });
 
         it("should borrow tokens", async () => {
@@ -863,7 +937,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "repayBehalf", [lender.address, loanId, borrowAmount])
-            ).to.equal(vmError(poolError.WRONG_BORROWER));
+            ).to.equal(vmError2(poolError.WRONG_BORROWER));
         });
 
         it("should repayBehalf  tokens", async () => {
@@ -987,6 +1061,57 @@ describe("Pool", () => {
 
         it("should return correct value", async () => {
             expect((await call(pool, "totalPrincipal", [])).toString()).to.equal(borrowAmount.toString());
+        });
+    });
+
+    describe("totalInterestRate", () => {
+        let pool, lender, borrower, tokenId, loanId;
+
+        const lendAmount = ethers.utils.parseEther("2000");
+        const borrowAmount = ethers.utils.parseEther("1000");
+
+        beforeEach(async () => {
+            borrower = signer1;
+            lender = signer2;
+            const connectedController = await connect(controller, borrower);
+
+            // transfer AMPT tokens to the borrower
+            await send(amptToken, "transfer", [borrower.address, ethers.utils.parseEther("100")]);
+
+            // approve deposit for controller
+            let connectedAmptToken = await connect(amptToken, borrower);
+            await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
+
+            await send(connectedController, "submitBorrower");
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+
+            // create pool
+            pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
+
+            await send(stableCoin, "mint", [lender.address, lendAmount]);
+
+            // approve some tokens to the pool for lending
+            let connectedStableCoin = await connect(stableCoin, lender);
+            await send(connectedStableCoin, "approve", [pool.address, lendAmount]);
+
+            let connectedPool = await connect(pool, lender);
+            await send(connectedPool, "lend", [lendAmount]);
+
+            const blockNumber = 1;
+
+            await send(controller, "setBlockTimestamp", [timestamp]);
+            await send(pool, "setBlockTimestamp", [timestamp]);
+            await send(controller, "setBlockNumber", [blockNumber]);
+            await send(pool, "setBlockNumber", [blockNumber]);
+
+            [loanId, tokenId] = await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, borrower, borrowAmount, maturity);
+
+            connectedPool = await connect(pool, borrower);
+            await send(connectedPool, "borrow", [loanId, borrowAmount]);
+        });
+
+        it("should return correct value", async () => {
+            expect((await call(pool, "totalInterestRate", [])).toString()).to.equal(ethers.utils.parseEther("10").div(100).toString());
         });
     });
 

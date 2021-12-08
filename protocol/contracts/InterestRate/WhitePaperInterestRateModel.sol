@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 2.201 Kbytes
+/// @dev size: 2.444 Kbytes
 pragma solidity ^0.8.0;
 
 import "./InterestRateModel.sol";
@@ -52,6 +52,10 @@ contract WhitePaperInterestRateModel is InterestRateModel, Ownable {
      */
     function getGracePeriod() external override view returns (GracePeriod[] memory) {
         return _gracePeriod;
+    }
+
+    function getGracePeriodSnapshot() external override view returns (GracePeriod[] memory, uint256) {
+        return (_gracePeriod, blocksPerYear);
     }
 
     /**

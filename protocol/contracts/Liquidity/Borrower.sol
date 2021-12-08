@@ -19,7 +19,8 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
         uint256 borrowIndex;
         uint256 principal;
         uint256 lockedAsset;
-        uint accrualBlockNumber;
+        uint256 interestRate;
+        uint256 accrualBlockNumber;
         bool isClosed;
     }
 
@@ -38,7 +39,6 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
 
     event CreditLineOpened(uint256 indexed loanId, uint256 indexed tokenId, address borrower, uint256 amount, uint256 maturity);
     event CreditLineClosed(uint256 indexed loanId);
-
     event Borrowed(uint256 indexed loanId, uint256 _amount);
     event Repayed(uint256 indexed loanId, uint256 _amount, uint256 penaltyAmount);
     event AssetUnlocked(uint256 indexed tokenId);
@@ -59,6 +59,14 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
             total += creditLines[i].principal;
         }
         return total;
+    }
+
+    function totalInterestRate() public virtual view returns (uint256) {
+        uint256 total = 0;
+        for (uint8 i = 0; i < creditLines.length; i++) {
+            total += creditLines[i].interestRate;
+        }
+        return total * 1e16 / creditLines.length;
     }
 
     /** @dev used by rewards contract */
@@ -84,7 +92,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
         return balance;
     }
 
-    function createCreditLineInternal(address borrower, uint256 tokenId, uint256 borrowCap, uint256 maturity) internal returns (uint256) {
+    function createCreditLineInternal(address borrower, uint256 tokenId, uint256 borrowCap, uint256 interestRate, uint256 maturity) internal returns (uint256) {
         require(lockedAssetsIds[tokenId] == false, toString(Error.LOAN_ASSET_ALREADY_USED));
         uint256 loanId = _loanIds.current();
         _loanIds;
@@ -98,6 +106,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
             borrowIndex: mantissaOne,
             principal: 0,
             lockedAsset: tokenId,
+            interestRate: interestRate,
             accrualBlockNumber: getBlockNumber(),
             isClosed: false
         }));
