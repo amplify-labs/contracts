@@ -6,6 +6,8 @@ import "./Vesting.sol";
 import "../proxy/Clones.sol";
 import "../security/Ownable.sol";
 
+/// @title Vesting instance factory
+/// @notice Create vesting schedule instance contract for an organization
 contract VestingFactory is Ownable {
     struct Instance {
         address instanceAddr;

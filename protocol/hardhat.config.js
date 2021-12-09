@@ -1,5 +1,6 @@
 // hardhat.config.js
 require("@nomiclabs/hardhat-waffle");
+require('hardhat-docgen');
 require("@nomiclabs/hardhat-etherscan");
 require('hardhat-contract-sizer');
 
@@ -49,6 +50,12 @@ module.exports = {
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
+  },
+  docgen: {
+    // The path to the docgen config file
+    path: "./docs",
+    clear: true,
+    runOnCompile: true,
   },
   solidity: {
     version: "0.8.4",

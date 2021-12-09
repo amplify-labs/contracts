@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
+    "docgen": "yarn run hardhat docgen",
     "deploy:mumbai": "npx hardhat run scripts/deploy.js --network polygon_mumbai",
     "deploy:velastest": "npx hardhat run scripts/deploy.js --network velas_testnet",
     "deploy:matic": "npx hardhat run scripts/deploy.js --network polygon_mainet",
@@ -25,6 +26,7 @@
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.0",
     "hardhat": "^2.7.0",
-    "hardhat-contract-sizer": "^2.1.1"
+    "hardhat-contract-sizer": "^2.1.1",
+    "hardhat-docgen": "^1.2.0"
   }
 }

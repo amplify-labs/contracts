@@ -8,6 +8,9 @@ import "../utils/Counters.sol";
 import "../utils/NonZeroAddressGuard.sol";
 import "../security/Ownable.sol";
 
+
+/// @title An instance to run vesting schedule for an organization
+/// @notice Use this contract to create vesting schedule entires for team members
 contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
     using Counters for Counters.Counter;
 

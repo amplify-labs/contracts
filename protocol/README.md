@@ -34,24 +34,25 @@ npx hardhat compile
 ```
 
 ### Deploy Your Contracts
+Use deployments scripts from `scripts` folder to deploy a particual smart contract.
+
+#### Local Network
+
+1. Run `npx hardhat node` to setup a local blockchian node `http://127.0.0.1:8545`, several account addresses and their corresponding private keys will be listed on screen. Use them to deploy contracts or transfer tokens. Keep the terminal running in background.
+1. Open a new terminal tab
+1. Run `npx hardhat run --network localhost scripts/SCRIPT_NAME.js` to deploy the contract. Deployed contract address will be returned if succeed, it's an address started with `0x`
+
+#### Polygon Testnet (Mumbai)
+
+-   `.secret` has to be existed with correct `Polygon Testnet` account private key in it
+-   Get some matic tokens that will be used as gas by [Matic Faucet](https://faucet.matic.network/)
+-   Run `npx hardhat run scripts/SCRIPT_NAME.js --network polygon_mumbai` to deploy the contract. After successful deployment, an address started with `0x` will be showed. [Mumbai Explorer](https://mumbai.polygonscan.com) can be used to query detail information about deployed contract by the returned contract address.
 
 ### Get contract flattened code
 
 ```
 npx hardhat flatten contract/MyContract.sol > out/MyContract.sol
 ```
-
-#### Local Network
-
-1. Run `npx hardhat node` to setup a local blockchian node `http://127.0.0.1:8545`, several account addresses and their corresponding private keys will be listed on screen. Use them to deploy contracts or transfer tokens. Keep the terminal running in background.
-1. Open a new terminal tab
-1. Run `npx hardhat run --network localhost scripts/deploy.js` to deploy the contract. Deployed contract address will be returned if succeed, it's an address started with `0x`
-
-#### Polygon Testnet (Mumbai)
-
--   `.secret` has to be existed with correct `Polygon Testnet` account private key in it
--   Get some matic tokens that will be used as gas by [Matic Faucet](https://faucet.matic.network/)
--   Run `npx hardhat run scripts/deploy.js --network polygon_mumbai` to deploy the ERC721 contract. After successful deployment, an address started with `0x` will be showed. [Mumbai Explorer](https://mumbai.polygonscan.com) can be used to query detail information about deployed contract by the returned contract address.
 
 ### Verify Your Contracts
 
