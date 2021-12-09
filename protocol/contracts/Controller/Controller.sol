@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 20.845 Kbytes
+/// @dev size: 20.892 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -130,8 +130,10 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     }
 
     struct APYLocalVars {
+        MathError err;
         uint256 interestDelta;
         uint256 utilizationRate;
+        uint256 apy;
     }
     function getPoolAPY(address pool) external view returns (uint256) {
         APYLocalVars memory vars;
@@ -139,7 +141,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         vars.interestDelta = Pool(pool).totalInterestRate();
         vars.utilizationRate = this.getPoolUtilizationRate(pool);
 
-        return vars.interestDelta * vars.utilizationRate;
+        return mul_(vars.utilizationRate, Exp({ mantissa: vars.interestDelta }));
     }
 
     // Admin functions

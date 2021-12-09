@@ -208,7 +208,7 @@ export async function claimRewards(account: string, options?: CallOptions): Prom
         ...options
     };
 
-    return eth.trx(controllerAddr, 'claimAMPT', parameters, trxOptions);
+    return eth.trx(controllerAddr, 'claimAMPT(address)', parameters, trxOptions);
 }
 
 /**
@@ -236,54 +236,6 @@ export async function getStableCoins(options: CallOptions = {}): Promise<string[
     const result = await eth.read(factoryAddress, 'getStableCoins', [], trxOptions);
     return result;
 }
-
-
-/**
- * Get lender reward balance
-* @param {string} lender Lender address.
-* @param {string} pool Pool address.
- * @returns {string} Returns a string of the numeric total for funds deposited.
- *
- * @example
- * ```
- * (async function () {
- *   const amount = await amplify.getSupplyRewardAmount('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
- *   console.log('Deposited:', amount);
- * })().catch(console.error);
- * ```
- */
-export async function getSupplyRewardAmount(
-    lender: string,
-    pool: string,
-    options: CallOptions = {}
-): Promise<string> {
-    await netId(this);
-    const errorPrefix = 'Amplify [getSupplyReward] | ';
-    const trxOptions: CallOptions = {
-        _amplifyProvider: this._provider,
-        abi: abi.Controller,
-        ...options
-    };
-
-    if (
-        typeof lender !== 'string' &&
-        !ethers.utils.isAddress(lender)
-    ) {
-        throw Error(errorPrefix + 'Argument `lender` must be an address');
-    }
-
-    if (
-        typeof pool !== 'string' &&
-        !ethers.utils.isAddress(pool)
-    ) {
-        throw Error(errorPrefix + 'Argument `pool` must be an address');
-    }
-
-    const controllerAddr = address[this._network.name].Controller;
-    const result = await eth.read(controllerAddr, 'getSupplyReward', [lender, pool], trxOptions);
-    return result.toString();
-}
-
 
 /**
  * Get pool APY
@@ -425,7 +377,6 @@ export type ControllerInterface = {
     createPool: (name: string, minDeposit: string | number | BigNumber, stableCoin: string, poolAccess: 0 | 1, options?: CallOptions) => Promise<TrxResponse>;
     claimRewards(account: string, options?: CallOptions): Promise<TrxResponse>;
     getStableCoins(options?: CallOptions): Promise<string[]>;
-    getSupplyRewardAmount(lender: string, pool: string, options?: CallOptions): Promise<string>;
     getPoolAPY(pool: string, options?: CallOptions): Promise<string>;
     getSupplyReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
     getBorrowReward(address: string, pool?: string, options?: CallOptions): Promise<string>;

@@ -758,7 +758,7 @@ describe("Controller", () => {
 
             expect(
                 await call(controller, "getPoolAPY", [pool.address])
-            ).to.equal(totalBorrows.mul(exp).div(totalBorrows.add(totalCash)).mul(totalInterestRate).toString());
+            ).to.equal(totalBorrows.mul(exp).div(totalBorrows.add(totalCash)).mul(totalInterestRate).div(exp).toString());
         });
     });
 
