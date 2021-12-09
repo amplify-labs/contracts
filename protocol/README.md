@@ -33,6 +33,10 @@ Compile after contract development is completed with `hardhat compile` command:
 npx hardhat compile
 ```
 
+### Contract documentation
+Latest docs are available at `docs/index.html` after every compilation. We follow [NatSpec format](https://docs.soliditylang.org/en/develop/natspec-format.html) for contracts documentation. 
+
+
 ### Deploy Your Contracts
 Use deployments scripts from `scripts` folder to deploy a particual smart contract.
 
