@@ -168,6 +168,50 @@ export async function createPool(name: string, minDeposit: string | number | Big
 
 
 /**
+ * Claim the AMPT rewards
+ *
+ * @param {string} account Address of the account to claim rewards for
+ * @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
+ *
+ * @returns {object} Returns an Ethers.js transaction object of the createPool
+ *     transaction.
+ *
+ * @example
+ * ```
+ * const amplify = Amplify.createInstance(window.ethereum);
+ *
+ * (async function () {
+ *   const trx = await amplify.claimRewards('0x....0a');
+ *   console.log('Ethers.js transaction object', trx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function claimRewards(account: string, options?: CallOptions): Promise<TrxResponse> {
+    await netId(this);
+    const errorPrefix = 'Amplify [claimRewards] | ';
+
+    if (
+        typeof account !== 'string' &&
+        !ethers.utils.isAddress(account)
+    ) {
+        throw Error(errorPrefix + 'Argument `account` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+    const parameters = [account];
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    return eth.trx(controllerAddr, 'claimAMPT', parameters, trxOptions);
+}
+
+/**
  * Get factory supported stable coins
  * @returns {array} Returns an array of addresesd.
  *
@@ -279,11 +323,110 @@ export async function getPoolAPY(
 }
 
 
+/**
+ * Get supply rewards balance
+* @param {string} account Lender address.
+* @param {string} pool Pool address.
+ * @returns {string} Returns a string of the numeric total for tokens rewarded.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.getSupplyReward('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('reward:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getSupplyReward(
+    account: string,
+    pool?: string,
+    options: CallOptions = {}
+): Promise<string> {
+    await netId(this);
+    const errorPrefix = 'Amplify [getSupplyReward] | ';
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    if (
+        typeof account !== 'string' &&
+        !ethers.utils.isAddress(account)
+    ) {
+        throw Error(errorPrefix + 'Argument `account` must be an address');
+    }
+
+    if (pool && typeof pool !== 'string' && !ethers.utils.isAddress(pool)) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+
+    if (pool) {
+        const result = await eth.read(controllerAddr, 'getSupplyReward', [account, pool], trxOptions);
+        return result.toString();
+    }
+    const result = await eth.read(controllerAddr, 'getTotalSupplyReward', [account], trxOptions);
+    return result.toString();
+}
+
+/**
+ * Get borrow rewards balance
+* @param {string} account Borrower address.
+* @param {string} pool Pool address.
+ * @returns {string} Returns a string of the numeric total for tokens rewarded.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.getBorrowReward('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('reward:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getBorrowReward(
+    account: string,
+    pool?: string,
+    options: CallOptions = {}
+): Promise<string> {
+    await netId(this);
+    const errorPrefix = 'Amplify [getBorrowReward] | ';
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    if (
+        typeof account !== 'string' &&
+        !ethers.utils.isAddress(account)
+    ) {
+        throw Error(errorPrefix + 'Argument `account` must be an address');
+    }
+
+    if (pool && typeof pool !== 'string' && !ethers.utils.isAddress(pool)) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+
+    if (pool) {
+        const result = await eth.read(controllerAddr, 'getBorrowReward', [account, pool], trxOptions);
+        return result.toString();
+    }
+    const result = await eth.read(controllerAddr, 'getTotalBorrowReward', [account], trxOptions);
+    return result.toString();
+}
+
 export type ControllerInterface = {
     submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, options?: CallOptions) => Promise<TrxResponse>;
     withdrawLenderDeposit: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
     createPool: (name: string, minDeposit: string | number | BigNumber, stableCoin: string, poolAccess: 0 | 1, options?: CallOptions) => Promise<TrxResponse>;
+    claimRewards(account: string, options?: CallOptions): Promise<TrxResponse>;
     getStableCoins(options?: CallOptions): Promise<string[]>;
     getSupplyRewardAmount(lender: string, pool: string, options?: CallOptions): Promise<string>;
     getPoolAPY(pool: string, options?: CallOptions): Promise<string>;
+    getSupplyReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
+    getBorrowReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
 }
