@@ -66,7 +66,10 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
         for (uint8 i = 0; i < creditLines.length; i++) {
             total += creditLines[i].interestRate;
         }
-        return total * 1e16 / creditLines.length;
+        if (total != 0){
+            return total * 1e16 / creditLines.length;
+        }
+        return total;
     }
 
     /** @dev used by rewards contract */

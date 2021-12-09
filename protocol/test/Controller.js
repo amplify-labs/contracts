@@ -1,6 +1,6 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-const { init, call, connect, deploy, wrongOwner, send, vmError, zeroAddress, zeroAddressError, double } = require("./utils");
+const { init, call, connect, deploy, wrongOwner, send, vmError, zeroAddress, zeroAddressError, double, exp } = require("./utils");
 
 const {
     deployProvisionPool,
@@ -724,6 +724,41 @@ describe("Controller", () => {
 
             let speed = await call(controller, "amptPoolSpeeds", [poolAddr]);
             expect(speed.toString()).to.equal(amptSpeed.toString());
+        });
+    });
+
+    describe("getPoolAPY", () => {
+        let controller, stableCoin, amptToken, pool;
+        const minDeposit = ethers.utils.parseEther("1");
+        const amptSpeed = ethers.utils.parseEther("1");
+
+        beforeEach(async () => {
+            [controller, stableCoin, amptToken] = await getController(root);
+
+            const connectedController = await connect(controller, signer1);
+            await whitelistBorrower(amptToken, controller, signer1);
+
+            pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
+        });
+
+        it("should return correct value", async () => {
+            expect(
+                await call(controller, "getPoolAPY", [pool.address])
+            ).to.equal("0");
+        });
+
+        it("should return correct value", async () => {
+            let totalCash = ethers.utils.parseEther("2000");
+            let totalBorrows = ethers.utils.parseEther("1500");
+            let totalInterestRate = ethers.utils.parseUnits("1", 17);
+
+            await send(stableCoin, "mint", [pool.address, totalCash]);
+            await send(pool, "setTotalBorrows", [totalBorrows]);
+            await send(pool, "setTotalInterestRate", [totalInterestRate]);
+
+            expect(
+                await call(controller, "getPoolAPY", [pool.address])
+            ).to.equal(totalBorrows.mul(exp).div(totalBorrows.add(totalCash)).mul(totalInterestRate).toString());
         });
     });
 

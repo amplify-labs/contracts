@@ -11,6 +11,7 @@ contract PoolHarness is Pool {
     uint internal _totalPrincipal;
     uint internal _totalSupply;
     uint internal _totalBorrows;
+    uint internal _totalInterestRate;
 
     constructor() Pool(){}
 
@@ -40,6 +41,10 @@ contract PoolHarness is Pool {
         _totalSupply = supply;
     }
 
+    function setTotalInterestRate(uint rate) public {
+        _totalInterestRate = rate;
+    }
+
     function setTotalBorrows(uint borrows) public {
         _totalBorrows = borrows;
     }
@@ -57,6 +62,13 @@ contract PoolHarness is Pool {
             return super.totalPrincipal();
         }
         return _totalPrincipal;
+    }
+
+    function totalInterestRate() public override view returns (uint256) {
+        if(_totalInterestRate == 0) {
+            return super.totalInterestRate();
+        }
+        return _totalInterestRate;
     }
 
     function totalSupply() public override view returns (uint) {
