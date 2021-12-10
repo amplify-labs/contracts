@@ -274,6 +274,42 @@ export async function getPoolAPY(
     return result.toString();
 }
 
+/**
+ * Get total supply balance
+* @param {string} account Lender address.
+ * @returns {string} Returns a string of the numeric total for tokens supplied.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.getTotalSuppliedBalance('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('balance:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getTotalSuppliedBalance(
+    account: string,
+    options: CallOptions = {}
+): Promise<string> {
+    await netId(this);
+    const errorPrefix = 'Amplify [getTotalSuppliedBalance] | ';
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    if (
+        typeof account !== 'string' &&
+        !ethers.utils.isAddress(account)
+    ) {
+        throw Error(errorPrefix + 'Argument `account` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+    const result = await eth.read(controllerAddr, 'getTotalSupplyBalance', [account], trxOptions);
+    return result.toString();
+}
 
 /**
  * Get supply rewards balance
@@ -378,6 +414,7 @@ export type ControllerInterface = {
     claimRewards(account: string, options?: CallOptions): Promise<TrxResponse>;
     getStableCoins(options?: CallOptions): Promise<string[]>;
     getPoolAPY(pool: string, options?: CallOptions): Promise<string>;
+    getTotalSuppliedBalance(lender: string, options?: CallOptions): Promise<string>;
     getSupplyReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
     getBorrowReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
 }

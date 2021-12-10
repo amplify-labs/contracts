@@ -1,9 +1,9 @@
 {
     "network": "mumbai",
-    "asset_address": "0xd162A73b29fbb3BE9f13e6e4777072e9b40971BC",
-    "asset_start_block": 22214994,
+    "asset_address": "0x4609E17EeEDB5E841329FC59c981A0657d5308fe",
+    "asset_start_block": 22492056,
     "voting_address": "0xd8d193853AF5b70B8Eff61bE038CfDe90C83204B",
     "voting_start_block": 21322378,
-    "controller_address": "0x77d9f631d64c72A18Dc7Fcb1c33C7Fc145B15bEd",
-    "controller_start_block": 22435440
+    "controller_address": "0x216AAe3bbBCDA38Ed69586C9F684ff5e7be15A2e",
+    "controller_start_block": 22492130
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 20.892 Kbytes
+/// @dev size: 21.284 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -142,6 +142,14 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         vars.utilizationRate = this.getPoolUtilizationRate(pool);
 
         return mul_(vars.utilizationRate, Exp({ mantissa: vars.interestDelta }));
+    }
+
+    function getTotalSupplyBalance(address lender) external view returns (uint256) {
+        uint256 totalSupply = 0;
+        for (uint256 i = 0; i < lenderJoinedPools[lender].length; i++) {
+            totalSupply += Pool(lenderJoinedPools[lender][i]).balanceOfUnderlying(lender);
+        }
+        return totalSupply;
     }
 
     // Admin functions
@@ -323,6 +331,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
         updateSupplyIndexInternal(pool);
         distributeSupplierTokens(pool, lender);
+        lenderJoinedPools[lender].push(pool);
 
         return uint256(Error.NO_ERROR);
     }
@@ -400,6 +409,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         uint256 maturity;
         uint256 interestRate;
         uint256 advanceRate;
+        address owner;
         bool redeemed;
     }
     function createCreditLineAllowed(address pool, address borrower, uint256 collateralAsset) external virtual nonReentrant returns (uint256, uint256, uint256, uint256, uint256) {
@@ -410,11 +420,11 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         require(_pool.isActive, toString(Error.POOL_NOT_ACTIVE));
 
         // Check if collateral asset is supported
-        (vars.assetValue, vars.maturity,vars.interestRate,vars.advanceRate,, , vars.redeemed) = assetsFactory.getTokenInfo(collateralAsset);
+        (vars.assetValue, vars.maturity,vars.interestRate,vars.advanceRate,, , vars.owner ,vars.redeemed) = assetsFactory.getTokenInfo(collateralAsset);
         uint256 borrowCap = borrowers[borrower].debtCeiling;
 
         require(borrowCap == 0 || borrowCap >= vars.assetValue, toString(Error.BORROW_CAP_EXCEEDED));
-        require(assetsFactory.ownerOf(collateralAsset) == pool, toString(Error.INVALID_OWNER));
+        require(vars.owner == pool, toString(Error.INVALID_OWNER));
         require(!vars.redeemed, toString(Error.ASSET_REDEEMED));
         require(vars.maturity >= getBlockTimestamp(), toString(Error.MATURITY_DATE_EXPIRED));
         require(vars.interestRate > 0, toString(Error.NOT_ALLOWED_TO_CREATE_CREDIT_LINE));

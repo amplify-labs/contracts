@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 7.029 Kbytes
+/// @dev size: 7.060 Kbytes
 pragma solidity ^0.8.0;
 
 import "./AssetStorage.sol";
@@ -51,8 +51,9 @@ contract Asset is AssetInterface, AssetStorage, Ownable {
         return _tokenIds.current();
     }
 
-    function getTokenInfo(uint256 _tokenId) external override view returns (uint256, uint256, uint256, uint256, string memory, string memory, bool) {
-        Token storage _info = _tokens[_tokenId];
+    function getTokenInfo(uint256 tokenId_) external override view returns (uint256, uint256, uint256, uint256, string memory, string memory, address, bool) {
+        Token storage _info = _tokens[tokenId_];
+        address owner = ownerOf(tokenId_);
 
         return (
             _info.value,
@@ -61,6 +62,7 @@ contract Asset is AssetInterface, AssetStorage, Ownable {
             _info.advanceRate,
             _info.rating,
             _info._hash,
+            owner,
             _info.redeemed
         );
     }

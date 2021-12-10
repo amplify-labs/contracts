@@ -42,5 +42,6 @@ abstract contract ControllerStorage {
 
 
     mapping(address => address[]) public borrowerPools;
+    mapping(address => address[]) public lenderJoinedPools;
     mapping(address => mapping(address => bool)) public borrowerWhitelists;
 }

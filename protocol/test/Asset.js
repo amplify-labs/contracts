@@ -63,7 +63,7 @@ describe("Asset", function () {
             await send(factory, "markAsRedeemed", [tokenId]);
 
             let tokenInfo = await call(factory, "getTokenInfo", [tokenId]);
-            expect(tokenInfo[6]).to.equal(true);
+            expect(tokenInfo[7]).to.equal(true);
         });
     });
 
@@ -84,7 +84,8 @@ describe("Asset", function () {
             expect(tokenInfo[3].toString()).to.equal("90");
             expect(tokenInfo[4]).to.equal("A");
             expect(tokenInfo[5]).to.equal(tokenHash);
-            expect(tokenInfo[6]).to.equal(false);
+            expect(tokenInfo[6]).to.equal(root.address);
+            expect(tokenInfo[7]).to.equal(false);
 
             expect(tokenUri).to.equal(tokenHash + ".png");
         });

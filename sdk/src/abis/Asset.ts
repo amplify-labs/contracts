@@ -217,7 +217,7 @@ export const abi = [
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "_tokenId",
+                "name": "tokenId_",
                 "type": "uint256"
             }
         ],
@@ -252,6 +252,11 @@ export const abi = [
                 "internalType": "string",
                 "name": "",
                 "type": "string"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
             },
             {
                 "internalType": "bool",

@@ -32,8 +32,8 @@ export const address = {
     "VestingEscrow": ""
   },
   "polygon_mumbai": {
-    "Controller": "0x77d9f631d64c72A18Dc7Fcb1c33C7Fc145B15bEd",
-    "Asset": "0xd162A73b29fbb3BE9f13e6e4777072e9b40971BC",
+    "Controller": "0x216AAe3bbBCDA38Ed69586C9F684ff5e7be15A2e",
+    "Asset": "0x4609E17EeEDB5E841329FC59c981A0657d5308fe",
     "DAI": "0x86321ca156c655d151474a054f25970acb5b42a8",
     "USDC": "0xeb80b946d57902d92c5b90bd8f4968ce3c8c4f9e",
     "USDT": "0x6861fa406ff83036fb127c7f462a1906f776c3c1",
