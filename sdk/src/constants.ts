@@ -285,12 +285,6 @@ export const networks: Network[] = [
 // TODO: Should be updated after each deploy
 export const abi = {
   Asset: AssetAbi.abi,
-  Factory: [
-    "function addStableCoin(address stableCoin)",
-    "function removeStableCoin(address stableCoin)",
-    "function getStableCoins() returns (address[])",
-    "function createPool(string name, string structure, address stableCoin, uint256 minDeposit)",
-  ],
   Pool: PoolAbi.abi,
   Controller: ControllerAbi.abi,
   ERC20: ERC20Abi.abi,

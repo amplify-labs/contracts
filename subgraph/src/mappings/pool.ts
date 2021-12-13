@@ -7,13 +7,17 @@ import { Pool, Balance } from '../../generated/schema';
 // Pool
 export function createNewPool(event: PoolCreated): void {
     let pool = new Pool(event.params.pool.toHex());
+
     pool.name = event.params.name;
-    pool.stableCoin = event.params.stableCoin;
-    pool.access = event.params.access == 0 ? "PUBLIC" : "PRIVATE";
-    pool.owner = event.params.owner;
     pool.minDeposit = event.params.minDeposit;
+    pool.access = event.params.access == 0 ? "PUBLIC" : "PRIVATE";
+
+    pool.stableCoin = event.params.stableCoin;
+    pool.owner = event.params.owner;
+
     pool.totalDeposited = new BigInt(0);
     pool.totalBorrowed = new BigInt(0);
+
     pool.createdAt = event.block.timestamp;
     pool.assetsLocked = [];
     pool.members = [];
@@ -41,7 +45,7 @@ export function handlePoolLend(event: Lend): void {
     //     event.params._amount,
     //     event.block.timestamp);
 
-    handleBalance(pool.id, event.params.account, "LEND", event.params.amount);
+    // handleBalance(pool.id, event.params.account, "LEND", event.params.amount);
     pool.save();
 }
 
@@ -58,7 +62,7 @@ export function handlePoolRedeem(event: Redeem): void {
     //     event.params.lender,
     //     event.params._amount,
     //     event.block.timestamp);
-    handleBalance(pool.id, event.params.account, "REDEEM", event.params.amount);
+    // handleBalance(pool.id, event.params.account, "REDEEM", event.params.amount);
     pool.save();
 }
 

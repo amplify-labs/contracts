@@ -9,7 +9,6 @@ type Pool @entity {
     totalBorrowed: BigInt!
     createdAt: BigInt!
     assetsLocked: [Asset!]!
-    balances: [Balance!]! @derivedFrom(field: "pool")
     members: [Bytes!]!
 }
 
@@ -30,13 +29,13 @@ type Asset @entity {
     id: ID!
     hash: String!
     value: BigInt!
-    uploadedAt: BigInt!
     uri: String!
     riskRating: String!
     maturityDate: BigInt!
     owner: Bytes!
     isLocked: Boolean!
     isRedeemed: Boolean!
+    uploadedAt: BigInt!
 }
 
 type VotingInfo @entity {
