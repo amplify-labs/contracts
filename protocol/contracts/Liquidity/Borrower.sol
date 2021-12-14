@@ -95,6 +95,11 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
         return balance;
     }
 
+    function borrowerSnapshot(uint256 loanId) external view returns (uint256, uint256) {
+        (,uint256 penaltyAmount) = getPenaltyIndexAndFee(loanId);
+        return (borrowBalanceSnapshot(loanId), penaltyAmount);
+    }
+
     function createCreditLineInternal(address borrower, uint256 tokenId, uint256 borrowCap, uint256 interestRate, uint256 maturity) internal returns (uint256) {
         require(lockedAssetsIds[tokenId] == false, toString(Error.LOAN_ASSET_ALREADY_USED));
         uint256 loanId = _loanIds.current();

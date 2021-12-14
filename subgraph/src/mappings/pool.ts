@@ -1,8 +1,9 @@
-import { dataSource, BigInt, Bytes } from '@graphprotocol/graph-ts';
+import { dataSource, BigInt, Bytes, Address } from '@graphprotocol/graph-ts';
 
-import { Lend, Redeem } from '../../generated/templates/Pool/PoolAbi';
+import { Lend, Redeem, CreditLineOpened, CreditLineClosed } from '../../generated/templates/Pool/PoolAbi';
 import { PoolCreated } from '../../generated/Controller/ControllerAbi';
-import { Pool, Balance } from '../../generated/schema';
+import { handleAssetLock, handleAssetRedeem } from "./asset";
+import { Pool, Loan, Transaction } from '../../generated/schema';
 
 // Pool
 export function createNewPool(event: PoolCreated): void {
@@ -37,15 +38,13 @@ export function handlePoolLend(event: Lend): void {
         pool.members = currentMembers;
     }
 
-    // handleAddTransaction(
-    //     event.transaction.hash.toHex(),
-    //     "LEND",
-    //     event.params.lender,
-    //     Address.fromString(pool.id),
-    //     event.params._amount,
-    //     event.block.timestamp);
-
-    // handleBalance(pool.id, event.params.account, "LEND", event.params.amount);
+    handleAddTransaction(
+        event.transaction.hash.toHex(),
+        "LEND",
+        event.params.account,
+        Address.fromString(pool.id),
+        event.params.amount,
+        event.block.timestamp);
     pool.save();
 }
 
@@ -55,14 +54,13 @@ export function handlePoolRedeem(event: Redeem): void {
 
     pool.totalDeposited = pool.totalDeposited.minus(event.params.amount);
 
-    // handleAddTransaction(
-    //     event.transaction.hash.toHex(),
-    //     "WITHDRAW",
-    //     Address.fromString(pool.id),
-    //     event.params.lender,
-    //     event.params._amount,
-    //     event.block.timestamp);
-    // handleBalance(pool.id, event.params.account, "REDEEM", event.params.amount);
+    handleAddTransaction(
+        event.transaction.hash.toHex(),
+        "REDEEM",
+        Address.fromString(pool.id),
+        event.params.account,
+        event.params.amount,
+        event.block.timestamp);
     pool.save();
 }
 
@@ -117,24 +115,27 @@ export function handlePoolRedeem(event: Redeem): void {
 //     pool.save();
 // }
 
-// Loan
-// export function handleCreateCreditLine(event: CreditLineOpened): void {
-//     let pool = event.transaction.to.toHex();
+export function handleCreateCreditLine(event: CreditLineOpened): void {
+    let context = dataSource.context();
+    let pool = context.getBytes("pool").toHex();
 
-//     let loan = new Loan(event.params.loanId.toHex());
+    let loan = new Loan(event.params.loanId.toHex());
 
-//     loan.amount = event.params.amount;
-//     loan.debt = new BigInt(0);
-//     loan.factor = event.params.borrower;
-//     loan.collateralAsset = event.params.tokenId.toHex()
-//     loan.borrowingPool = pool;
-//     loan.createdAt = event.block.timestamp;
-//     loan.isClosed = false;
-//     loan.transactions = [];
+    loan.createdAt = event.block.timestamp;
+    loan.isClosed = false;
 
-//     handlePoolLockedAsset(pool, event.params.tokenId.toHex(), event.params.loanId.toHex());
-//     loan.save();
-// }
+    loan.borrower = event.params.borrower;
+    loan.available = event.params.amount;
+    loan.borrowCeiling = event.params.amount;
+
+    loan.asset = event.params.tokenId.toHex()
+    loan.pool = pool;
+
+    loan.transactions = [];
+
+    handlePoolLockedAsset(pool, event.params.tokenId.toHex(), event.params.loanId.toHex());
+    loan.save();
+}
 
 // export function handleLoanAddDebt(loanId: string, amount: BigInt): void {
 //     let loan = Loan.load(loanId);
@@ -153,40 +154,40 @@ export function handlePoolRedeem(event: Redeem): void {
 //     }
 // }
 
-// export function handlePoolLockedAsset(poolAddr: string, tokenId: string, loanId: string): void {
-//     let pool = Pool.load(poolAddr);
+export function handlePoolLockedAsset(poolAddr: string, tokenId: string, loanId: string): void {
+    let pool = Pool.load(poolAddr);
 
-//     if (pool !== null) {
-//         let poolAssets = pool.assetsLocked;
-//         poolAssets.push(tokenId);
-//         pool.assetsLocked = poolAssets;
+    if (pool !== null) {
+        let poolAssets = pool.assetsLocked;
+        poolAssets.push(tokenId);
+        pool.assetsLocked = poolAssets;
 
-//         handleAssetLock(tokenId, loanId);
-//         pool.save();
-//     }
-// }
+        handleAssetLock(tokenId, loanId);
+        pool.save();
+    }
+}
 
-// export function handleLoanClose(event: CreditLineClosed): void {
-//     let loan = Loan.load(event.params.loanId.toHex());
-//     if (loan !== null) {
-//         loan.isClosed = true;
-//         handleAssetRedeem(loan.collateralAsset);
-//         loan.save();
-//     }
-// }
+export function handleLoanClose(event: CreditLineClosed): void {
+    let loan = Loan.load(event.params.loanId.toHex());
+    if (loan !== null) {
+        loan.isClosed = true;
+        handleAssetRedeem(loan.asset);
+        loan.save();
+    }
+}
 
 // // Transaction
-// function handleAddTransaction(txId: string, type: string, from: Bytes, to: Bytes, amount: BigInt, timestamp: BigInt): void {
-//     let transaction = new Transaction(txId);
-//     transaction.from = from;
-//     transaction.to = to;
-//     transaction.type = type;
+function handleAddTransaction(txId: string, type: string, from: Bytes, to: Bytes, amount: BigInt, timestamp: BigInt): void {
+    let transaction = new Transaction(txId);
+    transaction.from = from;
+    transaction.to = to;
+    transaction.type = type;
 
-//     transaction.amount = amount;
-//     transaction.createdAt = timestamp;
+    transaction.amount = amount;
+    transaction.createdAt = timestamp;
 
-//     transaction.save();
-// }
+    transaction.save();
+}
 
 // export function handleAddLoanTx(loanId: string, txId: string): void {
 //     let loan = Loan.load(loanId);
@@ -198,35 +199,3 @@ export function handlePoolRedeem(event: Redeem): void {
 //         loan.save();
 //     }
 // }
-
-// Balance
-function handleBalance(id: string, lender: Bytes, type: string, amount: BigInt): void {
-    let balance = Balance.load(id);
-
-    if (balance == null) {
-        balance = new Balance(id);
-        balance.lender = lender;
-        balance.pool = id;
-        balance.earned = new BigInt(0);
-
-        switch (true) {
-            case type === "LEND":
-                balance.lend = amount;
-                break;
-            default:
-                break;
-        }
-    } else {
-        switch (true) {
-            case type === "LEND":
-                balance.lend = balance.lend.plus(amount);
-                break;
-            case type === "REDEEM":
-                balance.lend = balance.lend.minus(amount);
-                break;
-            default:
-                break;
-        }
-    }
-    balance.save();
-}

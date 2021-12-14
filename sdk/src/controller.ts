@@ -136,7 +136,7 @@ export async function withdrawLenderDeposit(pool: string, options?: CallOptions)
  */
 export async function createPool(name: string, minDeposit: string | number | BigNumber, stableCoin: string, poolAccess: 0 | 1, options?: CallOptions): Promise<TrxResponse> {
     await netId(this);
-    const errorPrefix = 'Amplify [requestPoolWhitelist] | ';
+    const errorPrefix = 'Amplify [createPool] | ';
 
     if (
         typeof minDeposit !== 'number' &&
@@ -312,6 +312,68 @@ export async function getTotalSuppliedBalance(
 }
 
 /**
+ * Get total borrowed balance
+* @param {string} account Borrower address.
+ * @returns {string} Returns a string of the numeric total for tokens borrowed.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.getTotalBorrowedBalance('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   console.log('balance:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getTotalBorrowedBalance(
+    account: string,
+    options: CallOptions = {}
+): Promise<string[]> {
+    await netId(this);
+    const errorPrefix = 'Amplify [getTotalBorrowedBalance] | ';
+    const controllerOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    const poolOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Pool,
+        ...options
+    };
+
+    if (
+        typeof account !== 'string' &&
+        !ethers.utils.isAddress(account)
+    ) {
+        throw Error(errorPrefix + 'Argument `account` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+
+    let borrowerPools = await eth.read(controllerAddr, "borrowerPools", [account], controllerOptions);
+
+    let loanIds = {};
+    for (let i = 0; i < borrowerPools.length; i++) {
+        let _loanIds = await eth.read(borrowerPools[i], "loansIdsByAddress", [account], poolOptions);
+        loanIds[borrowerPools[i]] = _loanIds;
+    }
+
+    let totalBorrowedBalance = BigNumber.from(0);
+    let totalPenalties = BigNumber.from(0);
+    Object.entries(loanIds).forEach(([pool, loans]: [string, string[]]) => {
+        loans.forEach(async (loan) => {
+            let [t, p] = await eth.read(pool, "borrowerSnapshot", [loan], poolOptions);
+
+            totalBorrowedBalance = totalBorrowedBalance.add(t);
+            totalPenalties = totalPenalties.add(p);
+        });
+    });
+
+    return [totalBorrowedBalance.toString(), totalPenalties.toString()];
+}
+
+/**
  * Get supply rewards balance
 * @param {string} account Lender address.
 * @param {string} pool Pool address.
@@ -415,6 +477,7 @@ export type ControllerInterface = {
     getStableCoins(options?: CallOptions): Promise<string[]>;
     getPoolAPY(pool: string, options?: CallOptions): Promise<string>;
     getTotalSuppliedBalance(lender: string, options?: CallOptions): Promise<string>;
+    getTotalBorrowedBalance(borrower: string, options?: CallOptions): Promise<string[]>;
     getSupplyReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
     getBorrowReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
 }

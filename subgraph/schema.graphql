@@ -17,12 +17,33 @@ enum PoolAccess {
     PRIVATE
 }
 
-type Balance @entity {
+type Loan @entity {
     id: ID!
+    borrowCeiling: BigInt!
+    available: BigInt!
+    maturity: BigInt!
+    borrower: Bytes!
     pool: Pool!
-    lender: Bytes!
-    lend: BigInt!
-    earned: BigInt!
+    asset: Asset!
+    createdAt: BigInt!
+    isClosed: Boolean!
+    transactions: [Transaction!]!
+}
+
+type Transaction @entity {
+    id: ID!
+    from: Bytes!
+    to: Bytes!
+    amount: BigInt!
+    createdAt: BigInt!
+    type: TransactionType!
+}
+
+enum TransactionType {
+    BORROW
+    REPAY
+    LEND
+    REDEEM
 }
 
 type Asset @entity {
@@ -36,8 +57,10 @@ type Asset @entity {
     isLocked: Boolean!
     isRedeemed: Boolean!
     uploadedAt: BigInt!
+    loanInfo: Loan
 }
 
+# voting info
 type VotingInfo @entity {
     id: ID!
     locked: BigInt!
