@@ -7,7 +7,7 @@ import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 import { ethers } from 'ethers';
 import * as eth from './eth';
 import { netId } from './helpers';
-import { abi, address } from './constants';
+import { abi } from './constants';
 import { CallOptions, TrxResponse } from './types';
 
 /**

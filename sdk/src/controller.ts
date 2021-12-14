@@ -350,20 +350,21 @@ export async function getTotalBorrowedBalance(
     }
 
     const controllerAddr = address[this._network.name].Controller;
-
-    let borrowerPools = await eth.read(controllerAddr, "borrowerPools", [account], controllerOptions);
+    const borrowerPools = await eth.read(controllerAddr, "borrowerPools", [account], controllerOptions);
 
     let loanIds = {};
     for (let i = 0; i < borrowerPools.length; i++) {
         let _loanIds = await eth.read(borrowerPools[i], "loansIdsByAddress", [account], poolOptions);
-        loanIds[borrowerPools[i]] = _loanIds;
+        loanIds = Object.assign(loanIds, {
+            [borrowerPools[i]]: _loanIds
+        });
     }
 
     let totalBorrowedBalance = BigNumber.from(0);
     let totalPenalties = BigNumber.from(0);
     Object.entries(loanIds).forEach(([pool, loans]: [string, string[]]) => {
         loans.forEach(async (loan) => {
-            let [t, p] = await eth.read(pool, "borrowerSnapshot", [loan], poolOptions);
+            const [t, p] = await eth.read(pool, "borrowerSnapshot", [loan], poolOptions);
 
             totalBorrowedBalance = totalBorrowedBalance.add(t);
             totalPenalties = totalPenalties.add(p);
