@@ -354,7 +354,7 @@ export async function getTotalBorrowedBalance(
 
     let loanIds = {};
     for (let i = 0; i < borrowerPools.length; i++) {
-        let _loanIds = await eth.read(borrowerPools[i], "loansIdsByAddress", [account], poolOptions);
+        const _loanIds = await eth.read(borrowerPools[i], "loansIdsByAddress", [account], poolOptions);
         loanIds = Object.assign(loanIds, {
             [borrowerPools[i]]: _loanIds
         });
