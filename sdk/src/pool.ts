@@ -273,7 +273,10 @@ export async function repay(
     ) {
         throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    amount = ethers.utils.parseEther(amount.toString());
+
+    if (!BigNumber.from(amount).eq(ethers.constants.MaxUint256)) {
+        amount = ethers.utils.parseEther(amount.toString());
+    }
 
     if (
         typeof pool !== 'string' &&

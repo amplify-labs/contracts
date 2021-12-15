@@ -19,6 +19,7 @@ enum PoolAccess {
 
 type Loan @entity {
     id: ID!
+    key: String!
     borrowCeiling: BigInt!
     available: BigInt!
     maturity: BigInt!
@@ -35,6 +36,7 @@ type Transaction @entity {
     from: Bytes!
     to: Bytes!
     amount: BigInt!
+    penaltyAmount: BigInt
     createdAt: BigInt!
     type: TransactionType!
 }

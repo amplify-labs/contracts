@@ -875,6 +875,28 @@ describe("Pool", () => {
             expect(creditLine.borrowIndex.toString()).to.equal(borrowIndex.toString());
             expect(creditLine.isClosed).to.equal(true);
         });
+
+        it("should repay tokens in multiple tx", async () => {
+            await send(stableCoin, "mint", [borrower.address, lendAmount]);
+
+            // approve some tokens to the pool for repay
+            let connectedStableCoin = await connect(stableCoin, borrower);
+            await send(connectedStableCoin, "approve", [pool.address, lendAmount]);
+
+            await send(pool, "fastForward", [30]);
+
+            let connectedPool = await connect(pool, borrower);
+            await send(connectedPool, "repay", [loanId, ethers.utils.parseEther("500")]);
+            await send(connectedPool, "repay", [loanId, ethers.constants.MaxUint256]);
+
+            let creditLine = await call(pool, "creditLines", [0]);
+            let borrowIndex = await call(pool, "getBorrowIndex", [loanId]);
+
+            expect(creditLine.principal.toString()).to.equal("0");
+            expect(creditLine.accrualBlockNumber.toString()).to.equal("31");
+            expect(creditLine.borrowIndex.toString()).to.equal(borrowIndex.toString());
+            expect(creditLine.isClosed).to.equal(true);
+        });
     });
 
     describe("repayBehalf", () => {

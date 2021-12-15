@@ -92,3 +92,9 @@ templates:
           handler: handleLoanCreation
         - event: CreditLineClosed(indexed uint256)
           handler: handleLoanClose
+        - event: Borrowed(indexed uint256,uint256)
+          handler: handlePoolBorrow
+        - event: Repayed(indexed uint256,uint256,uint256)
+          handler: handlePoolRepay
+        - event: AssetUnlocked(indexed uint256)
+          handler: handlePoolAssetUnlock

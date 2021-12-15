@@ -8,11 +8,15 @@ async function main() {
     const assetsFactory = "";
     const amptToken = "";
 
-    await addContracts(controller, interestRate, assetsFactory, amptToken);
+    const daiContract = "";
+    const usdcContract = "";
+    const usdtContract = "";
+
+    await addContracts(controller, interestRate, assetsFactory, amptToken, daiContract, usdcContract, usdtContract);
 }
 
-async function addContracts(controller, interestRate, assetsFactory, amptToken) {
-    if (controller === "" || interestRate === "" || assetsFactory === "" || amptToken === "") {
+async function addContracts(controller, interestRate, assetsFactory, amptToken, daiContract, usdcContract, usdtContract) {
+    if (controller === "" || interestRate === "" || assetsFactory === "" || amptToken === "" || daiContract === "" || usdcContract === "" || usdtContract === "") {
         return;
     }
 
@@ -21,6 +25,10 @@ async function addContracts(controller, interestRate, assetsFactory, amptToken) 
     await Controller._setInterestRateModel(interestRate);
     await Controller._setAssetsFactory(assetsFactory);
     await Controller._setAmptContract(amptToken);
+
+    await Controller.addStableCoin(daiContract);
+    await Controller.addStableCoin(usdcContract);
+    await Controller.addStableCoin(usdtContract);
 }
 
 main()

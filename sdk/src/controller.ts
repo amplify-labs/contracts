@@ -470,6 +470,44 @@ export async function getBorrowReward(
     return result.toString();
 }
 
+/**
+ * Get fees amount
+ * @returns {string} Returns a string array of the amounts.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.getFeesAmount();
+ *   console.log('reward:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getFeesAmount(options: CallOptions = {}): Promise<string[]> {
+    await netId(this);
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+    const controllerAddr = address[this._network.name].Controller;
+
+    const lossProvisionPoolAddr = await eth.read(controllerAddr, 'provisionPool', [], trxOptions);
+
+    const lossTrxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.LossProvisionPool,
+        ...options
+    }
+
+    let result = await eth.read(lossProvisionPoolAddr, 'lossProvisionFee', [], lossTrxOptions);
+    const lossProvisionFee = result.toString();
+
+    result = await eth.read(lossProvisionPoolAddr, 'buyBackProvisionFee', [], lossTrxOptions);
+    const treasuryFee = result.toString();
+
+    return [lossProvisionFee, treasuryFee];
+}
+
 export type ControllerInterface = {
     submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, options?: CallOptions) => Promise<TrxResponse>;
     withdrawLenderDeposit: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
@@ -481,4 +519,5 @@ export type ControllerInterface = {
     getTotalBorrowedBalance(borrower: string, options?: CallOptions): Promise<string[]>;
     getSupplyReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
     getBorrowReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
+    getFeesAmount(options?: CallOptions): Promise<string[]>;
 }
