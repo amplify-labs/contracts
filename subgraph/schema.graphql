@@ -10,6 +10,7 @@ type Pool @entity {
     createdAt: BigInt!
     assetsLocked: [Asset!]!
     members: [Bytes!]!
+    applications: [Application!]! @derivedFrom(field: "pool")
 }
 
 enum PoolAccess {
@@ -60,6 +61,26 @@ type Asset @entity {
     isRedeemed: Boolean!
     uploadedAt: BigInt!
     loanInfo: Loan
+}
+
+enum ApplicationStatus {
+    NOT_LISTED
+    WHITELISTED
+    BLACKLISTED
+}
+
+type Application @entity {
+    id: ID!
+    pool: Pool!
+    account: Bytes!
+    status: ApplicationStatus!
+}
+
+type Borrower @entity {
+    id: ID!
+    status: ApplicationStatus!
+    pools: [Pool!]!
+    whitelists: [Bytes!]!
 }
 
 # voting info

@@ -59,12 +59,27 @@ dataSources:
       file: ./src/mappings/controller.ts
       entities:
         - Pool
+        - Borrower
+        - Application
       abis:
         - name: ControllerAbi
           file: ./abis/Controller.json
       eventHandlers:
         - event: PoolCreated(indexed address,indexed address,address,string,uint256,uint8)
           handler: handlePoolCreation
+        - event: BorrowerCreated(address)
+          handler: handleBorrowerCreation
+        - event: BorrowerWhitelisted(address)
+          handler: handleBorrowerWhitelist
+        - event: BorrowerBlacklisted(address)
+          handler: handleBorrowerBlacklist
+        - event: LenderCreated(address,address)
+          handler: handleLenderCreation
+        - event: LenderWhitelisted(address,address)
+          handler: handleLenderWhitelist
+        - event: LenderBlacklisted(address,address)
+          handler: handleLenderBlacklist
+
 templates:
   - name: Pool
     kind: "ethereum/contract"

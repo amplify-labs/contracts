@@ -383,14 +383,14 @@ export async function getLenderBalance(
 
 /**
  * Get borrower debt amount without penalty
-* @param {string} borrower Borrower address.
+* @param {string} loanId Loan ID.
 * @param {string} pool Pool address.
  * @returns {string} Returns a string of the numeric total for funds to be repayed.
  *
  * @example
  * ```
  * (async function () {
- *   const amount = await amplify.getBorrowerDebtAmount('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
+ *   const amount = await amplify.getBorrowerDebtAmount('1','0x916cCC0963dEB7BEA170AF7822242A884d52d4c7');
  *   console.log('Borrowed:', amount);
  * })().catch(console.error);
  * ```
@@ -466,6 +466,6 @@ export interface PoolInterface {
     unlockAsset(pool: string, loanId: string, options?: CallOptions): Promise<TrxResponse>;
 
     getLenderBalance(lender: string, pool: string): Promise<string>;
-    getBorrowerDebtAmount(borrower: string, pool: string): Promise<string[]>;
+    getBorrowerDebtAmount(loanId: string, pool: string): Promise<string[]>;
     poolLpToken(pool: string, options?: CallOptions): Promise<string>;
 }

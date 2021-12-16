@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 21.284 Kbytes
+/// @dev size: 21.282 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -35,7 +35,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     event BorrowerWhitelisted(address borrower);
     event BorrowerBlacklisted(address borrower);
 
-    event LenderCreated(address lender);
+    event LenderCreated(address lender, address pool);
     event LenderWhitelisted(address lender, address borrower);
     event LenderBlacklisted(address lender, address borrower);
     
@@ -49,6 +49,11 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     function _deployPoolLibrary() internal virtual {
         _poolLibrary = address(new Pool());
     }
+
+    function getBorrowerPools(address _borrower) external view returns(address[] memory) {
+        return borrowerPools[_borrower];
+    }
+
 
     function submitBorrower() external returns (uint256) {
         transferAMPTDeposit(msg.sender);
@@ -80,7 +85,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
             application.mapIndex = poolApplications[pool].length;
 
             poolApplications[pool].push(application);
-            emit LenderCreated(msg.sender);
+            emit LenderCreated(msg.sender, pool);
             
             assert(poolI.stableCoin().transferFrom(msg.sender, address(this), deposit));
         }

@@ -35,7 +35,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
     mapping(uint256 => PenaltyInfo) public penaltyInfo;
 
     mapping(uint256 => bool) public lockedAssetsIds;
-    mapping(address => uint256[]) loansIdsByAddress;
+    mapping(address => uint256[]) internal loansIdsByAddress;
 
     event CreditLineOpened(uint256 indexed loanId, uint256 indexed tokenId, address borrower, uint256 amount, uint256 maturity);
     event CreditLineClosed(uint256 indexed loanId);
@@ -98,6 +98,10 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
     function borrowerSnapshot(uint256 loanId) external view returns (uint256, uint256) {
         (,uint256 penaltyAmount) = getPenaltyIndexAndFee(loanId);
         return (borrowBalanceSnapshot(loanId), penaltyAmount);
+    }
+
+    function getBorrowerLoans(address _borrower) external view returns(uint256[] memory) {
+        return loansIdsByAddress[_borrower];
     }
 
     function createCreditLineInternal(address borrower, uint256 tokenId, uint256 borrowCap, uint256 interestRate, uint256 maturity) internal returns (uint256) {

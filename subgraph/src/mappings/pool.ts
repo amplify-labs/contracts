@@ -32,12 +32,6 @@ export function handlePoolLend(event: Lend): void {
 
     pool.totalDeposited = pool.totalDeposited.plus(event.params.amount);
 
-    if (!pool.members.includes(event.params.account)) {
-        let currentMembers = pool.members;
-        currentMembers.push(event.params.account);
-        pool.members = currentMembers;
-    }
-
     handleAddTransaction(
         event.transaction.hash.toHex(),
         "LEND",

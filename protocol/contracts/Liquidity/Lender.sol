@@ -10,7 +10,7 @@ import "../utils/Exponential.sol";
 
 abstract contract Lendable is ReentrancyGuard, NonZeroAddressGuard, Exponential, TokenErrorReporter {
 
-    uint256 public constant initialExchangeRate = 2e16;
+    uint256 internal constant initialExchangeRate = 2e16;
     uint256 public minDeposit;
 
     PoolToken public lpToken;

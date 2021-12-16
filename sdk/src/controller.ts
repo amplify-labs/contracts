@@ -64,6 +64,40 @@ export async function submitLenderApplication(pool: string, depositAmount: strin
     return eth.trx(controllerAddr, 'requestPoolWhitelist', parameters, trxOptions);
 }
 
+/**
+ * Submit the borrower application
+ *
+ * @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
+ *
+ * @returns {object} Returns an Ethers.js transaction object of the submitBorrowerApplication
+ *     transaction.
+ *
+ * @example
+ * ```
+ * const amplify = Amplify.createInstance(window.ethereum);
+ *
+ * (async function () {
+ *   const trx = await amplify.submitBorrowerApplication('0x....0a');
+ *   console.log('Ethers.js transaction object', trx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function submitBorrowerApplication(options?: CallOptions): Promise<TrxResponse> {
+    await netId(this);
+
+    const controllerAddr = address[this._network.name].Controller;
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    return eth.trx(controllerAddr, 'submitBorrower', [], trxOptions);
+}
+
 
 /**
  * Withdraw tokens deposited during application
@@ -350,11 +384,11 @@ export async function getTotalBorrowedBalance(
     }
 
     const controllerAddr = address[this._network.name].Controller;
-    const borrowerPools = await eth.read(controllerAddr, "borrowerPools", [account], controllerOptions);
+    const borrowerPools = await eth.read(controllerAddr, "getBorrowerPools", [account], controllerOptions);
 
     let loanIds = {};
     for (let i = 0; i < borrowerPools.length; i++) {
-        const _loanIds = await eth.read(borrowerPools[i], "loansIdsByAddress", [account], poolOptions);
+        const _loanIds = await eth.read(borrowerPools[i], "getBorrowerLoans", [account], poolOptions);
         loanIds = Object.assign(loanIds, {
             [borrowerPools[i]]: _loanIds
         });
@@ -510,6 +544,7 @@ export async function getFeesAmount(options: CallOptions = {}): Promise<string[]
 
 export type ControllerInterface = {
     submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, options?: CallOptions) => Promise<TrxResponse>;
+    submitBorrowerApplication: (options?: CallOptions) => Promise<TrxResponse>;
     withdrawLenderDeposit: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
     createPool: (name: string, minDeposit: string | number | BigNumber, stableCoin: string, poolAccess: 0 | 1, options?: CallOptions) => Promise<TrxResponse>;
     claimRewards(account: string, options?: CallOptions): Promise<TrxResponse>;
