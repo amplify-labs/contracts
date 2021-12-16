@@ -394,15 +394,23 @@ export async function getTotalBorrowedBalance(
         });
     }
 
+    const promises: Array<Promise<Array<string>>> = [];
+    for (let i = 0; i < Object.keys(loanIds).length; i++) {
+        const key = Object.keys(loanIds)[i];
+        const values = loanIds[key];
+
+        values.forEach((loan: BigNumber) => {
+            promises.push(eth.read(key, "borrowerSnapshot", [loan], poolOptions))
+        });
+    }
+
     let totalBorrowedBalance = BigNumber.from(0);
     let totalPenalties = BigNumber.from(0);
-    Object.entries(loanIds).forEach(([pool, loans]: [string, string[]]) => {
-        loans.forEach(async (loan) => {
-            const [t, p] = await eth.read(pool, "borrowerSnapshot", [loan], poolOptions);
 
-            totalBorrowedBalance = totalBorrowedBalance.add(t);
-            totalPenalties = totalPenalties.add(p);
-        });
+    const values = await Promise.all(promises);
+    values.forEach(([t, p]) => {
+        totalBorrowedBalance = totalBorrowedBalance.add(t);
+        totalPenalties = totalPenalties.add(p);
     });
 
     return [totalBorrowedBalance.toString(), totalPenalties.toString()];
