@@ -68,6 +68,7 @@ async function deployAMPTToken(admin) {
 
 async function whitelistBorrower(amptToken, controller, signer1) {
     const depositAmount = ethers.utils.parseEther("10");
+    const rating = ethers.utils.parseEther("1");
 
     // transfer tokens to the signer
     await send(amptToken, "transfer", [signer1.address, depositAmount]);
@@ -78,7 +79,7 @@ async function whitelistBorrower(amptToken, controller, signer1) {
     const connectedController = await connect(controller, signer1);
     await send(connectedController, "submitBorrower");
 
-    await send(controller, "whitelistBorrower", [signer1.address, 0, 1]);
+    await send(controller, "whitelistBorrower", [signer1.address, 0, rating]);
 }
 
 const ErrorCode = {

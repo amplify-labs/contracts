@@ -103,7 +103,7 @@ templates:
           handler: handlePoolLend
         - event: Redeem(indexed address,uint256,uint256)
           handler: handlePoolRedeem
-        - event: CreditLineOpened(indexed uint256,indexed uint256,address,uint256,uint256)
+        - event: CreditLineOpened(indexed uint256,indexed uint256,address,uint256,uint256,uint256)
           handler: handleLoanCreation
         - event: CreditLineClosed(indexed uint256)
           handler: handleLoanClose

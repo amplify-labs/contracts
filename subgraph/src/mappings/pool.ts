@@ -82,6 +82,7 @@ export function handleLoanCreation(event: CreditLineOpened): void {
         loan.borrower = event.params.borrower;
         loan.available = event.params.amount;
         loan.maturity = event.params.maturity;
+        loan.interestRate = event.params.interestRate;
         loan.borrowCeiling = event.params.amount;
 
         loan.asset = event.params.tokenId.toHex()

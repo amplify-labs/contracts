@@ -25,6 +25,7 @@ type Loan @entity {
     borrowCeiling: BigInt!
     available: BigInt!
     maturity: BigInt!
+    interestRate: BigInt!
     borrower: Bytes!
     pool: Pool!
     asset: Asset!

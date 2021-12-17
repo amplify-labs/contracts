@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 21.282 Kbytes
+/// @dev size: 21.474 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -336,7 +336,9 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
         updateSupplyIndexInternal(pool);
         distributeSupplierTokens(pool, lender);
-        lenderJoinedPools[lender].push(pool);
+        if (lenderJoinedPoolsMap[lender][pool]) {
+            lenderJoinedPools[lender].push(pool);
+        }
 
         return uint256(Error.NO_ERROR);
     }
@@ -434,7 +436,21 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         require(vars.maturity >= getBlockTimestamp(), toString(Error.MATURITY_DATE_EXPIRED));
         require(vars.interestRate > 0, toString(Error.NOT_ALLOWED_TO_CREATE_CREDIT_LINE));
 
+        vars.interestRate = calculateBorrowInterestRate(borrower, vars.interestRate);
         return (uint256(Error.NO_ERROR), vars.assetValue, vars.maturity, vars.interestRate, vars.advanceRate);
+    }
+
+    struct InterestRateLocalVars {
+        uint256 interestRateScaled;
+        uint256 interestProduct;
+    }
+    function calculateBorrowInterestRate(address borrower, uint256 interestRate) internal view returns (uint256) {
+        InterestRateLocalVars memory vars;
+
+        vars.interestRateScaled = div_(mul_(interestRate, expScale), 100); // interest rate scaled in %
+        vars.interestProduct = div_(mul_(vars.interestRateScaled, borrowers[borrower].ratingMantissa), expScale); // interest product mantissa
+
+        return add_(vars.interestRateScaled, vars.interestProduct);
     }
 
     // Internal function

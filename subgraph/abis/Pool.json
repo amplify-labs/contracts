@@ -94,6 +94,12 @@
                 "internalType": "uint256",
                 "name": "maturity",
                 "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "interestRate",
+                "type": "uint256"
             }
         ],
         "name": "CreditLineOpened",

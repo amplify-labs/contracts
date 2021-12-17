@@ -18,6 +18,8 @@ describe("Pool", () => {
     const minDeposit = ethers.utils.parseEther("1");
     let controller, stableCoin, amptToken, assetsFactory, root, signer1, signer2, signer3, signer4;
 
+    const borrowerRating = ethers.utils.parseEther("1");
+
     before(async () => {
         [root, signer1, signer2, signer3, signer4] = await ethers.getSigners();
         [controller, stableCoin, amptToken, assetsFactory] = await getController(root);
@@ -202,7 +204,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, lendAmount]);
             await send(connectedController, "submitBorrower");
 
-            await send(controller, "whitelistBorrower", [borrower.address, 0, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, 0, borrowerRating]);
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
 
             // transfer some tokens to the signer for lending
@@ -221,7 +223,7 @@ describe("Pool", () => {
 
             let tokenAmount = await call(pool, "balanceOf", [signer1.address]);
 
-            expect(await send(connectedPool, "redeem", [tokenAmount.add(2)])).to.equal(vmError(poolError.AMOUNT_HIGHER));
+            expect(await send(connectedPool, "redeem", [tokenAmount.add(2)])).to.equal(vmError2(poolError.AMOUNT_HIGHER));
         });
 
         it('should redeem signer tokens', async () => {
@@ -280,7 +282,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, lendAmount]);
             await send(connectedController, "submitBorrower");
 
-            await send(controller, "whitelistBorrower", [borrower.address, 0, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, 0, borrowerRating]);
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
 
             // transfer some tokens to the signer for lending
@@ -299,7 +301,7 @@ describe("Pool", () => {
 
             let amount = await call(pool, "balanceOfUnderlying", [signer1.address]);
 
-            expect(await send(connectedPool, "redeemUnderlying", [amount.add(2)])).to.equal(vmError(poolError.AMOUNT_HIGHER));
+            expect(await send(connectedPool, "redeemUnderlying", [amount.add(2)])).to.equal(vmError2(poolError.AMOUNT_HIGHER));
         });
 
         it('should redeem signer tokens', async () => {
@@ -470,7 +472,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -585,6 +587,9 @@ describe("Pool", () => {
             expect(creditLine.lockedAsset.toString()).to.equal(tokenId.toString());
             expect(creditLine.accrualBlockNumber.toString()).to.equal(blockNumber.toString());
             expect(creditLine.isClosed).to.equal(false);
+            expect(creditLine.interestRate.toString()).to.equal(
+                ethers.utils.parseUnits("20", 16).toString()
+            );
 
             expect(penaltyInfo.maturity.toString()).to.equal(maturity.toString());
             expect(penaltyInfo.index.toString()).to.equal(exp.toString());
@@ -635,7 +640,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -693,7 +698,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "closeCreditLine", [loanId])
-            ).to.equal(vmError2("Debt should be 0"))
+            ).to.equal(vmError("Debt should be 0"))
         });
     });
 
@@ -717,7 +722,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -812,7 +817,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -919,7 +924,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1003,7 +1008,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1054,7 +1059,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1105,7 +1110,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1133,7 +1138,9 @@ describe("Pool", () => {
         });
 
         it("should return correct value", async () => {
-            expect((await call(pool, "totalInterestRate", [])).toString()).to.equal(ethers.utils.parseEther("10").div(100).toString());
+            expect(
+                (await call(pool, "totalInterestRate", [])).toString()
+            ).to.equal(ethers.utils.parseEther("20").div(100).toString());
         });
     });
 
@@ -1156,7 +1163,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1230,7 +1237,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1298,7 +1305,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1339,9 +1346,13 @@ describe("Pool", () => {
             let borrowIndex = await call(pool, "getBorrowIndex", [loanId]);
             let creditLine = await call(pool, "creditLines", [0]);
 
-            let interestRate = ethers.utils.parseUnits("1", 16).mul(10).div(365);
+            let assetInterestRate = ethers.utils.parseUnits("10", 16);
 
-            let interestFactor = interestRate.mul(blocksDelta);
+            let interestProduct = assetInterestRate.mul(borrowerRating).div(exp);
+            let interestRate = interestProduct.add(assetInterestRate);
+            let interestRatePerYear = interestRate.div(365);
+
+            let interestFactor = interestRatePerYear.mul(blocksDelta);
             let newBorrowIndex = interestFactor.mul(creditLine.borrowIndex).div(exp).add(creditLine.borrowIndex);
 
             expect(borrowIndex.toString()).to.equal(newBorrowIndex.toString());
@@ -1367,7 +1378,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
@@ -1446,7 +1457,7 @@ describe("Pool", () => {
             await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
 
             await send(connectedController, "submitBorrower");
-            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, 1]);
+            await send(controller, "whitelistBorrower", [borrower.address, lendAmount, borrowerRating]);
 
             // create pool
             pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);

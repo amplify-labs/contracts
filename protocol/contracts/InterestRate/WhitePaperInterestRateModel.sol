@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 2.444 Kbytes
+/// @dev size: 2.426 Kbytes
 pragma solidity ^0.8.0;
 
 import "./InterestRateModel.sol";
@@ -44,7 +44,7 @@ contract WhitePaperInterestRateModel is InterestRateModel, Ownable {
      * @dev See {InterestRateModel-getBorrowRate}.
      */
     function getBorrowRate(uint256 interestRate) external override view returns (uint256) { 
-        return interestRate * 1e16 / blocksPerYear;
+        return interestRate / blocksPerYear;
     }
 
     /**

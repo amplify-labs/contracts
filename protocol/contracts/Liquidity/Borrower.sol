@@ -37,7 +37,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
     mapping(uint256 => bool) public lockedAssetsIds;
     mapping(address => uint256[]) internal loansIdsByAddress;
 
-    event CreditLineOpened(uint256 indexed loanId, uint256 indexed tokenId, address borrower, uint256 amount, uint256 maturity);
+    event CreditLineOpened(uint256 indexed loanId, uint256 indexed tokenId, address borrower, uint256 amount, uint256 maturity, uint256 interestRate);
     event CreditLineClosed(uint256 indexed loanId);
     event Borrowed(uint256 indexed loanId, uint256 _amount);
     event Repayed(uint256 indexed loanId, uint256 _amount, uint256 penaltyAmount);
@@ -67,7 +67,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
             total += creditLines[i].interestRate;
         }
         if (total != 0){
-            return total * 1e16 / creditLines.length;
+            return total / creditLines.length;
         }
         return total;
     }
@@ -130,7 +130,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
             isOpened: false
         });
 
-        emit CreditLineOpened(loanId, tokenId, borrower, borrowCap, maturity);
+        emit CreditLineOpened(loanId, tokenId, borrower, borrowCap, maturity, interestRate);
 
         _loanIds.increment();
         return uint256(Error.NO_ERROR);
