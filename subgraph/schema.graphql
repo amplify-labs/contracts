@@ -10,6 +10,7 @@ type Pool @entity {
     createdAt: BigInt!
     assetsLocked: [Asset!]!
     members: [Bytes!]!
+    joins: [Bytes!]
     applications: [Application!]! @derivedFrom(field: "pool")
 }
 

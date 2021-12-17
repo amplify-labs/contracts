@@ -550,6 +550,31 @@ export async function getFeesAmount(options: CallOptions = {}): Promise<string[]
     return [lossProvisionFee, treasuryFee];
 }
 
+
+/**
+ * Get earnest amount
+ * @returns {string} Returns a string array of the earnest amount.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const amount = await amplify.getEarnestAmount();
+ *   console.log('earnest:', amount);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getEarnestAmount(options: CallOptions = {}): Promise<string> {
+    await netId(this);
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+    const controllerAddr = address[this._network.name].Controller;
+    const result = await eth.read(controllerAddr, 'amptDepositAmount', [], trxOptions)
+    return result.toString();
+}
+
 export type ControllerInterface = {
     submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, options?: CallOptions) => Promise<TrxResponse>;
     submitBorrowerApplication: (options?: CallOptions) => Promise<TrxResponse>;
@@ -563,4 +588,5 @@ export type ControllerInterface = {
     getSupplyReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
     getBorrowReward(address: string, pool?: string, options?: CallOptions): Promise<string>;
     getFeesAmount(options?: CallOptions): Promise<string[]>;
+    getEarnestAmount(options?: CallOptions): Promise<string>;
 }

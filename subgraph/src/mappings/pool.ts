@@ -22,6 +22,7 @@ export function createNewPool(event: PoolCreated): void {
     pool.createdAt = event.block.timestamp;
     pool.assetsLocked = [];
     pool.members = [];
+    pool.joins = [];
 
     pool.save();
 }
@@ -31,6 +32,12 @@ export function handlePoolLend(event: Lend): void {
     let pool = Pool.load(context.getBytes("pool").toHex());
 
     pool.totalDeposited = pool.totalDeposited.plus(event.params.amount);
+
+    if (!pool.joins.includes(event.params.account)) {
+        let currentJoins = pool.joins;
+        currentJoins.push(event.params.account);
+        pool.joins = currentJoins;
+    }
 
     handleAddTransaction(
         event.transaction.hash.toHex(),
