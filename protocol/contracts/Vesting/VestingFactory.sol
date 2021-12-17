@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 1.793 Kbytes
+/// @dev size: 1.871 Kbytes
 pragma solidity 0.8.4;
 
 import "./Vesting.sol";
 import "../proxy/Clones.sol";
 import "../security/Ownable.sol";
+import "../utils/NonZeroAddressGuard.sol";
 
 /// @title Vesting instance factory
 /// @notice Create vesting schedule instance contract for an organization
-contract VestingFactory is Ownable {
+contract VestingFactory is Ownable, NonZeroAddressGuard {
     struct Instance {
         address instanceAddr;
         address owner;
@@ -29,7 +30,6 @@ contract VestingFactory is Ownable {
     constructor(address _libraryAddress) {
         require(_libraryAddress != address(0), "Library address cannot be 0");
 
-        owner = msg.sender;
         libraryAddress = _libraryAddress;
     }
 
@@ -49,7 +49,7 @@ contract VestingFactory is Ownable {
      * @notice Deploy a new vesting contract
      * @param _token Address of the ERC20 token being distributed
     */
-    function createVestingContract(IERC20 _token) external virtual {
+    function createVestingContract(IERC20 _token) external virtual nonZeroAddress(address(_token)) {
         address _contract = Clones.createClone(libraryAddress);
 
         Vesting(_contract).initialize(msg.sender, _token);

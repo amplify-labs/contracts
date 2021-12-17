@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 6.856 Kbytes
+/// @dev size: 6.986 Kbytes
 pragma solidity 0.8.4;
 
 import { IERC20 } from "../ERC20/IERC20.sol";
@@ -38,8 +38,8 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
     /// @notice Mapping of addresses to lists of their entries IDs
     mapping(address => uint256[]) public entryIdsByRecipient;
 
-    /// @dev Flag to prevent re-entrancy
-    bool private _entered;
+    /// @dev Flag to prevent reinitialization
+    bool private _initialized;
 
     event EntryCreated(uint256 indexed entryId, address recipient, uint256 amount, uint256 start, uint256 end, uint256 cliff);
     event EntryFired(uint256 indexed entryId);
@@ -50,11 +50,12 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
      * @param owner_ owner of the contract
      * @param token_ address of the ERC20 token
      */
-    function initialize(address owner_, IERC20 token_) external nonZeroAddress(owner_) {
+    function initialize(address owner_, IERC20 token_) external nonZeroAddress(owner_) nonZeroAddress(address(token_)) {
+        require(!_initialized, "Already initialized");
         owner = owner_;
         token = token_;
 
-        _entered = false;
+        _initialized = true;
     }
 
     struct EntryVars {
@@ -69,7 +70,7 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
 
     /**
      * @notice Create new vesting entry
-     * @notice A transfer is used to bring tokens into the Vesting contract so pre-approval is required
+     * @notice A transfer made by AMPT Token holder is prior to bring tokens into the Vesting contract
      * @param entry beneficiary of the vested tokens
      * @return boolean indicating success
     */
@@ -88,7 +89,7 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
 
     /**
      * @notice Create new vesting entries in a batch
-     * @notice A transfer is used to bring tokens into the Vesting contract so pre-approval is required
+     * @notice A transfer made by AMPT Token holder is prior to bring tokens into the Vesting contract
      * @param _entries array of beneficiaries of the vested tokens
     */
     function createEntries(EntryVars[] calldata _entries) external onlyOwner nonReentrant returns (bool){
@@ -121,7 +122,8 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
      * @dev Must be called directly by the beneficiary assigned the tokens in the entry
     */
     function withdraw(address destination) external onlyOwner nonZeroAddress(destination) returns (bool) {
-        return token.transfer(destination, this.balanceOf());
+        require(token.transfer(destination, this.balanceOf()), "transfer failed");
+        return true;
     }
 
     /**
@@ -216,7 +218,7 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
         return block.timestamp;
     }
 
-    function _balanceOf(uint256 _entryId) public view returns (uint256) {
+    function _balanceOf(uint256 _entryId) internal view returns (uint256) {
         Entry storage entry = entries[_entryId];
 
         if (entry.amount == 0) { // entry not found
@@ -236,7 +238,7 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
         return vested;
     }
 
-    function _lockedOf(uint256 _entryId) public view returns (uint256) {
+    function _lockedOf(uint256 _entryId) internal view returns (uint256) {
         Entry storage entry = entries[_entryId];
         if (entry.amount == 0) { // entry not found
             return 0;
