@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 21.474 Kbytes
+/// @dev size: 21.795 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -108,6 +108,8 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
     function createPool(string memory name, uint256 minDeposit, address stableCoin, Pool.Access poolAccess) external nonReentrant {
         require(borrowers[msg.sender].whitelisted, "Only whitelisted user can create pool");
+        require(_stableCoins.contains(stableCoin), "Stable coin not supported");
+
         address pool = Clones.createClone(_poolLibrary);
 
         Pool _poolI = Pool(pool);
@@ -221,7 +223,8 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     }
 
     function transferFunds(address destination) external onlyOwner nonZeroAddress(destination) returns (bool) {
-        return amptToken.transfer(destination, amptToken.balanceOf(address(this)));
+        require(amptToken.transfer(destination, amptToken.balanceOf(address(this))), "transfer failed");
+        return true;
     }
 
     function whitelistBorrower(address borrower, uint256 debtCeiling, uint256 rating) external onlyOwner returns (uint256) {
@@ -336,8 +339,9 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
         updateSupplyIndexInternal(pool);
         distributeSupplierTokens(pool, lender);
-        if (lenderJoinedPoolsMap[lender][pool]) {
+        if (!lenderJoinedPoolsMap[lender][pool]) {
             lenderJoinedPools[lender].push(pool);
+            lenderJoinedPoolsMap[lender][pool] = true;
         }
 
         return uint256(Error.NO_ERROR);

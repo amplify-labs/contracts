@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 1.871 Kbytes
+/// @dev size: 1.943 Kbytes
 pragma solidity 0.8.4;
 
 import "./Vesting.sol";
@@ -20,6 +20,7 @@ contract VestingFactory is Ownable, NonZeroAddressGuard {
     address public libraryAddress;
 
     event InstanceCreated(address indexed instance, address owner, address token);
+    event LibraryChanged(address oldLibrary, address newLibrary);
 
     /**
      * @notice Contract constructor
@@ -39,10 +40,12 @@ contract VestingFactory is Ownable, NonZeroAddressGuard {
      * @param _libraryAddress `Vesting` contract address
      */
     function setLibraryAddress(address _libraryAddress) external onlyOwner {
+        address currentLibrary = libraryAddress;
         require(_libraryAddress != address(0), "Library address cannot be 0");
-        require(_libraryAddress != libraryAddress, "Library address cannot be the same as the current one");
+        require(_libraryAddress != currentLibrary, "Library address cannot be the same as the current one");
 
         libraryAddress = _libraryAddress;
+        emit LibraryChanged(currentLibrary, libraryAddress);
     }
 
     /** 
