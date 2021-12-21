@@ -143,6 +143,65 @@ export async function withdrawLenderDeposit(pool: string, options?: CallOptions)
     return eth.trx(controllerAddr, 'withdrawApplicationDeposit', parameters, trxOptions);
 }
 
+/**
+ * Change lender status during application
+ *
+ * @param {string} lender Lender address
+ * @param {string} pool Pool contract address
+ * @param {string} status New lender status
+ * @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
+ *
+ * @returns {object} Returns an Ethers.js transaction object of the changeLenderStatus
+ *     transaction.
+ *
+ * @example
+ * ```
+ * const amplify = Amplify.createInstance(window.ethereum);
+ *
+ * (async function () {
+ *   const trx = await amplify.changeLenderStatus('0x....0a', '0x....0a', 'whitelist');
+ *   console.log('Ethers.js transaction object', trx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function changeLenderStatus(lender: string, pool: string, status: string, options?: CallOptions): Promise<TrxResponse> {
+    await netId(this);
+    const errorPrefix = 'Amplify [changeLenderStatus] | ';
+
+    if (
+        typeof lender !== 'string' &&
+        !ethers.utils.isAddress(lender)
+    ) {
+        throw Error(errorPrefix + 'Argument `lender` must be an address');
+    }
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    if (status === 'whitelist') {
+        return eth.trx(controllerAddr, 'whitelistLender', [lender, pool], trxOptions);
+    } else if (status === 'blacklist') {
+        return eth.trx(controllerAddr, 'blacklistLender', [lender], trxOptions);
+    } else {
+        throw Error(errorPrefix + 'Argument `status` must be either `whitelist` or `blacklist`');
+    }
+
+}
+
 
 /**
  * Create a borrrowing pool
@@ -579,6 +638,7 @@ export type ControllerInterface = {
     submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, options?: CallOptions) => Promise<TrxResponse>;
     submitBorrowerApplication: (options?: CallOptions) => Promise<TrxResponse>;
     withdrawLenderDeposit: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
+    changeLenderStatus: (lender: string, pool: string, status: string, options?: CallOptions) => Promise<TrxResponse>;
     createPool: (name: string, minDeposit: string | number | BigNumber, stableCoin: string, poolAccess: 0 | 1, options?: CallOptions) => Promise<TrxResponse>;
     claimRewards(account: string, options?: CallOptions): Promise<TrxResponse>;
     getStableCoins(options?: CallOptions): Promise<string[]>;

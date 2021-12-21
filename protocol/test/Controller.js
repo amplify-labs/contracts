@@ -18,6 +18,8 @@ const { PoolType, createPool } = require("./_pool");
 describe("Controller", () => {
     let root, signer1, signer2;
 
+    const borrowerRating = ethers.utils.parseEther("1");
+
     beforeEach(async () => {
         [root, signer1, signer2] = await ethers.getSigners();
     })
@@ -412,7 +414,7 @@ describe("Controller", () => {
             let borrower = await call(controller, "borrowers", [signer1.address]);
 
             expect(borrower.debtCeiling.toString()).to.equal("0");
-            expect(borrower.ratingMantissa.toString()).to.equal("1");
+            expect(borrower.ratingMantissa.toString()).to.equal(borrowerRating.toString());
             expect(borrower.whitelisted).to.equal(true);
             expect(borrower.created).to.equal(true);
         });
@@ -445,7 +447,7 @@ describe("Controller", () => {
             let borrower = await call(controller, "borrowers", [signer1.address]);
 
             expect(borrower.debtCeiling.toString()).to.equal("0");
-            expect(borrower.ratingMantissa.toString()).to.equal("1");
+            expect(borrower.ratingMantissa.toString()).to.equal(borrowerRating.toString());
             expect(borrower.whitelisted).to.equal(false);
             expect(borrower.created).to.equal(true);
         });

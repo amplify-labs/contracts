@@ -11,7 +11,7 @@ type Pool @entity {
     assetsLocked: [Asset!]!
     members: [Bytes!]!
     joins: [Bytes!]
-    applications: [Application!]! @derivedFrom(field: "pool")
+    applications: [LenderApplication!]! @derivedFrom(field: "pool")
 }
 
 enum PoolAccess {
@@ -71,11 +71,14 @@ enum ApplicationStatus {
     BLACKLISTED
 }
 
-type Application @entity {
+type LenderApplication @entity {
     id: ID!
     pool: Pool!
     account: Bytes!
+    amount: BigInt!
     status: ApplicationStatus!
+    poolOwner: Borrower!
+    createdAt: BigInt!
 }
 
 type Borrower @entity {

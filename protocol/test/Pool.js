@@ -12,8 +12,6 @@ const timestamp = Math.floor(Date.now() / 1000);
 const maturity = timestamp + day * 40;
 
 
-
-
 describe("Pool", () => {
     const minDeposit = ethers.utils.parseEther("1");
     let controller, stableCoin, amptToken, assetsFactory, root, signer1, signer2, signer3, signer4;

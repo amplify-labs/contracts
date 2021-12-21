@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 21.795 Kbytes
+/// @dev size: 21.882 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -35,9 +35,10 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     event BorrowerWhitelisted(address borrower);
     event BorrowerBlacklisted(address borrower);
 
-    event LenderCreated(address lender, address pool);
+    event LenderCreated(address lender, address pool, uint256 amount);
     event LenderWhitelisted(address lender, address borrower);
     event LenderBlacklisted(address lender, address borrower);
+    event LenderDepositWithdrawn(address lender, address pool, uint256 amount);
     
     event DebtCeilingChanged(address borrower, uint newCeiling);
     event RatingChanged(address borrower, uint newRating);
@@ -72,12 +73,12 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
     function requestPoolWhitelist(address pool, uint256 deposit) external nonReentrant nonZeroAddress(pool) returns (uint256) {
         Pool poolI = Pool(pool);
-
         require(poolI.isInitialized(), "Pool is not initialized");
-        require(poolI.stableCoin().allowance(msg.sender, address(this)) >= deposit, "Lender does not approve allowance");
 
         Application storage application = poolApplicationsByLender[pool][msg.sender];
         if(!application.created) {
+            require(poolI.stableCoin().allowance(msg.sender, address(this)) >= deposit, "Lender does not approve allowance");
+            
             application.created = true;
 
             application.depositAmount = deposit;
@@ -85,7 +86,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
             application.mapIndex = poolApplications[pool].length;
 
             poolApplications[pool].push(application);
-            emit LenderCreated(msg.sender, pool);
+            emit LenderCreated(msg.sender, pool, deposit);
             
             assert(poolI.stableCoin().transferFrom(msg.sender, address(this), deposit));
         }
@@ -102,6 +103,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
             application.depositAmount = 0;
             poolApplications[pool][application.mapIndex] = application;
 
+            emit LenderDepositWithdrawn(msg.sender, pool, depositAmount);
             assert(Pool(pool).stableCoin().transfer(msg.sender, depositAmount));
         }
     }

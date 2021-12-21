@@ -73,12 +73,14 @@ dataSources:
           handler: handleBorrowerWhitelist
         - event: BorrowerBlacklisted(address)
           handler: handleBorrowerBlacklist
-        - event: LenderCreated(address,address)
+        - event: LenderCreated(address,address,uint256)
           handler: handleLenderCreation
         - event: LenderWhitelisted(address,address)
           handler: handleLenderWhitelist
         - event: LenderBlacklisted(address,address)
           handler: handleLenderBlacklist
+        - event: LenderDepositWithdrawn(address,address,uint256)
+          handler: handlerLenderWithrawn
 
 templates:
   - name: Pool

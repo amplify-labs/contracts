@@ -7,10 +7,11 @@ import {
     BorrowerBlacklisted,
     LenderCreated,
     LenderWhitelisted,
-    LenderBlacklisted
+    LenderBlacklisted,
+    LenderDepositWithdrawn
 } from '../../generated/Controller/ControllerAbi';
 import { Pool } from '../../generated/templates';
-import { Borrower, Application, Pool as PoolEntity } from '../../generated/schema';
+import { Borrower, LenderApplication, Pool as PoolEntity } from '../../generated/schema';
 import { createNewPool } from './pool';
 
 export function handlePoolCreation(event: PoolCreated): void {
@@ -74,14 +75,19 @@ function handleBorrowerPool(event: PoolCreated): void {
 // lender application entity
 export function handleLenderCreation(event: LenderCreated): void {
     let lenderId = createLenderId(event.params.lender.toHex(), event.params.pool.toHex());
-    let application = Application.load(lenderId);
+    let application = LenderApplication.load(lenderId);
 
     if (application == null) {
-        application = new Application(lenderId);
+        application = new LenderApplication(lenderId);
+
+        let pool = PoolEntity.load(event.params.pool.toHex());
 
         application.pool = event.params.pool.toHex();
+        application.poolOwner = pool.owner.toHex();
+        application.amount = event.params.amount;
         application.account = event.params.lender;
         application.status = "NOT_LISTED";
+        application.createdAt = event.block.timestamp;
 
         application.save();
     }
@@ -136,9 +142,20 @@ export function handleLenderBlacklist(event: LenderBlacklisted): void {
     borrower.save();
 }
 
+export function handleLenderWithdrawn(event: LenderDepositWithdrawn): void {
+    let lenderId = createLenderId(event.params.lender.toHex(), event.params.pool.toHex());
+
+    let application = LenderApplication.load(lenderId);
+
+    if (application !== null) {
+        application.amount = application.amount.minus(event.params.amount);
+        application.save();
+    }
+}
+
 function _changeLenderStatus(lender: string, pool: string, status: string): void {
     let lenderId = createLenderId(lender, pool);
-    let application = Application.load(lenderId);
+    let application = LenderApplication.load(lenderId);
 
     if (application !== null) {
         application.status = status;
