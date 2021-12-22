@@ -49,7 +49,8 @@ module.exports = {
     alphaSort: true,
     disambiguatePaths: false,
     runOnCompile: true,
-    strict: true,
+    strict: false,
+    exclude: ['PoolHarness', 'ControllerHarness']
   },
   docgen: {
     // The path to the docgen config file

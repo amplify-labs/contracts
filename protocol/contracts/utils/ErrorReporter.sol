@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 contract TokenErrorReporter {
     enum Error {
         NO_ERROR,
-        CONTROLLER_LEND_REJECTION,
-        CONTROLLER_REDEEM_REJECTION,
-        CONTROLLER_BORRROW_REJECTION,
-        CONTROLLER_REPAY_REJECTION,
-        CONTROLLER_CREATE_REJECTION,
+        C_LEND_REJECTION,
+        C_REDEEM_REJECTION,
+        C_BORRROW_REJECTION,
+        C_REPAY_REJECTION,
+        C_CREATE_REJECTION,
         INSUFFICIENT_FUNDS,
         AMOUNT_LOWER_THAN_0,
         AMOUNT_HIGHER,
@@ -22,7 +22,7 @@ contract TokenErrorReporter {
         LOAN_PENALTY_NOT_PAYED,
         WRONG_BORROWER,
         TRANSFER_FAILED,
-        TRANSFER_IN_RESERVE_POOL_FAILED,
+        LPP_TRANSFER_FAILED,
         POOL_NOT_FOUND
     }
 

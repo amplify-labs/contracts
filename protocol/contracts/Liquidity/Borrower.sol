@@ -210,7 +210,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
     }
     function repayInternal(uint256 loanId, address payer, address borrower, uint256 amount) internal onlyIfActive(loanId, borrower) nonReentrant returns (uint256) {
         uint256 allowed = repayAllowed(address(this), payer, borrower, amount);
-        require(allowed == 0, toString(Error.CONTROLLER_REPAY_REJECTION));
+        require(allowed == 0, toString(Error.C_REPAY_REJECTION));
 
         CreditLine storage creditLine = creditLines[loanId];
         PenaltyInfo storage _penaltyInfo = penaltyInfo[loanId];

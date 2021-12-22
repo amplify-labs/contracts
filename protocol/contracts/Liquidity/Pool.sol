@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 23.836 Kbytes
+/// @dev size: 24.033 Kbytes
 pragma solidity ^0.8.0;
 
 import "./Lender.sol";
@@ -13,9 +13,8 @@ import "../Controller/ControllerInterface.sol";
 import { IERC20Metadata } from "../ERC20/IERC20.sol";
 
 contract Pool is Ownable, Lendable, Borrowable {
-    string public name;
-
     bool public isInitialized;
+    string public name;
 
     ControllerInterface public controller;
     IERC20Metadata public stableCoin;
@@ -28,13 +27,12 @@ contract Pool is Ownable, Lendable, Borrowable {
 
     event AccessChanged(uint8 newAccess);
 
-    constructor() {}
-
     function initialize(address _admin, address _stableCoin, string memory _name, uint256 _minDeposit, Access _access) external {
         _initialize(_admin, _stableCoin, _name, _minDeposit, _access);
     }
 
     function _initialize(address _admin, address _stableCoin, string memory _name, uint256 _minDeposit, Access _access) internal nonReentrant {
+        require(!isInitialized, "already initialized");
         isInitialized = true;
 
         name = _name;
@@ -60,7 +58,12 @@ contract Pool is Ownable, Lendable, Borrowable {
 
     /// lender override methods
     function lend(uint256 amount) external returns (uint256) {
-        return lendInternal(msg.sender, amount);
+        return lendInternal(msg.sender, msg.sender, amount);
+    }
+    /// @dev Controller based function for whitelisted lenders
+    function _lend(uint256 amount, address lender) external returns (uint256) {
+        require(msg.sender == address(controller), "wrong address");
+        return lendInternal(msg.sender, lender, amount);
     }
 
     function redeem(uint256 tokens) external returns (uint256) {
@@ -112,7 +115,7 @@ contract Pool is Ownable, Lendable, Borrowable {
             vars.advanceRate
         ) = controller.createCreditLineAllowed(address(this), msg.sender, tokenId);
         if (vars.allowed != 0) {
-            return uint256(Error.CONTROLLER_CREATE_REJECTION);
+            return uint256(Error.C_CREATE_REJECTION);
         }
 
         vars.borrowCap = vars.assetValue * vars.advanceRate / 100;
@@ -297,7 +300,7 @@ contract Pool is Ownable, Lendable, Borrowable {
         ErrorReporter.check(uint256(vars.mathError));
 
         require(stableCoin.transfer(to, vars.amountWithoutFees), toString(Error.TRANSFER_FAILED));
-        require(stableCoin.transfer(controller.provisionPool.address, vars.feesAmount), toString(Error.TRANSFER_IN_RESERVE_POOL_FAILED));
+        require(stableCoin.transfer(controller.provisionPool.address, vars.feesAmount), toString(Error.LPP_TRANSFER_FAILED));
         return true;
     }
 

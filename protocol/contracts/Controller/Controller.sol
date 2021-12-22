@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 21.882 Kbytes
+/// @dev size: 21.910 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -100,8 +100,9 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
         if (application.created) {
             uint256 depositAmount = application.depositAmount;
-            application.depositAmount = 0;
-            poolApplications[pool][application.mapIndex] = application;
+            
+            delete poolApplications[pool][application.mapIndex];
+            delete poolApplicationsByLender[pool][msg.sender];
 
             emit LenderDepositWithdrawn(msg.sender, pool, depositAmount);
             assert(Pool(pool).stableCoin().transfer(msg.sender, depositAmount));
@@ -245,18 +246,25 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
     function whitelistLender(address _lender, address _pool) external returns (uint256) {
         Application storage application = poolApplicationsByLender[_pool][_lender];
-        require(application.created, toString(Error.LENDER_NOT_CREATED));
 
         address borrower = pools[_pool].owner;
         require(borrower == msg.sender, toString(Error.INVALID_OWNER));
 
         require(!borrowerWhitelists[borrower][_lender], toString(Error.ALREADY_WHITELISTED));
-
         borrowerWhitelists[borrower][_lender] = true;
-        application.whitelisted = true;
-        poolApplications[_pool][application.mapIndex] = application;
-
         emit LenderWhitelisted(_lender, msg.sender);
+
+        if (application.created) {
+            application.whitelisted = true;
+            poolApplications[_pool][application.mapIndex] = application;
+            
+            // transfer tokens in the pool
+            Pool poolI = Pool(_pool);
+
+            assert(poolI.stableCoin().approve(_pool, application.depositAmount));
+            assert(poolI._lend(application.depositAmount, _lender) == 0);
+        }
+
         return uint256(Error.NO_ERROR);
     }
 
@@ -275,16 +283,11 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         return uint256(Error.NO_ERROR);
     }
 
+    // @dev this function must be used to limit the lender actions in the pool 
     function blacklistLender(address _lender) external returns (uint256) {
         require(borrowerWhitelists[msg.sender][_lender], toString(Error.LENDER_NOT_WHITELISTED));
     
         borrowerWhitelists[msg.sender][_lender] = false;
-        for(uint8 i=0; i < borrowerPools[msg.sender].length; i++) {
-            address pool = borrowerPools[msg.sender][i];
-            
-            poolApplicationsByLender[pool][_lender].whitelisted = false;
-            poolApplications[pool][poolApplicationsByLender[pool][_lender].mapIndex] = poolApplicationsByLender[pool][_lender];
-        }
 
         emit LenderBlacklisted(_lender, msg.sender);
         return uint256(Error.NO_ERROR);

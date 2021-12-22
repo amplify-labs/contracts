@@ -80,7 +80,7 @@ dataSources:
         - event: LenderBlacklisted(address,address)
           handler: handleLenderBlacklist
         - event: LenderDepositWithdrawn(address,address,uint256)
-          handler: handlerLenderWithrawn
+          handler: handleLenderWithrawn
 
 templates:
   - name: Pool

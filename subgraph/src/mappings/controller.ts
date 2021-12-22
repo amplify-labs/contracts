@@ -1,4 +1,4 @@
-import { Bytes, DataSourceContext } from '@graphprotocol/graph-ts';
+import { Bytes, DataSourceContext, store } from '@graphprotocol/graph-ts';
 
 import {
     PoolCreated,
@@ -142,15 +142,10 @@ export function handleLenderBlacklist(event: LenderBlacklisted): void {
     borrower.save();
 }
 
-export function handleLenderWithdrawn(event: LenderDepositWithdrawn): void {
+export function handleLenderWithrawn(event: LenderDepositWithdrawn): void {
     let lenderId = createLenderId(event.params.lender.toHex(), event.params.pool.toHex());
 
-    let application = LenderApplication.load(lenderId);
-
-    if (application !== null) {
-        application.amount = application.amount.minus(event.params.amount);
-        application.save();
-    }
+    store.remove('LenderApplication', lenderId);
 }
 
 function _changeLenderStatus(lender: string, pool: string, status: string): void {

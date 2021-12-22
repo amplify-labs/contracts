@@ -9,7 +9,6 @@ import { ErrorReporter, TokenErrorReporter } from "../utils/ErrorReporter.sol";
 import "../utils/Exponential.sol";
 
 abstract contract Lendable is ReentrancyGuard, NonZeroAddressGuard, Exponential, TokenErrorReporter {
-
     uint256 internal constant initialExchangeRate = 2e16;
     uint256 public minDeposit;
 
@@ -24,7 +23,7 @@ abstract contract Lendable is ReentrancyGuard, NonZeroAddressGuard, Exponential,
         uint256 mintedTokens;
     }
 
-    function lendInternal(address lender, uint256 amount) internal nonReentrant nonZeroAddress(lender) returns(uint256) {
+    function lendInternal(address payer, address lender, uint256 amount) internal nonReentrant nonZeroAddress(lender) returns(uint256) {
         require(amount >= minDeposit, toString(Error.AMOUNT_LOWER_THAN_MIN_DEPOSIT));
         uint256 allowed = lendAllowed(address(this), lender, amount);
         require(allowed == 0, ErrorReporter.uint2str(allowed));
@@ -34,7 +33,7 @@ abstract contract Lendable is ReentrancyGuard, NonZeroAddressGuard, Exponential,
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateInternal();
         ErrorReporter.check(uint256(vars.mathErr));
 
-        require(_transferTokens(lender, address(this), amount));
+        require(_transferTokens(payer, address(this), amount));
 
         (vars.mathErr, vars.mintedTokens) = divScalarByExpTruncate(amount, Exp({mantissa: vars.exchangeRateMantissa}));
         ErrorReporter.check(uint256(vars.mathErr));
