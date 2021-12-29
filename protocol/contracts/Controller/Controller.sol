@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 21.910 Kbytes
+/// @dev size: 21.942 Kbytes
 pragma solidity ^0.8.0;
 
 import "./ControllerStorage.sol";
@@ -258,11 +258,13 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
             application.whitelisted = true;
             poolApplications[_pool][application.mapIndex] = application;
             
-            // transfer tokens in the pool
-            Pool poolI = Pool(_pool);
+            if (!!lenderJoinedPoolsMap[_lender][_pool]) { // if the pool is already joined
+                // transfer tokens in the pool
+                Pool poolI = Pool(_pool);
 
-            assert(poolI.stableCoin().approve(_pool, application.depositAmount));
-            assert(poolI._lend(application.depositAmount, _lender) == 0);
+                assert(poolI.stableCoin().approve(_pool, application.depositAmount));
+                assert(poolI._lend(application.depositAmount, _lender) == 0);
+            }
         }
 
         return uint256(Error.NO_ERROR);
