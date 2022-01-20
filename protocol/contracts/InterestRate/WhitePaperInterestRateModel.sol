@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /// @dev size: 2.426 Kbytes
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "./InterestRateModel.sol";
 import "../security/Ownable.sol";
@@ -18,6 +18,7 @@ contract WhitePaperInterestRateModel is InterestRateModel, Ownable {
     GracePeriod[] private _gracePeriod;
 
     constructor(uint256 _blockPerYear) {
+        require(_blockPerYear > 0, "zero value");
         blocksPerYear = _blockPerYear;
         predefinedStages();
     }

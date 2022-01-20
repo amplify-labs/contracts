@@ -14,6 +14,7 @@ module.exports = {
   defaultNetwork: "polygon_mumbai",
   networks: {
     hardhat: {
+      allowUnlimitedContractSize: true
     },
     polygon_mumbai: {
       chainId: 80001,

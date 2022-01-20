@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "../Liquidity/Pool.sol";
 
@@ -15,37 +15,37 @@ contract PoolHarness is Pool {
 
     constructor() Pool(){}
 
-    function fastForward(uint blocks) public returns (uint) {
+    function fastForward(uint blocks) external returns (uint) {
         blockNumber += blocks;
         return blockNumber;
     }
 
-    function fastTimestamp(uint days_) public returns (uint) {
+    function fastTimestamp(uint days_) external returns (uint) {
         blockTimestamp += days_ * 24 * 60 * 60;
         return blockTimestamp;
     }
 
-    function setBlockNumber(uint number) public {
+    function setBlockNumber(uint number) external {
         blockNumber = number;
     }
 
-    function setBlockTimestamp(uint timestamp) public {
+    function setBlockTimestamp(uint timestamp) external {
         blockTimestamp = timestamp;
     }
 
-    function setTotalPrincipal(uint principal) public {
+    function setTotalPrincipal(uint principal) external {
         _totalPrincipal = principal;
     }
 
-    function setTotalSupply(uint supply) public {
+    function setTotalSupply(uint supply) external {
         _totalSupply = supply;
     }
 
-    function setTotalInterestRate(uint rate) public {
+    function setTotalInterestRate(uint rate) external {
         _totalInterestRate = rate;
     }
 
-    function setTotalBorrows(uint borrows) public {
+    function setTotalBorrows(uint borrows) external {
         _totalBorrows = borrows;
     }
 

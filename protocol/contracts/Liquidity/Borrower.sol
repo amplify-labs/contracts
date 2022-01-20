@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "../security/ReentrancyGuard.sol";
 import "../utils/NonZeroAddressGuard.sol";
@@ -15,20 +15,20 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
 
     struct CreditLine {
         address borrower;
+        bool isClosed;
         uint256 borrowCap;
         uint256 borrowIndex;
         uint256 principal;
         uint256 lockedAsset;
         uint256 interestRate;
         uint256 accrualBlockNumber;
-        bool isClosed;
     }
 
     struct PenaltyInfo {
+        bool isOpened;
         uint256 maturity;
         uint256 index;
         uint256 timestamp;
-        bool isOpened;
     }
 
     CreditLine[] public creditLines;
@@ -55,7 +55,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
 
     function totalPrincipal() public virtual view returns (uint256) {
         uint256 total = 0;
-        for (uint8 i = 0; i < creditLines.length; i++) {
+        for (uint256 i = 0; i < creditLines.length; i++) {
             total += creditLines[i].principal;
         }
         return total;
@@ -63,7 +63,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
 
     function totalInterestRate() public virtual view returns (uint256) {
         uint256 total = 0;
-        for (uint8 i = 0; i < creditLines.length; i++) {
+        for (uint256 i = 0; i < creditLines.length; i++) {
             total += creditLines[i].interestRate;
         }
         if (total != 0){
@@ -76,7 +76,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
     function getBorrowerTotalPrincipal(address _borrower) external view returns (uint256) {
         uint256 balance;
 
-        for(uint8 i=0; i < loansIdsByAddress[_borrower].length; i++) {
+        for(uint256 i=0; i < loansIdsByAddress[_borrower].length; i++) {
             uint256 loanId = loansIdsByAddress[_borrower][i];
 
             uint256 principal = creditLines[loanId].principal;
@@ -89,7 +89,7 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
     function getBorrowerBalance(address _borrower) external view returns (uint256) {
         uint256 balance;
 
-        for(uint8 i=0; i < loansIdsByAddress[_borrower].length; i++) {
+        for(uint256 i=0; i < loansIdsByAddress[_borrower].length; i++) {
             balance += borrowBalanceSnapshot(loansIdsByAddress[_borrower][i]);
         }
         return balance;

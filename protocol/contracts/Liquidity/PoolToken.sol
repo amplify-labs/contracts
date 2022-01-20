@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 2.947 Kbytes
-pragma solidity ^0.8.0;
+/// @dev size: 3.252 Kbytes
+pragma solidity 0.8.4;
 
 import "../ERC20/ERC20Mintable.sol";
 

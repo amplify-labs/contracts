@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "../InterestRate/InterestRateModel.sol";
 import "../Asset/AssetInterface.sol";
@@ -8,6 +8,7 @@ import { IERC20 } from "../ERC20/IERC20.sol";
 
 abstract contract ControllerStorage {
     uint256 public amptDepositAmount = 10e18;
+    uint256 public maxPoolsByOwner = 50;
 
     LossProvisionInterface public provisionPool;
     InterestRateModel public interestRateModel;
@@ -24,10 +25,10 @@ abstract contract ControllerStorage {
 
     struct Application {
         address lender;
-        uint256 depositAmount;
-        uint256 mapIndex;
         bool created;
         bool whitelisted;
+        uint256 depositAmount;
+        uint256 mapIndex;
     }
 
     struct PoolInfo {

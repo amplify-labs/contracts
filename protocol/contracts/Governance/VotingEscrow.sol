@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+/// @dev size: 10.219 Kbytes
 pragma solidity 0.8.4;
 /*
 # Voting escrow to have time-weighted votes

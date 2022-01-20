@@ -74,7 +74,7 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
      * @param entry beneficiary of the vested tokens
      * @return boolean indicating success
     */
-    function createEntry(EntryVars calldata entry) external onlyOwner nonReentrant returns (bool){
+    function createEntry(EntryVars calldata entry) external onlyOwner returns (bool){
         return _createEntry(entry);
     }
 
@@ -92,7 +92,7 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
      * @notice A transfer made by AMPT Token holder is prior to bring tokens into the Vesting contract
      * @param _entries array of beneficiaries of the vested tokens
     */
-    function createEntries(EntryVars[] calldata _entries) external onlyOwner nonReentrant returns (bool){
+    function createEntries(EntryVars[] calldata _entries) external onlyOwner returns (bool){
         require(_entries.length  > 0, "empty data");
         require(_entries.length  <= 80, "exceed max length");
 
@@ -246,7 +246,7 @@ contract Vesting is ReentrancyGuard, Ownable, NonZeroAddressGuard {
         return entry.amount - entry.claimed;
     }
 
-    function _createEntry(EntryVars memory entry) internal returns (bool success) {
+    function _createEntry(EntryVars memory entry) internal nonReentrant returns (bool success) {
         address recipient = entry.recipient;
         require(recipient != address(0), "recipient cannot be the zero address");
 

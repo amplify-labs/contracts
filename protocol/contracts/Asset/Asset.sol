@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 7.060 Kbytes
-pragma solidity ^0.8.0;
+/// @dev size: 7.329 Kbytes
+pragma solidity 0.8.4;
 
 import "./AssetStorage.sol";
 import "./AssetInterface.sol";
@@ -27,6 +27,10 @@ contract Asset is AssetInterface, AssetStorage, Ownable {
         uint256 maturity, 
         string memory tokenURI
     ) external returns (uint256) {
+        require(value > 0, "zero value");
+        require(maturity > block.timestamp, "maturity is in the past");
+        require(riskModel.ratingFlags[tokenRating] == true, "invalid rating");
+
         _tokenIds.increment();
 
         uint256 newAssetId = _tokenIds.current();

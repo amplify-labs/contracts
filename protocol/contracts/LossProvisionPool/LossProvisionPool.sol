@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /// @dev size: 2.622 Kbytes
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "./LossProvisionInterface.sol";
 import "../security/Ownable.sol";

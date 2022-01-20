@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 24.033 Kbytes
-pragma solidity ^0.8.0;
+/// @dev size: 24.261 Kbytes
+pragma solidity 0.8.4;
 
 import "./Lender.sol";
 import "./Borrower.sol";
@@ -159,7 +159,7 @@ contract Pool is Ownable, Lendable, Borrowable {
 
     function getTotalBorrowBalance() public virtual override(Lendable, Borrowable) view returns (uint256) {
         uint256 total;
-        for (uint8 i = 0; i < creditLines.length; i++) {
+        for (uint256 i = 0; i < creditLines.length; i++) {
             total += borrowBalanceSnapshot(i);
         }
         return total;
@@ -229,7 +229,7 @@ contract Pool is Ownable, Lendable, Borrowable {
         vars.timestamp = getBlockTimestamp();
 
         (_gracePeriod, vars.interestBlocksPerYear) = controller.interestRateModel().getGracePeriodSnapshot();
-        for(uint8 i=0; i < _gracePeriod.length; i++) {
+        for(uint256 i=0; i < _gracePeriod.length; i++) {
             uint256 _start = _gracePeriod[i].start * day + _penaltyInfo.maturity;
             uint256 _end = _gracePeriod[i].end * day + _penaltyInfo.maturity;
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 library StableCoin {
     struct Data {
@@ -9,7 +9,7 @@ library StableCoin {
         uint id;
     }
 
-    function insert(Data storage self, address stableCoin) public returns (bool) {
+    function insert(Data storage self, address stableCoin) external returns (bool) {
         if (self.flags[stableCoin]) {
              return false;
         }
@@ -21,7 +21,7 @@ library StableCoin {
         return true;
     }
 
-    function remove(Data storage self, address stableCoin) public returns (bool) {
+    function remove(Data storage self, address stableCoin) external returns (bool) {
         if (!self.flags[stableCoin]) {
             return false;
         }
@@ -31,11 +31,11 @@ library StableCoin {
         return true;
     }
 
-    function contains(Data storage self, address stableCoin) public view returns (bool) {
+    function contains(Data storage self, address stableCoin) external view returns (bool) {
         return self.flags[stableCoin];
     }
 
-    function getList(Data storage self) public view returns (address[] memory) {
+    function getList(Data storage self) external view returns (address[] memory) {
         return self.addresses;
     }
 }

@@ -298,6 +298,14 @@ describe("Controller", () => {
             pool = await createPool(connectedController, "TEST", ethers.utils.parseEther("1"), stableCoin, PoolType.PRIVATE);
         });
 
+        it("should fails because of zero address", async () => {
+            const connectedController = await connect(controller, signer2);
+
+            expect(
+                await send(connectedController, "requestPoolWhitelist", [zeroAddress, depositAmount])
+            ).to.equal(zeroAddressError);
+        });
+
         it("should fails because of allowance missing", async () => {
             const connectedController = await connect(controller, signer2);
 
@@ -362,6 +370,14 @@ describe("Controller", () => {
             await send(connectedController, "whitelistLender", [signer2.address, pool.address]);
         });
 
+        it("should fails because of zero address", async () => {
+            const connectedController = await connect(controller, signer2);
+
+            expect(
+                await send(connectedController, "withdrawApplicationDeposit", [zeroAddress])
+            ).to.equal(zeroAddressError);
+        });
+
         it("should fails because of wrong lender", async () => {
             const connectedController = await connect(controller, signer1);
 
@@ -384,7 +400,7 @@ describe("Controller", () => {
             expect(currentBalance.toString()).to.equal(signerBalance.add(depositAmount).toString());
 
             let application = await call(controller, "poolApplications", [pool.address, 0]);
-            expect(application.lender).to.equal(signer2.address);
+            expect(application.lender).to.equal(zeroAddress);
             expect(application.depositAmount.toString()).to.equal("0");
         });
     });
@@ -394,6 +410,14 @@ describe("Controller", () => {
 
         beforeEach(async () => {
             [controller, _, amptToken] = await getController(root);
+        });
+
+        it("should fails because of zero address", async () => {
+            const connectedController = await connect(controller, signer1);
+
+            expect(
+                await send(connectedController, "whitelistBorrower", [zeroAddress, 0, 0])
+            ).to.equal(zeroAddressError);
         });
 
         it("should fails because of wrong owner", async () => {
@@ -425,6 +449,14 @@ describe("Controller", () => {
 
         beforeEach(async () => {
             [controller, _, amptToken] = await getController(root);
+        });
+
+        it("should fails because of zero address", async () => {
+            const connectedController = await connect(controller, signer1);
+
+            expect(
+                await send(connectedController, "blacklistBorrower", [zeroAddress])
+            ).to.equal(zeroAddressError);
         });
 
         it("should fails because of wrong owner", async () => {
@@ -483,10 +515,20 @@ describe("Controller", () => {
             await send(connectedController, "requestPoolWhitelist", [pool.address, depositAmount]);
         });
 
-        it("should fails because of wrong lender", async () => {
+        it("should fails because of zero address lender", async () => {
+            const connectedController = await connect(controller, borrower);
+
             expect(
-                await send(controller, "whitelistLender", [borrower.address, pool.address])
-            ).to.equal(vmError("14"));
+                await send(connectedController, "whitelistLender", [zeroAddress, pool.address])
+            ).to.equal(zeroAddressError);
+        });
+
+        it("should fails because of zero address pool", async () => {
+            const connectedController = await connect(controller, borrower);
+
+            expect(
+                await send(connectedController, "whitelistLender", [lender.address, zeroAddress])
+            ).to.equal(zeroAddressError);
         });
 
         it("should fails because of wrong owner", async () => {
@@ -542,6 +584,14 @@ describe("Controller", () => {
             await send(connectedController, "requestPoolWhitelist", [pool.address, depositAmount]);
         });
 
+        it("should fails because of zero address", async () => {
+            const connectedController = await connect(controller, signer1);
+
+            expect(
+                await send(connectedController, "blacklistLender", [zeroAddress])
+            ).to.equal(zeroAddressError);
+        });
+
         it("should fails because of non whitelisted lender", async () => {
             expect(await send(controller, "blacklistLender", [signer2.address])).to.equal(vmError("12"));
         });
@@ -551,10 +601,7 @@ describe("Controller", () => {
             await send(connectedController, "whitelistLender", [signer2.address, pool.address]);
             await send(connectedController, "blacklistLender", [signer2.address]);
 
-            let application = await call(controller, "poolApplications", [pool.address, 0]);
             let lenderWhitelisted = await call(controller, "borrowerWhitelists", [root.address, signer1.address]);
-
-            expect(application.whitelisted).to.equal(false);
             expect(lenderWhitelisted).to.equal(false);
         });
     });
@@ -607,6 +654,12 @@ describe("Controller", () => {
             [controller, stableCoin, amptToken] = await getController(root);
         });
 
+        it("should fails because of zero address", async () => {
+            expect(
+                await send(controller, "addStableCoin", [zeroAddress])
+            ).to.equal(zeroAddressError);
+        });
+
         it("should fails because of wrong owner", async () => {
             const connectedController = await connect(controller, signer1);
 
@@ -626,6 +679,12 @@ describe("Controller", () => {
     describe("removeStableCoin", () => {
         beforeEach(async () => {
             [controller, stableCoin, amptToken] = await getController(root);
+        });
+
+        it("should fails because of zero address", async () => {
+            expect(
+                await send(controller, "removeStableCoin", [zeroAddress])
+            ).to.equal(zeroAddressError);
         });
 
         it("should fails because of wrong owner", async () => {

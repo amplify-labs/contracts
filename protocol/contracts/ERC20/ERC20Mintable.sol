@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "./ERC20Burnable.sol";
 
@@ -10,7 +10,7 @@ abstract contract ERC20Mintable is ERC20Burnable {
         _admin = msg.sender;
     }
 
-    function mint(address to, uint256 amount) public virtual {
+    function mint(address to, uint256 amount) external virtual {
         require(msg.sender == _admin, "ERC20: must have admin role to mint");
         _mint(to, amount);
     }

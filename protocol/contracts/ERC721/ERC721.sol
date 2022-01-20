@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "./IERC721.sol";
 
@@ -25,7 +25,7 @@ contract ERC721 is IERC721, IERC721Metadata {
     }
 
 
-    function balanceOf(address owner) public view virtual override returns (uint) {
+    function balanceOf(address owner) external view virtual override returns (uint) {
         require(owner != address(0), "ERC721: balance query for the zero address");
         return _balances[owner];
     }
@@ -36,11 +36,11 @@ contract ERC721 is IERC721, IERC721Metadata {
         return owner;
     }
 
-     function name() public view virtual override returns (string memory) {
+     function name() external view virtual override returns (string memory) {
         return _name;
     }
 
-    function symbol() public view virtual override returns (string memory) {
+    function symbol() external view virtual override returns (string memory) {
         return _symbol;
     }
 
@@ -63,7 +63,7 @@ contract ERC721 is IERC721, IERC721Metadata {
         _approve(to, tokenId);
     }
 
-    function transferFrom(address from, address to, uint tokenId) public virtual override {
+    function transferFrom(address from, address to, uint tokenId) external virtual override {
         require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
 
         _transfer(from, to, tokenId);

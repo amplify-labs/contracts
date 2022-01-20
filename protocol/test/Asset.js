@@ -30,6 +30,24 @@ describe("Asset", function () {
         const tokenHash = uuidv4();
         const tokenValue = ethers.utils.parseEther("1000");
 
+        it("fails because of zero value", async () => {
+            expect(
+                await send(factory, "tokenizeAsset", [tokenHash, "A", 0, maturity, tokenHash + ".png"])
+            ).to.equal(vmError("zero value"));
+        });
+
+        it("fails because of past maturity", async () => {
+            expect(
+                await send(factory, "tokenizeAsset", [tokenHash, "A", tokenValue, 100, tokenHash + ".png"])
+            ).to.equal(vmError("maturity is in the past"));
+        });
+
+        it("fails because of invalid rating", async () => {
+            expect(
+                await send(factory, "tokenizeAsset", [tokenHash, "X", tokenValue, maturity, tokenHash + ".png"])
+            ).to.equal(vmError("invalid rating"));
+        });
+
         it("should create new Token", async () => {
             let { events } = await send(factory, "tokenizeAsset", [tokenHash, "A", tokenValue, maturity, tokenHash + ".png"]);
 

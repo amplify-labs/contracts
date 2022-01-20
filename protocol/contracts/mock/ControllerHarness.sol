@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "../Controller/Controller.sol";
 import "./PoolHarness.sol";
@@ -18,29 +18,29 @@ contract ControllerHarness is Controller {
         _poolLibrary = address(new PoolHarness());
     }
 
-    function harnessFastForward(uint blocks) public returns (uint) {
+    function harnessFastForward(uint blocks) external returns (uint) {
         blockNumber += blocks;
         return blockNumber;
     }
 
-    function fastTimestamp(uint _days) public returns (uint) {
+    function fastTimestamp(uint _days) external returns (uint) {
         blockTimestamp += _days * 24 * 3600;
         return blockTimestamp;
     }
 
-    function setBlockNumber(uint number) public {
+    function setBlockNumber(uint number) external {
         blockNumber = number;
     }
 
-    function setSupplierBalance(address _supplier, address pool, uint _balance) public {
+    function setSupplierBalance(address _supplier, address pool, uint _balance) external {
         _suppliers[pool][_supplier] = _balance;
     }
 
-    function setBorrowerTotalPrincipal(address _borrower, address pool, uint _balance) public {
+    function setBorrowerTotalPrincipal(address _borrower, address pool, uint _balance) external {
         _borrrowers[pool][_borrower] = _balance;
     }
 
-    function setBlockTimestamp(uint timestamp) public {
+    function setBlockTimestamp(uint timestamp) external {
         blockTimestamp = timestamp;
     }
 

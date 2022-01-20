@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 21.942 Kbytes
-pragma solidity ^0.8.0;
+/// @dev size: 22.618 Kbytes
+pragma solidity 0.8.4;
 
 import "./ControllerStorage.sol";
 import "./Rewards.sol";
@@ -30,6 +30,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
     event AmptPoolSpeedChanged(address pool, uint oldSpeed, uint newSpeed);
     event AmptDepositAmountChanged(uint oldAmount, uint newAmount);
+    event MaxPoolsByOwnerChanged(uint oldMax, uint newMax);
 
     event BorrowerCreated(address borrower);
     event BorrowerWhitelisted(address borrower);
@@ -94,7 +95,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         return uint256(Error.NO_ERROR);
     }
 
-    function withdrawApplicationDeposit(address pool) external {
+    function withdrawApplicationDeposit(address pool) nonZeroAddress(pool) external {
         Application storage application = poolApplicationsByLender[pool][msg.sender];
         require(application.lender == msg.sender, "invalid application lender");
 
@@ -112,6 +113,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     function createPool(string memory name, uint256 minDeposit, address stableCoin, Pool.Access poolAccess) external nonReentrant {
         require(borrowers[msg.sender].whitelisted, "Only whitelisted user can create pool");
         require(_stableCoins.contains(stableCoin), "Stable coin not supported");
+        require(borrowerPools[msg.sender].length < maxPoolsByOwner, "Max number of pools reached");
 
         address pool = Clones.createClone(_poolLibrary);
 
@@ -225,12 +227,23 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         }
     }
 
+    function _setMaxPoolByOwner(uint256 newMax) external onlyOwner{
+        require(newMax > 0, "amount must be greater than 0");
+
+        uint currentMax = maxPoolsByOwner;
+
+        if (currentMax != newMax) {
+            maxPoolsByOwner = newMax;
+            emit MaxPoolsByOwnerChanged(currentMax, newMax);
+        }
+    }
+
     function transferFunds(address destination) external onlyOwner nonZeroAddress(destination) returns (bool) {
         require(amptToken.transfer(destination, amptToken.balanceOf(address(this))), "transfer failed");
         return true;
     }
 
-    function whitelistBorrower(address borrower, uint256 debtCeiling, uint256 rating) external onlyOwner returns (uint256) {
+    function whitelistBorrower(address borrower, uint256 debtCeiling, uint256 rating) external nonZeroAddress(borrower) onlyOwner returns (uint256) {
         Borrower storage _borrower = borrowers[borrower];
         require(_borrower.created, toString(Error.BORROWER_NOT_CREATED));
         require(!_borrower.whitelisted, toString(Error.ALREADY_WHITELISTED));
@@ -244,7 +257,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         return uint256(Error.NO_ERROR);
     }
 
-    function whitelistLender(address _lender, address _pool) external returns (uint256) {
+    function whitelistLender(address _lender, address _pool) external nonZeroAddress(_lender) nonZeroAddress(_pool) returns (uint256) {
         Application storage application = poolApplicationsByLender[_pool][_lender];
 
         address borrower = pools[_pool].owner;
@@ -270,14 +283,14 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         return uint256(Error.NO_ERROR);
     }
 
-    function blacklistBorrower(address borrower) external onlyOwner returns (uint256) {
+    function blacklistBorrower(address borrower) external nonZeroAddress(borrower) onlyOwner returns (uint256) {
         Borrower storage _borrower = borrowers[borrower];
 
         require(_borrower.created, toString(Error.BORROWER_NOT_CREATED));
         require(_borrower.whitelisted, toString(Error.BORROWER_NOT_WHITELISTED));
     
         _borrower.whitelisted = false;
-        for(uint8 i=0; i < borrowerPools[borrower].length; i++) {
+        for(uint256 i=0; i < borrowerPools[borrower].length; i++) {
             address pool = borrowerPools[borrower][i];
             pools[pool].isActive = false;
         }
@@ -286,7 +299,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     }
 
     // @dev this function must be used to limit the lender actions in the pool 
-    function blacklistLender(address _lender) external returns (uint256) {
+    function blacklistLender(address _lender) external nonZeroAddress(_lender) returns (uint256) {
         require(borrowerWhitelists[msg.sender][_lender], toString(Error.LENDER_NOT_WHITELISTED));
     
         borrowerWhitelists[msg.sender][_lender] = false;
@@ -309,16 +322,16 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         return uint256(Error.NO_ERROR);
     }
 
-    function addStableCoin(address stableCoin) onlyOwner external {
-        require(_stableCoins.insert(stableCoin));
+    function addStableCoin(address _stableCoin) onlyOwner nonZeroAddress(_stableCoin) external {
+        require(_stableCoins.insert(_stableCoin));
     }
 
-    function removeStableCoin(address stableCoin) onlyOwner external {
-        require(_stableCoins.remove(stableCoin));
+    function removeStableCoin(address _stableCoin) onlyOwner nonZeroAddress(_stableCoin) external {
+        require(_stableCoins.remove(_stableCoin));
     }
 
-    function containsStableCoin(address stableCoin) public view returns (bool) {
-        return _stableCoins.contains(stableCoin);
+    function containsStableCoin(address _stableCoin) public nonZeroAddress(_stableCoin) view returns (bool) {
+        return _stableCoins.contains(_stableCoin);
     }
 
     function getStableCoins() external view returns (address[] memory) {

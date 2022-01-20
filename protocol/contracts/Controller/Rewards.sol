@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "../utils/ExponentialDouble.sol";
 
@@ -61,18 +61,18 @@ abstract contract Rewards is ExponentialDouble {
     }
 
     function claimAMPT(address[] memory holders, address[] memory poolsList, bool borrowers, bool suppliers) public {
-        for (uint8 i = 0; i < poolsList.length; i++) {
+        for (uint256 i = 0; i < poolsList.length; i++) {
             address pool = poolsList[i];
             if (borrowers == true) {
                 updateBorrowIndexInternal(pool);
-                for (uint8 j = 0; j < holders.length; j++) {
+                for (uint256 j = 0; j < holders.length; j++) {
                     distributeBorrowerTokens(pool, holders[j]);
                     borrowerState[holders[j]][pool].accrued = grantRewardInternal(holders[j], borrowerState[holders[j]][pool].accrued);
                 }
             }
             if (suppliers == true) {
                 updateSupplyIndexInternal(pool);
-                for (uint8 j = 0; j < holders.length; j++) {
+                for (uint256 j = 0; j < holders.length; j++) {
                     distributeSupplierTokens(pool, holders[j]);
                     supplierState[holders[j]][pool].accrued = grantRewardInternal(holders[j], supplierState[holders[j]][pool].accrued);
                 }

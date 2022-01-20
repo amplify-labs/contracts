@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "./IERC20.sol";
 
@@ -18,32 +18,32 @@ contract ERC20 is IERC20, IERC20Metadata {
         _symbol = symbol_;
     }
 
-    function name() public view virtual override returns (string memory) {
+    function name() external view virtual override returns (string memory) {
         return _name;
     }
 
-    function symbol() public view virtual override returns (string memory) {
+    function symbol() external view virtual override returns (string memory) {
         return _symbol;
     }
 
-    function decimals() public view virtual override returns (uint8) {
+    function decimals() external view virtual override returns (uint8) {
         return 18;
     }
 
-     function totalSupply() public view virtual override returns (uint256) {
+     function totalSupply() external view virtual override returns (uint256) {
         return _totalSupply;
     }
 
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function balanceOf(address account) external view virtual override returns (uint256) {
         return _balances[account];
     }
 
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function transfer(address recipient, uint256 amount) external virtual override returns (bool) {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint amount) public virtual override returns (bool) {
+    function transferFrom(address sender, address recipient, uint amount) external virtual override returns (bool) {
         _transfer(sender, recipient, amount);
 
         uint currentAllowance = _allowances[sender][msg.sender];
@@ -59,8 +59,23 @@ contract ERC20 is IERC20, IERC20Metadata {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint amount) public virtual override returns (bool) {
+    function approve(address spender, uint amount) external virtual override returns (bool) {
         _approve(msg.sender, spender, amount);
+        return true;
+    }
+
+    function increaseAllowance(address spender, uint256 addedValue) external virtual returns (bool) {
+        _approve(msg.sender, spender, _allowances[msg.sender][spender] + addedValue);
+        return true;
+    }
+
+    function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns (bool) {
+        uint256 currentAllowance = _allowances[msg.sender][spender];
+        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
+        unchecked {
+            _approve(msg.sender, spender, currentAllowance - subtractedValue);
+        }
+
         return true;
     }
 

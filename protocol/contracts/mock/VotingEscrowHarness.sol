@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "../Governance/VotingEscrow.sol";
 
@@ -16,21 +16,21 @@ contract VotingEscrowHarness is VotingEscrow {
         pointHistory[0].ts = ts;
     }
 
-    function fastForward(uint256 blocks) public returns (uint256) {
+    function fastForward(uint256 blocks) external returns (uint256) {
         blockNumber += blocks;
         return blockNumber;
     }
 
-    function fastTimestamp(uint256 days_) public returns (uint256) {
+    function fastTimestamp(uint256 days_) external returns (uint256) {
         blockTimestamp += days_ * 24 * 60 * 60;
         return blockTimestamp;
     }
 
-    function setBlockNumber(uint256 number) public {
+    function setBlockNumber(uint256 number) external {
         blockNumber = number;
     }
 
-    function setBlockTimestamp(uint256 timestamp) public {
+    function setBlockTimestamp(uint256 timestamp) external {
         blockTimestamp = timestamp;
     }
 

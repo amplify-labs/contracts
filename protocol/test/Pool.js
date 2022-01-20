@@ -614,7 +614,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "createCreditLine", [tokenId])
-            ).to.equal(vmError(poolError.LOAN_ASSET_ALREADY_USED));
+            ).to.equal(vmError2(poolError.LOAN_ASSET_ALREADY_USED));
         });
     });
 
@@ -667,7 +667,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "closeCreditLine", [loanId])
-            ).to.equal(vmError(poolError.WRONG_BORROWER))
+            ).to.equal(vmError2(poolError.WRONG_BORROWER))
         });
 
         it("should close creditLine", async () => {
@@ -686,7 +686,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "closeCreditLine", [loanId])
-            ).to.equal(vmError(poolError.LOAN_IS_ALREADY_CLOSED))
+            ).to.equal(vmError2(poolError.LOAN_IS_ALREADY_CLOSED))
         });
 
         it("should fails because existing debt", async () => {
@@ -696,7 +696,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "closeCreditLine", [loanId])
-            ).to.equal(vmError("Debt should be 0"))
+            ).to.equal(vmError2("Debt should be 0"))
         });
     });
 
@@ -855,7 +855,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "repay", [loanId, borrowAmount])
-            ).to.equal(vmError(poolError.WRONG_BORROWER));
+            ).to.equal(vmError2(poolError.WRONG_BORROWER));
         });
 
         it("should repay  tokens", async () => {
@@ -1416,7 +1416,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "unlockAsset", [loanId])
-            ).to.equal(vmError(poolError.WRONG_BORROWER));
+            ).to.equal(vmError2(poolError.WRONG_BORROWER));
         });
 
         it("should fails because unclosed loan", async () => {
@@ -1424,7 +1424,7 @@ describe("Pool", () => {
 
             expect(
                 await send(connectedPool, "unlockAsset", [loanId])
-            ).to.equal(vmError(poolError.LOAN_IS_NOT_CLOSED));
+            ).to.equal(vmError2(poolError.LOAN_IS_NOT_CLOSED));
         });
 
         it("should unlock asset", async () => {
