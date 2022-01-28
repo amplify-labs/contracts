@@ -9,6 +9,7 @@ const timestamp = Math.floor(Date.now() / 1000);
 const timestamp7Days = timestamp + 7 * day;
 const timestamp8Days = timestamp + 8 * day;
 const timestamp4Years = timestamp + 4 * 365 * day;
+const _4years = 4 * 365 * day;
 
 
 describe('Voting Escrow', function () {
@@ -29,7 +30,7 @@ describe('Voting Escrow', function () {
 
         it("succeeds when setting admin to contructor argument", async () => {
             let [voting] = await getVotingContract(root);
-            expect(await call(voting, 'admin')).to.equal(root.address);
+            expect(await call(voting, 'owner')).to.equal(root.address);
         });
 
         it("succeeds when setting smartChecker to contructor argument", async () => {
@@ -66,11 +67,11 @@ describe('Voting Escrow', function () {
             swNew = await deploySmartWalletChecker();
         });
 
-        it('should fails because of wrong admin', async () => {
+        it('should fails because of wrong owner', async () => {
             let connectedVoting = await connect(voting, signer1);
             expect(
                 await send(connectedVoting, 'changeSmartWalletChecker', [swOld.address])
-            ).to.equal(vmError("Only admin can change smart wallet checker"));
+            ).to.equal(vmError("Only owner can call this function"));
         });
 
         it('should fails because of the same address', async () => {
@@ -106,7 +107,7 @@ describe('Voting Escrow', function () {
 
             expect(
                 await send(connectedVoting, 'createLock', [0, timestamp8Days])
-            ).to.equal(vmError('Value must be greater than 0'));
+            ).to.equal(vmError('zero value'));
         });
 
         it('should fails because of past date', async () => {
@@ -114,7 +115,7 @@ describe('Voting Escrow', function () {
 
             expect(
                 await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp])
-            ).to.equal(vmError('Unlock time must be in the future'));
+            ).to.equal(vmError('unlock time is in the past'));
         });
 
         it('should fails because of exceed max cap of 4 years', async () => {
@@ -122,7 +123,7 @@ describe('Voting Escrow', function () {
 
             expect(
                 await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp4Years + day])
-            ).to.equal(vmError('Voting lock can be 4 years max'));
+            ).to.equal(vmError('lock can be 4 years max'));
         });
 
         it('should create lock instance', async () => {
@@ -142,7 +143,7 @@ describe('Voting Escrow', function () {
 
             expect(
                 await send(connectedVoting, 'createLock', [ethers.utils.parseEther('1'), timestamp8Days])
-            ).to.equal(vmError('Withdraw old tokens first'));
+            ).to.equal(vmError('already locked'));
         });
     });
 
@@ -196,7 +197,7 @@ describe('Voting Escrow', function () {
 
             expect(
                 await send(connectedVoting, 'increaseLockAmount', [0])
-            ).to.equal(vmError('Value must be greater than 0'));
+            ).to.equal(vmError('zero value'));
         });
 
         it("should fails because lock expired", async () => {
@@ -205,15 +206,7 @@ describe('Voting Escrow', function () {
             let connectedVoting = await connect(voting, signer1);
             expect(
                 await send(connectedVoting, 'increaseLockAmount', [ethers.utils.parseEther('2')])
-            ).to.equal(vmError('Cannot add to expired lock. Withdraw'));
-        });
-
-        it("should fails because no lock created", async () => {
-            let connectedVoting = await connect(voting, root);
-
-            expect(
-                await send(connectedVoting, 'increaseLockAmount', [ethers.utils.parseEther('1')])
-            ).to.equal(vmError('No existing lock found'));
+            ).to.equal(vmError('lock has expired. Withdraw'));
         });
 
         it('should increase lock amount', async () => {
@@ -248,14 +241,14 @@ describe('Voting Escrow', function () {
             let connectedVoting = await connect(voting, signer1);
             expect(
                 await send(connectedVoting, 'increaseLockTime', [timestamp4Years + day])
-            ).to.equal(vmError('Voting lock can be 4 years max'));
+            ).to.equal(vmError('lock can be 4 years max'));
         });
 
         it("should fails because time is lower than end time", async () => {
             let connectedVoting = await connect(voting, signer1);
             expect(
                 await send(connectedVoting, 'increaseLockTime', [timestamp7Days])
-            ).to.equal(vmError('Lock time must be greater'));
+            ).to.equal(vmError('lock time lower than expiration'));
         });
 
         it("should fails because lock expired", async () => {
@@ -264,15 +257,7 @@ describe('Voting Escrow', function () {
             let connectedVoting = await connect(voting, signer1);
             expect(
                 await send(connectedVoting, 'increaseLockTime', [timestamp8Days + day])
-            ).to.equal(vmError('Lock expired'));
-        });
-
-        it("should fails because no lock created", async () => {
-            let connectedVoting = await connect(voting, root);
-
-            expect(
-                await send(connectedVoting, 'increaseLockTime', [timestamp7Days])
-            ).to.equal(vmError('Nothing is locked'));
+            ).to.equal(vmError('lock has expired. Withdraw'));
         });
 
         it('should increase lock time', async () => {
@@ -281,150 +266,6 @@ describe('Voting Escrow', function () {
             await send(connectedVoting, 'increaseLockTime', [timestamp8Days + day]);
             let balance = await call(voting, 'locked', [signer1.address]);
             expect(balance[1].toString()).to.equal((timestamp8Days + day).toString());
-        });
-    });
-
-    describe('depositFor', function () {
-        let voting, amptToken;
-
-        beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root);
-
-            await send(voting, 'setBlockNumber', [1]);
-            await send(voting, 'setBlockTimestamp', [timestamp]);
-
-            await send(amptToken, 'transfer', [signer1.address, ethers.utils.parseEther('1000')]);
-
-            let connectedAmpt = await connect(amptToken, signer1);
-            await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('100')]);
-
-            let connectedVoting = await connect(voting, signer1);
-            await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
-        });
-
-        it("should fails because of zero value", async () => {
-            let connectedVoting = await connect(voting, signer2);
-
-            expect(
-                await send(connectedVoting, 'depositFor', [signer1.address, 0])
-            ).to.equal(vmError('Value must be greater than 0'));
-        });
-
-        it("should fails because no lock created", async () => {
-            let connectedVoting = await connect(voting, signer2);
-
-            expect(
-                await send(connectedVoting, 'depositFor', [root.address, ethers.utils.parseEther('1')])
-            ).to.equal(vmError('No existing lock found'));
-        });
-
-        it("should fails because lock expired", async () => {
-            await send(voting, 'fastTimestamp', [8]);
-
-            let connectedVoting = await connect(voting, signer2);
-            expect(
-                await send(connectedVoting, 'depositFor', [signer1.address, ethers.utils.parseEther('1')])
-            ).to.equal(vmError('Cannot add to expired lock. Withdraw'));
-        });
-
-        it('should deposit for other user', async () => {
-            let connectedVoting = await connect(voting, signer2);
-
-            await send(connectedVoting, 'depositFor', [signer1.address, ethers.utils.parseEther('1')]);
-
-            let balance = await call(voting, 'locked', [signer1.address]);
-            expect(balance[0] / 1e18).to.equal(11);
-        });
-    });
-
-    describe('deletegate', function () {
-        let voting, amptToken;
-
-        beforeEach(async () => {
-            [voting, amptToken] = await getVotingContract(root);
-
-            await send(voting, 'setBlockNumber', [1]);
-            await send(voting, 'setBlockTimestamp', [timestamp]);
-
-            await send(amptToken, 'transfer', [signer1.address, ethers.utils.parseEther('1000')]);
-            await send(amptToken, 'transfer', [signer2.address, ethers.utils.parseEther('1000')]);
-
-            let connectedAmpt = await connect(amptToken, signer1);
-            await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('100')]);
-
-            let connectedAmpt2 = await connect(amptToken, signer2);
-            await send(connectedAmpt2, 'approve', [voting.address, ethers.utils.parseEther('100')]);
-
-            let connectedVoting = await connect(voting, signer1);
-            await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
-        });
-
-        it("should fails because of self delegation", async () => {
-            let connectedVoting = await connect(voting, signer1);
-
-            expect(
-                await send(connectedVoting, 'delegate', [signer1.address])
-            ).to.equal(vmError('Cannot delegate to self'));
-        });
-
-        it("should fails because of `to` zero value", async () => {
-            let connectedVoting = await connect(voting, signer1);
-
-            expect(
-                await send(connectedVoting, 'delegate', [zeroAddress])
-            ).to.equal(vmError("Cannot delegate to the zero address"));
-        });
-
-        it("should fails because of missing lock amount", async () => {
-            let connectedVoting = await connect(voting, signer2);
-
-            expect(
-                await send(connectedVoting, 'delegate', [signer1.address])
-            ).to.equal(vmError("No existing lock found"));
-        });
-
-        it('should delegate vote for other user', async () => {
-            let connectedVoting = await connect(voting, signer1);
-            let connectedVoting2 = await connect(voting, signer2);
-
-            await send(connectedVoting, 'delegate', [signer2.address]);
-
-            let balanceDelegator = await call(voting, 'operationLocked', [signer1.address]);
-            let balanceDelegatee = await call(voting, 'operationLocked', [signer2.address]);
-
-
-            let votePower1 = await call(voting, 'balanceOf', [signer1.address]);
-            let votePower2 = await call(voting, 'balanceOf', [signer2.address]);
-
-            expect(balanceDelegator[0] / 1e18).to.equal(0);
-            expect(balanceDelegator[1].toString()).to.equal(timestamp8Days.toString());
-            expect(votePower1 / 1e18).to.equal(0);
-
-            expect(balanceDelegatee[0] / 1e18).to.equal(10);
-            expect(balanceDelegatee[1].toString()).to.equal(timestamp8Days.toString());
-            expect(votePower2.toString()).to.equal("54794520547660800");
-
-            // increase lock amount
-            await send(connectedVoting, 'increaseLockAmount', [ethers.utils.parseEther('10')]);
-
-            await send(connectedVoting2, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
-
-            // check new balances;
-            balanceDelegator = await call(voting, 'operationLocked', [signer1.address]);
-            balanceDelegatee = await call(voting, 'operationLocked', [signer2.address]);
-
-
-            votePower1 = await call(voting, 'balanceOf', [signer1.address]);
-            votePower2 = await call(voting, 'balanceOf', [signer2.address]);
-
-            expect(balanceDelegator[0] / 1e18).to.equal(10);
-            expect(balanceDelegator[1].toString()).to.equal(timestamp8Days.toString());
-            expect(votePower1.toString()).to.equal("54794520547660800"); // power is calculated for the new lock amount only
-
-
-            expect(balanceDelegatee[0] / 1e18).to.equal(20);
-            expect(balanceDelegatee[1].toString()).to.equal(timestamp8Days.toString());
-            expect(votePower2.toString()).to.equal("109589041095321600"); // calculated power is appended to the existing one
         });
     });
 
@@ -452,7 +293,7 @@ describe('Voting Escrow', function () {
             let connectedVoting = await connect(voting, signer1);
             expect(
                 await send(connectedVoting, 'withdraw', [])
-            ).to.equal(vmError('Cannot withdraw before lock expires'));
+            ).to.equal(vmError('lock has not expired yet'));
         });
 
         it('should withdraw the locked tokens', async () => {
@@ -467,6 +308,156 @@ describe('Voting Escrow', function () {
 
             expect(balanceDelegator[0] / 1e18).to.equal(0);
             expect(balanceDelegator[1] / 1e18).to.equal(0);
+        });
+    });
+
+    describe('depositFor', function () {
+        let voting, amptToken;
+
+        beforeEach(async () => {
+            [voting, amptToken] = await getVotingContract(root);
+
+            await send(voting, 'setBlockNumber', [1]);
+            await send(voting, 'setBlockTimestamp', [timestamp]);
+
+            await send(amptToken, 'transfer', [signer1.address, ethers.utils.parseEther('1000')]);
+
+            let connectedAmpt = await connect(amptToken, signer1);
+            await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('100')]);
+
+            let connectedVoting = await connect(voting, signer1);
+            await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
+        });
+
+        it("should fails because of zero value", async () => {
+            let connectedVoting = await connect(voting, signer2);
+
+            expect(
+                await send(connectedVoting, 'depositFor', [signer1.address, 0])
+            ).to.equal(vmError('zero value'));
+        });
+
+        it("should fails because no lock created", async () => {
+            let connectedVoting = await connect(voting, signer2);
+
+            expect(
+                await send(connectedVoting, 'depositFor', [root.address, ethers.utils.parseEther('1')])
+            ).to.equal(vmError('no lock found'));
+        });
+
+        it("should fails because lock expired", async () => {
+            await send(voting, 'fastTimestamp', [8]);
+
+            let connectedVoting = await connect(voting, signer2);
+            expect(
+                await send(connectedVoting, 'depositFor', [signer1.address, ethers.utils.parseEther('1')])
+            ).to.equal(vmError('Cannot add to expired lock. Withdraw'));
+        });
+
+        it('should deposit for other user', async () => {
+            let connectedVoting = await connect(voting, signer2);
+            let depositedAmount = ethers.utils.parseEther('1');
+
+            await send(amptToken, 'transfer', [signer2.address, ethers.utils.parseEther('1000')]);
+
+            let connectedAmpt = await connect(amptToken, signer2);
+            await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('100')]);
+
+            let oldBalance = await call(voting, 'locked', [signer1.address]);
+            await send(connectedVoting, 'depositFor', [signer1.address, depositedAmount]);
+
+            let newBalance = await call(voting, 'locked', [signer1.address]);
+            expect(newBalance[0].toString()).to.equal(oldBalance[0].add(depositedAmount).toString());
+        });
+    });
+
+    describe('deletegate', function () {
+        let voting, amptToken;
+
+        beforeEach(async () => {
+            [voting, amptToken] = await getVotingContract(root);
+
+            await send(voting, 'setBlockNumber', [1]);
+            await send(voting, 'setBlockTimestamp', [timestamp]);
+
+            await send(amptToken, 'transfer', [signer1.address, ethers.utils.parseEther('1000')]);
+            await send(amptToken, 'transfer', [signer2.address, ethers.utils.parseEther('1000')]);
+
+            let connectedAmpt = await connect(amptToken, signer1);
+            await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('100')]);
+
+            let connectedAmpt2 = await connect(amptToken, signer2);
+            await send(connectedAmpt2, 'approve', [voting.address, ethers.utils.parseEther('100')]);
+
+            let connectedVoting = await connect(voting, signer1);
+            await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
+        });
+
+        it("should fails because of missing lock amount", async () => {
+            let connectedVoting = await connect(voting, signer2);
+
+            expect(
+                await send(connectedVoting, 'delegate', [signer1.address])
+            ).to.equal(vmError("No existing lock found"));
+        });
+
+        it('should delegate vote for other user', async () => {
+            let connectedVoting = await connect(voting, signer1);
+            let connectedVoting2 = await connect(voting, signer2);
+
+            await send(connectedVoting, 'delegate', [signer2.address]);
+
+            let votePower1 = await call(voting, 'balanceOf', [signer1.address]);
+            let votePower2 = await call(voting, 'balanceOf', [signer2.address]);
+
+            let currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(votePower1.toString()).to.equal("0");
+            expect(votePower2.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10'),
+                    timestamp8Days,
+                    currentTs).toString());
+
+            // increase lock amount
+            await send(connectedVoting, 'increaseLockAmount', [ethers.utils.parseEther('10')]);
+
+            // create delegator own lock
+            await send(connectedVoting2, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
+
+            votePower1 = await call(voting, 'balanceOf', [signer1.address]);
+            expect(votePower1.toString()).to.equal("0"); // newly increased amount power goes to the delegator
+
+
+            votePower2 = await call(voting, 'balanceOf', [signer2.address]);
+            expect(votePower2.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10').add(ethers.utils.parseEther('10')), // increased amount
+                    timestamp8Days,
+                    currentTs).add( // new lock
+                        calculateVotePower(
+                            ethers.utils.parseEther('10'),
+                            timestamp8Days,
+                            currentTs)
+                    ).toString()) // calculated power is appended to the existing one
+
+            // Remove delegation
+            await send(connectedVoting, 'delegate', [zeroAddress]);
+
+            votePower1 = await call(voting, 'balanceOf', [signer1.address]);
+            expect(votePower1.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10').add(ethers.utils.parseEther('10')), // increased amount
+                    timestamp8Days,
+                    currentTs)
+            );
+
+            votePower2 = await call(voting, 'balanceOf', [signer2.address]);
+            expect(votePower2.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10'),
+                    timestamp8Days,
+                    currentTs).toString()
+            )
         });
     });
 
@@ -490,31 +481,61 @@ describe('Voting Escrow', function () {
 
         it('should return correct balance', async () => {
             let balance = await call(voting, 'balanceOf', [signer1.address]);
-            expect(balance.toString()).to.equal("999999999999981504000");
+            let currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(balance.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('1000'),
+                    timestamp4Years,
+                    currentTs).toString()
+            );
 
             // check after 1 year should be current balance * 3 / 4
             await send(voting, 'fastTimestamp', [365]);
 
             let balance1 = await call(voting, 'balanceOf', [signer1.address]);
-            expect(balance1.toString()).to.equal("749999999999986128000");
+            currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(balance1.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('1000'),
+                    timestamp4Years,
+                    currentTs).toString()
+            );
 
             // check after 1 year should be current balance / 2
             await send(voting, 'fastTimestamp', [365]);
 
             let balance2 = await call(voting, 'balanceOf', [signer1.address]);
-            expect(balance2.toString()).to.equal("499999999999990752000");
+            currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(balance2.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('1000'),
+                    timestamp4Years,
+                    currentTs).toString()
+            );
 
             // check after 1 year should be current balance / 4
             await send(voting, 'fastTimestamp', [365]);
 
             let balance3 = await call(voting, 'balanceOf', [signer1.address]);
-            expect(balance3.toString()).to.equal("249999999999995376000");
+            currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(balance3.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('1000'),
+                    timestamp4Years,
+                    currentTs).toString()
+            );
 
             // check after 1 year should be 0
             await send(voting, 'fastTimestamp', [365]);
 
             let balance4 = await call(voting, 'balanceOf', [signer1.address]);
-            expect(balance4.toString()).to.equal("0");
+            currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(balance4.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('1000'),
+                    timestamp4Years,
+                    currentTs).toString()
+            );
         });
     });
 
@@ -538,11 +559,18 @@ describe('Voting Escrow', function () {
 
         it('should return correct balance', async () => {
             let balance = await call(voting, 'balanceOf', [signer1.address]);
-            expect(balance.toString()).to.equal("99999999999999999923328000");
+
+            let currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(balance.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('100000000'),
+                    timestamp4Years,
+                    currentTs).toString()
+            );
         });
     });
 
-    describe('votePower', () => {
+    describe('totalSupply', () => {
         let voting, amptToken;
 
         beforeEach(async () => {
@@ -561,8 +589,16 @@ describe('Voting Escrow', function () {
         });
 
         it('should return correct votePower', async () => {
-            let power = await call(voting, 'votePower', []);
-            expect(power.toString()).to.equal("999999999999981504000");
+            let power = await call(voting, 'totalSupply', []);
+
+            let currentTs = await call(voting, 'getBlockTimestamp', []);
+
+            expect(power.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('1000'),
+                    timestamp4Years,
+                    currentTs).toString()
+            );
         });
 
         it("should return correct votePower for 2 locks", async () => {
@@ -575,11 +611,25 @@ describe('Voting Escrow', function () {
             let connectedVoting1 = await connect(voting, signer2);
             await send(connectedVoting1, 'createLock', [ethers.utils.parseEther('1000'), timestamp4Years]);
 
-            let power = await call(voting, 'votePower', []);
-            expect(power.toString()).to.equal("1999999999999963008000");
+            let power = await call(voting, 'totalSupply', []);
+            let currentTs = await call(voting, 'getBlockTimestamp', []);
+
+
+            expect(power.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('1000'),
+                    timestamp4Years,
+                    currentTs).add(
+                        calculateVotePower(
+                            ethers.utils.parseEther('1000'),
+                            timestamp4Years,
+                            currentTs)
+                    )
+            );
         })
     });
-})
+});
+
 
 async function getVotingContract(admin) {
     let [voting, amptToken, sw] = await deployVotingContract(admin);
@@ -598,4 +648,16 @@ async function deployVotingContract(admin) {
 async function deploySmartWalletChecker() {
     const sw = await deploy("SmartWalletWhitelist");
     return sw;
+}
+
+function calculateVotePower(amount, expiration, currentTs) {
+    let deltaAmount = amount.div(_4years);
+
+    if (currentTs >= expiration) {
+        return ethers.utils.parseEther("0");
+    }
+
+    let deltaTs = expiration - currentTs;
+
+    return deltaAmount.mul(deltaTs);
 }
