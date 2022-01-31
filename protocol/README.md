@@ -1,5 +1,15 @@
 # Amplify Contracts
 
+## Deployments
+| Role | Chain | Address |
+| -------- | -------- | -------- |
+| AMPT Token     | Ethereum     | 0x3F17cfAd23C2014C5a32722557Df87DFF46819dA     |
+| AMPT Token     | Polygon     | 0x4ed92a1de77ee2638a2a42be48dd4720b3a2734a     |
+| AMPT Vault     | Ethereum     | 0xfCCA073Be04a6621f0095665C16A0429B9967e6F     |
+| AMPT Vault     | Polygon     | 0x7BEBdf303441BA3284323F8808cbDE921712cc06     |
+
+Other deployed contracts can be found in JS SDK's [constants.ts](../sdk/src/constants.ts) file.
+
 ## Introduction
 
 ### Related technology
