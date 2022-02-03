@@ -218,6 +218,25 @@ export const abi = [
         "inputs": [
             {
                 "indexed": false,
+                "internalType": "uint256",
+                "name": "oldMax",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMax",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxPoolsByOwnerChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
                 "internalType": "contract IERC20",
                 "name": "oldAmptToken",
                 "type": "address"
@@ -443,6 +462,19 @@ export const abi = [
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "newMax",
+                "type": "uint256"
+            }
+        ],
+        "name": "_setMaxPoolByOwner",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "contract LossProvisionInterface",
                 "name": "newProvisionPool",
                 "type": "address"
@@ -457,7 +489,7 @@ export const abi = [
         "inputs": [
             {
                 "internalType": "address",
-                "name": "stableCoin",
+                "name": "_stableCoin",
                 "type": "address"
             }
         ],
@@ -741,7 +773,7 @@ export const abi = [
         "inputs": [
             {
                 "internalType": "address",
-                "name": "stableCoin",
+                "name": "_stableCoin",
                 "type": "address"
             }
         ],
@@ -1078,6 +1110,19 @@ export const abi = [
     },
     {
         "inputs": [],
+        "name": "maxPoolsByOwner",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "owner",
         "outputs": [
             {
@@ -1110,16 +1155,6 @@ export const abi = [
                 "type": "address"
             },
             {
-                "internalType": "uint256",
-                "name": "depositAmount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "mapIndex",
-                "type": "uint256"
-            },
-            {
                 "internalType": "bool",
                 "name": "created",
                 "type": "bool"
@@ -1128,6 +1163,16 @@ export const abi = [
                 "internalType": "bool",
                 "name": "whitelisted",
                 "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "depositAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "mapIndex",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -1203,7 +1248,7 @@ export const abi = [
         "inputs": [
             {
                 "internalType": "address",
-                "name": "stableCoin",
+                "name": "_stableCoin",
                 "type": "address"
             }
         ],

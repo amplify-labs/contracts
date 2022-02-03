@@ -97,6 +97,6 @@ type VotingInfo @entity {
 type Lock @entity {
     id: ID!
     amount: BigInt!
-    start: BigInt!
     end: BigInt!
+    delegatee: Bytes!
 }

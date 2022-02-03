@@ -416,6 +416,11 @@ export const abi = [
                 "type": "address"
             },
             {
+                "internalType": "bool",
+                "name": "isClosed",
+                "type": "bool"
+            },
+            {
                 "internalType": "uint256",
                 "name": "borrowCap",
                 "type": "uint256"
@@ -444,11 +449,6 @@ export const abi = [
                 "internalType": "uint256",
                 "name": "accrualBlockNumber",
                 "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "isClosed",
-                "type": "bool"
             }
         ],
         "stateMutability": "view",
@@ -766,6 +766,11 @@ export const abi = [
         "name": "penaltyInfo",
         "outputs": [
             {
+                "internalType": "bool",
+                "name": "isOpened",
+                "type": "bool"
+            },
+            {
                 "internalType": "uint256",
                 "name": "maturity",
                 "type": "uint256"
@@ -779,11 +784,6 @@ export const abi = [
                 "internalType": "uint256",
                 "name": "timestamp",
                 "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "isOpened",
-                "type": "bool"
             }
         ],
         "stateMutability": "view",

@@ -175,6 +175,43 @@ export async function withdrawLockedAmount(options: CallOptions = {}): Promise<T
 }
 
 /**
+ * Delegate voting power
+ * @param {string} delegatee delegatee address. 
+ * @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ * transaction. A passed `gasLimit` will be used in both the `approve` (if
+ * not supressed) and `mint` transactions.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const tx = await amplify.delegateVotePower('0xaadsad');
+ *   console.log('tx:', tx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function delegateVotePower(delegatee: string, options: CallOptions = {}): Promise<TrxResponse> {
+    await netId(this);
+    const errorPrefix = 'Amplify [delegate] | ';
+
+    if (
+        typeof delegatee !== 'string' &&
+        !ethers.utils.isAddress(delegatee)
+    ) {
+        throw Error(errorPrefix + 'Argument `delegatee` must be an address');
+    }
+
+    const votingContract = address[this._network.name].VotingEscrow;
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.VotingEscrow,
+        ...options
+    };
+
+    return eth.trx(votingContract, 'delegate', [delegatee], trxOptions);
+}
+
+/**
  * Get contract symbol
  * @returns {string} Returns a string.
  *
@@ -271,7 +308,7 @@ export async function lockedAmount(addr: string, options?: CallOptions): Promise
 
     const votingContract = address[this._network.name].VotingEscrow;
     const result = await eth.read(votingContract, 'locked', [addr], trxOptions);
-    return [result[0].toString(), result[1].toString()];
+    return result.map(r => r.toString());
 }
 
 /**
@@ -299,7 +336,7 @@ export async function totalVotePower(options?: CallOptions): Promise<string> {
     };
 
     const votingContract = address[this._network.name].VotingEscrow;
-    const result = await eth.read(votingContract, 'votePower', [], trxOptions);
+    const result = await eth.read(votingContract, 'totalSupply', [], trxOptions);
     return result.toString();
 }
 
@@ -329,7 +366,7 @@ export async function totalLocked(options?: CallOptions): Promise<string> {
     };
 
     const votingContract = address[this._network.name].VotingEscrow;
-    const result = await eth.read(votingContract, 'totalSupply', [], trxOptions);
+    const result = await eth.read(votingContract, 'totalLocked', [], trxOptions);
     return result.toString();
 }
 
@@ -338,6 +375,7 @@ export interface VotingEscrowInterface {
     increaseLockAmount(value: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
     increaseLockTime(newUnlockTime: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
     withdrawLockedAmount(options?: CallOptions): Promise<TrxResponse>;
+    delegateVotePower(delegatee: string, options?: CallOptions): Promise<TrxResponse>
     voteSymbol(): Promise<string>;
     votePower(addr: string, options?: CallOptions): Promise<string>;
     lockedAmount(addr: string, options?: CallOptions): Promise<string[]>;

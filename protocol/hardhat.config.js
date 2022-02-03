@@ -23,6 +23,13 @@ module.exports = {
       gas: 2100000,
       gasPrice: 8000000000
     },
+    rinkeby: {
+      chainId: 4,
+      url: "https://rinkeby.infura.io/v3/9db365cb1fb444c4afbe9a3a3f1e7faf",
+      accounts: [privateKey],
+      gas: 5600000,
+      gasPrice: 12000000000
+    },
     velas_testnet: {
       chainId: 111,
       url: "https://testnet.velas.com/rpc",
@@ -41,7 +48,7 @@ module.exports = {
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    // apiKey: "5H7T16BMTBV5FHYJ4KYT5QSEKMJ67BQUNM"
+    // apiKey: "97XBW4YPJ4EIWF1WWB71NDI1NWF54T91BD"
     // Your API key for Polygon
     // Obtain one at https://polygonscan.com/myaccount
     apiKey: "T5EE3A81HMYUJYZE7TH2RQBKPQY2FRBGD3"

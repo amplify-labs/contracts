@@ -41,10 +41,16 @@ dataSources:
         - name: VotingAbi
           file: ./abis/Voting.json
       eventHandlers:
-        - event: Deposited(indexed address,uint256,indexed uint256,uint256)
+        - event: Deposited(indexed address,uint256,uint256)
           handler: handleLockDeposit
+        - event: IncreasedAmount(indexed address,uint256)
+          handler: handleLockIncreaseAmount
+        - event: IncreasedTime(indexed address,uint256)
+          handler: handleLockIncreaseTime
         - event: Withdrawn(indexed address,uint256)
           handler: handleLockWithdraw
+        - event: DelegateChanged(indexed address,indexed address)
+          handler: handleLockDelegate
   - kind: ethereum/contract
     name: Controller
     network: "{{network}}"

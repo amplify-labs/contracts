@@ -119,7 +119,54 @@ export async function checkAllowance(
     return result.toString();
 }
 
+/**
+ * Get account balance
+ * @param {string} tokenAddress ERC20 token address.
+ * @param {string} addr Account address.
+* @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ * transaction. A passed `gasLimit` will be used in both the `approve` (if
+ * not supressed) and `mint` transactions.
+ * @returns {string} Returns a string.
+ *
+ * @example
+ * ```
+ * (async function () {
+ *   const balance = await amplify.getBalance('0x34324431242314142daa');
+ *   console.log('balance:', balance);
+ * })().catch(console.error);
+ * ```
+ */
+export async function getBalance(tokenAddress: string, addr: string, options?: CallOptions): Promise<string> {
+    await netId(this);
+    const errorPrefix = 'Amplify [balanceOf] | ';
+
+    if (
+        typeof addr !== 'string' &&
+        !ethers.utils.isAddress(addr)
+    ) {
+        throw Error(errorPrefix + 'Argument `addr` must be an address');
+    }
+
+    if (
+        typeof tokenAddress !== 'string' &&
+        !ethers.utils.isAddress(tokenAddress)
+    ) {
+        throw Error(errorPrefix + 'Argument `tokenAddress` must be an address');
+    }
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.ERC20,
+        ...options
+    };
+
+    const result = await eth.read(tokenAddress, 'balanceOf', [addr], trxOptions);
+    return result.toString();
+}
+
+
 export type Erc20Interface = {
+    getBalance(tokenAddress: string, account: string, options?: CallOptions): Promise<string>;
     checkAllowance(tokenAddress: string, spender: string, options?: CallOptions): Promise<string>;
     approveTransfer(tokenAddress: string, spender: string, amount: string | BigNumber, options?: CallOptions): Promise<TrxResponse>;
 }

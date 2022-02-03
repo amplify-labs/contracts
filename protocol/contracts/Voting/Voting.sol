@@ -506,7 +506,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
 
             lastPoint.block = initialLastPoint.block + blockSlope * (timeIndex - initialLastPoint.ts) / 1e18;
             _vars.epoch += 1;
-            if (timeIndex == _vars.epoch) {
+            if (timeIndex == _vars.ts) {
                 lastPoint.block = _vars.block;
                 break;
             } else {

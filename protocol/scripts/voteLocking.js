@@ -19,6 +19,8 @@ async function deploySmartChecker() {
 async function deployVotingEscrow(sw, name, symbol) {
     // We get the contract to deploy
 
+    const AMPT = "";
+
     if (!AMPT) return;
 
     const VotingEscrow = await ethers.getContractFactory("VotingEscrow");
