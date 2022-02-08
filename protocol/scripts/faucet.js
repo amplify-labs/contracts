@@ -2,7 +2,7 @@ const hre = require("hardhat");
 const ethers = hre.ethers;
 
 async function main() {
-    let ampToken = AMPT;
+    let amptToken = "";
 
     if (!amptToken) return;
     // We get the contract to deploy
