@@ -11,29 +11,32 @@ import * as VestingAbi from "./abis/Vesting";
 
 export const address = {
   "mainnet": {
+    "Controller": "",
     "Asset": "",
-    "Factory": "",
-    "DAI": "",
-    "USDC": "",
-    "USDT": "",
-    "AMPT": "",
+    "SmartWalletChecker": "",
     "VotingEscrow": "",
+    "DAI": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "AMPT": "0x3f17cfad23c2014c5a32722557df87dff46819da",
     "Faucet": "",
     "VestingFactory": "",
+    "VestingLibrary": "",
     "VestingEscrow": ""
   },
   "polygon_mainet": {
-    "Asset": "",
-    "Factory": "",
-    "DAI": "",
-    "USDC": "",
-    "USDT": "",
-    "AMPT": "",
-    "VotingEscrow": "",
+    "Controller": "0x36b5A0C7f7b38D3B8dF61478B14D3a668519Aea0",
+    "Asset": "0xB8693262a1B4aAB40c3374Cc2A027dDBA85c9c57",
     "SmartWalletChecker": "",
+    "VotingEscrow": "",
+    "DAI": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+    "USDC": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+    "USDT": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+    "AMPT": "0x4ED92A1De77EE2638A2a42bE48DD4720B3A2734a",
     "Faucet": "",
-    "VestingFactory": "",
-    "VestingEscrow": ""
+    "VestingFactory": "0xC2FD447DbF4C8ABBB7e952d4605cdEbC58E23aBD",
+    "VestingLibrary": "0x59699F096d51c0Ca936dEaca4e2Fc6590AC5eFB0",
+    "VestingEscrow": "0x2673e2Cf4AaD5359D7961627F97E5F85A94cE497"
   },
   "polygon_mumbai": {
     "Controller": "0x4f3000CA2bb053412a4D20C39393bEFCAb7a05d2",

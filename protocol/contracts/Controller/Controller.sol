@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 22.618 Kbytes
+/// @dev size: 22.545 Kbytes
 pragma solidity 0.8.4;
 
 import "./ControllerStorage.sol";
@@ -58,7 +58,9 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
 
 
     function submitBorrower() external returns (uint256) {
-        transferAMPTDeposit(msg.sender);
+        if (amptDepositAmount > 0) {
+            transferAMPTDeposit(msg.sender);
+        }
 
         if(!borrowers[msg.sender].created) {
             borrowers[msg.sender] = Borrower(
@@ -217,7 +219,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     }
 
     function _setAmptDepositAmount(uint256 newDeposit) external onlyOwner{
-        require(newDeposit > 0, "amount must be greater than 0");
+        require(newDeposit >= 0, "amount must be greater or equal to 0");
 
         uint currentDeposit = amptDepositAmount;
 

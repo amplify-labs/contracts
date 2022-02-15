@@ -193,11 +193,6 @@ describe("Controller", () => {
             ).to.equal(wrongOwner);
         });
 
-        it("should fails because of zero value", async () => {
-            expect(await send(controller, "_setAmptDepositAmount", [0])
-            ).to.equal(vmError("amount must be greater than 0"));
-        });
-
         it("should skip update", async () => {
             await send(controller, "_setAmptDepositAmount", [ethers.utils.parseEther("10")]);
 
@@ -249,6 +244,8 @@ describe("Controller", () => {
 
         beforeEach(async () => {
             [controller, _, amptToken] = await getController(root);
+
+            await send(controller, "_setAmptDepositAmount", [ethers.utils.parseEther("10")]);
         });
 
         it("should fails because of allowance missing", async () => {
@@ -272,6 +269,20 @@ describe("Controller", () => {
             expect(
                 (await call(amptToken, "allowance", [signer1.address, controller.address])).toString()
             ).to.equal(depositAmount.toString());
+
+            await send(connectedController, "submitBorrower");
+
+            let borrower = await call(controller, "borrowers", [signer1.address]);
+
+            expect(borrower.debtCeiling.toString()).to.equal("0");
+            expect(borrower.ratingMantissa.toString()).to.equal("0");
+            expect(borrower.whitelisted).to.equal(false);
+            expect(borrower.created).to.equal(true);
+        });
+
+        it("should skip allowance check if zero deposit and submit the borrower", async () => {
+            await send(controller, "_setAmptDepositAmount", [0]);
+            const connectedController = await connect(controller, signer1);
 
             await send(connectedController, "submitBorrower");
 

@@ -2,12 +2,15 @@
   "name": "amplify-subgraph",
   "license": "UNLICENSED",
   "scripts": {
+    "prepare:matic": "mustache networks/matic.json subgraph.template.yaml > subgraph.yaml",
     "prepare:mumbai": "mustache networks/mumbai.json subgraph.template.yaml > subgraph.yaml",
     "prepare:velastest": "mustache networks/velas_test.json subgraph.template.yaml > subgraph.yaml",
     "codegen": "npm run prepare:mumbai && graph codegen",
+    "build:matic": "npm run prepare:matic && graph build",
     "build:mumbai": "npm run prepare:mumbai && graph build",
     "build:velastest": "npm run prepare:velastest && graph build",
     "deploy:dev": "npm run prepare:mumbai && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ georgeciubotaru/amplify-dev --access-token ${GRAPH_TOKEN}",
+    "deploy:matic": "npm run prepare:matic && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ amplify-labs/amplify-matic --access-token ${GRAPH_TOKEN}",
     "deploy:mumbai": "npm run prepare:mumbai && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ amplify-labs/amplify-stage --access-token ${GRAPH_TOKEN}",
     "create-subgraph-velas": "graph create --node http://graph-node.ampt.tech:8020/ amplify-labs/amplify-velas-test",
     "deploy:velastest": "npm run prepare:velastest && graph deploy --node http://graph-node.ampt.tech:8020/ --ipfs http://graph-node.ampt.tech:5001/ amplify-labs/amplify-velas-test"

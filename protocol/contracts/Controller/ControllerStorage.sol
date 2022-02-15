@@ -7,7 +7,7 @@ import "../LossProvisionPool/LossProvisionInterface.sol";
 import { IERC20 } from "../ERC20/IERC20.sol";
 
 abstract contract ControllerStorage {
-    uint256 public amptDepositAmount = 10e18;
+    uint256 public amptDepositAmount;
     uint256 public maxPoolsByOwner = 50;
 
     LossProvisionInterface public provisionPool;

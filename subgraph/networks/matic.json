@@ -1,0 +1,9 @@
+{
+    "network": "matic",
+    "asset_address": "0xB8693262a1B4aAB40c3374Cc2A027dDBA85c9c57",
+    "asset_start_block": 24928391,
+    "voting_address": "",
+    "voting_start_block": 0,
+    "controller_address": "0x36b5A0C7f7b38D3B8dF61478B14D3a668519Aea0",
+    "controller_start_block": 24931738
+}
