@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 12.206 Kbytes
+/// @dev size: 12.267 Kbytes
 pragma solidity 0.8.4;
 /*
 # Voting escrow to have time-weighted votes
@@ -335,7 +335,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
 
     /**
      * @notice Deposit `value` tokens for `depositer` and add to the lock
-     * @dev Anyone (even a smart contract) can deposit for someone else, but cannot extend their locktime and deposit for a brand new use
+     * @dev Anyone (even a smart contract) can deposit for someone else, but cannot extend their locktime and deposit for a brand new user
      * @param depositer User's wallet address
      * @param value Amount to add to user's lock
     */
@@ -408,10 +408,9 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
 
                 delete delegations[oldDelegatee][delegateeIndex];
                 delete delegationIndexInMap[oldDelegatee][delegator];
-            } else {
-                delegations[delegatee].push(delegator);
-                delegationIndexInMap[delegatee][delegator] = delegations[delegatee].length - 1;
             }
+            delegations[delegatee].push(delegator);
+            delegationIndexInMap[delegatee][delegator] = delegations[delegatee].length - 1;
         }
         delegatorLock.delegator = delegatee;
 

@@ -13,13 +13,14 @@ const _4years = 4 * 365 * day;
 
 
 describe('Voting Escrow', function () {
-    let root, signer1, signer2;
+    let root, signer1, signer2, signer3;
 
     beforeEach(async () => {
         const signers = await ethers.getSigners();
         root = signers[0];
         signer1 = signers[1];
         signer2 = signers[2];
+        signer3 = signers[3];
     })
 
     describe('constructor', () => {
@@ -382,12 +383,16 @@ describe('Voting Escrow', function () {
 
             await send(amptToken, 'transfer', [signer1.address, ethers.utils.parseEther('1000')]);
             await send(amptToken, 'transfer', [signer2.address, ethers.utils.parseEther('1000')]);
+            await send(amptToken, 'transfer', [signer3.address, ethers.utils.parseEther('1000')]);
 
             let connectedAmpt = await connect(amptToken, signer1);
             await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('100')]);
 
             let connectedAmpt2 = await connect(amptToken, signer2);
             await send(connectedAmpt2, 'approve', [voting.address, ethers.utils.parseEther('100')]);
+
+            let connectedAmpt3 = await connect(amptToken, signer3);
+            await send(connectedAmpt3, 'approve', [voting.address, ethers.utils.parseEther('100')]);
 
             let connectedVoting = await connect(voting, signer1);
             await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
@@ -455,6 +460,74 @@ describe('Voting Escrow', function () {
             expect(votePower2.toString()).to.equal(
                 calculateVotePower(
                     ethers.utils.parseEther('10'),
+                    timestamp8Days,
+                    currentTs).toString()
+            )
+        });
+
+        it('should change delegate vote for other user', async () => {
+            let connectedVoting = await connect(voting, signer1);
+            let connectedVoting2 = await connect(voting, signer2);
+            let connectedVoting3 = await connect(voting, signer3);
+
+            await send(connectedVoting, 'delegate', [signer2.address]);
+
+            let votePower1 = await call(voting, 'balanceOf', [signer1.address]);
+            let votePower2 = await call(voting, 'balanceOf', [signer2.address]);
+            let votePower3 = await call(voting, 'balanceOf', [signer3.address]);
+
+            let currentTs = await call(voting, 'getBlockTimestamp', []);
+            expect(votePower1.toString()).to.equal("0");
+            expect(votePower2.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10'),
+                    timestamp8Days,
+                    currentTs).toString());
+            expect(votePower3.toString()).to.equal("0");
+
+            // increase lock amount
+            await send(connectedVoting, 'increaseLockAmount', [ethers.utils.parseEther('10')]);
+
+            // create delegator own lock
+            await send(connectedVoting2, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
+
+            votePower1 = await call(voting, 'balanceOf', [signer1.address]);
+            expect(votePower1.toString()).to.equal("0"); // newly increased amount power goes to the delegator
+
+
+            votePower2 = await call(voting, 'balanceOf', [signer2.address]);
+            expect(votePower2.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10').add(ethers.utils.parseEther('10')), // increased amount
+                    timestamp8Days,
+                    currentTs).add( // new lock
+                        calculateVotePower(
+                            ethers.utils.parseEther('10'),
+                            timestamp8Days,
+                            currentTs)
+                    ).toString()) // calculated power is appended to the existing one
+
+            votePower3 = await call(voting, 'balanceOf', [signer3.address]);
+            expect(votePower3.toString()).to.equal("0"); // no actions made
+
+            // Change delegation
+            await send(connectedVoting, 'delegate', [signer3.address]);
+
+            votePower1 = await call(voting, 'balanceOf', [signer1.address]);
+            expect(votePower1.toString()).to.equal("0");
+
+            votePower2 = await call(voting, 'balanceOf', [signer2.address]);
+            expect(votePower2.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10'),
+                    timestamp8Days,
+                    currentTs).toString()
+            )
+
+            votePower3 = await call(voting, 'balanceOf', [signer3.address]);
+            expect(votePower3.toString()).to.equal(
+                calculateVotePower(
+                    ethers.utils.parseEther('10').add(ethers.utils.parseEther('10')),
                     timestamp8Days,
                     currentTs).toString()
             )
