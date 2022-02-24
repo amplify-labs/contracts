@@ -34,6 +34,7 @@ abstract contract ControllerStorage {
     struct PoolInfo {
         address owner;
         bool isActive;
+        bool isClosed;
     }
 
     mapping(address => PoolInfo) public pools;

@@ -13,7 +13,12 @@ const {
     whitelistBorrower
 } = require("./_controller");
 
-const { PoolType, createPool } = require("./_pool");
+const { PoolType, createPool, createCreditLine } = require("./_pool");
+
+
+const day = 24 * 60 * 60;
+const timestamp = Math.floor(Date.now() / 1000);
+const maturity = timestamp + day * 40;
 
 describe("Controller", () => {
     let root, signer1, signer2;
@@ -740,6 +745,75 @@ describe("Controller", () => {
 
             expect(borrowerPool.owner).to.equal(signer1.address);
             expect(borrowerPool.isActive).to.equal(true);
+        });
+    });
+
+    describe("closePool", () => {
+        let controller, stableCoin, amptToken, poolAddr, assetsFactory;
+        const minDeposit = ethers.utils.parseEther("1");
+
+        beforeEach(async () => {
+            [controller, stableCoin, amptToken, assetsFactory] = await getController(root);
+
+            const connectedController = await connect(controller, signer1);
+
+            await whitelistBorrower(amptToken, controller, signer1);
+            let { events } = await send(connectedController, "createPool", ["TEST", minDeposit, stableCoin.address, PoolType.PUBLIC]);
+
+            poolAddr = events[0].args.pool;
+        });
+
+        it("should close a pool like owner if empty", async () => {
+            const connectedController = await connect(controller, signer1);
+
+            await send(connectedController, "closePool", [poolAddr]);
+
+            let borrowerPool = await call(controller, "pools", [poolAddr]);
+            expect(borrowerPool.isClosed).to.equal(true);
+        });
+
+        it("should close a pool like governor if empty", async () => {
+            await send(controller, "closePool", [poolAddr]);
+
+            let borrowerPool = await call(controller, "pools", [poolAddr]);
+            expect(borrowerPool.isClosed).to.equal(true);
+        });
+
+        it("should fail to close a pool like governor because of existing credit lines", async () => {
+            let pool = await init("PoolHarness", poolAddr);
+            await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, signer1, ethers.utils.parseEther("1"), maturity);
+
+            await send(controller, "closePool", [poolAddr]);
+
+            let borrowerPool = await call(controller, "pools", [poolAddr]);
+            expect(borrowerPool.isClosed).to.equal(false);
+        });
+
+        it("should close a pool like governor with all closed creditLines lines", async () => {
+            let pool = await init("PoolHarness", poolAddr);
+
+            let [l, _] = await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, signer1, ethers.utils.parseEther("1"), maturity);
+
+            const controllerPool = await connect(pool, signer1);
+            await send(controllerPool, "closeCreditLine", [l]);
+
+
+            await send(controller, "closePool", [poolAddr]);
+
+            let borrowerPool = await call(controller, "pools", [poolAddr]);
+            expect(borrowerPool.isClosed).to.equal(true);
+        });
+
+        it("should close a pool like governor because of defaulted credit lines", async () => {
+            let pool = await init("PoolHarness", poolAddr);
+            await send(controller, "setBlockTimestamp", [timestamp]);
+            await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, signer1, ethers.utils.parseEther("1"), maturity);
+
+            await send(controller, "fastTimestamp", [221]);
+            await send(controller, "closePool", [poolAddr]);
+
+            let borrowerPool = await call(controller, "pools", [poolAddr]);
+            expect(borrowerPool.isClosed).to.equal(true);
         });
     })
 

@@ -283,6 +283,19 @@ abstract contract Borrowable is ReentrancyGuard, NonZeroAddressGuard, Exponentia
     function repayAllowed(address _pool, address _payer, address _borrower, uint256 _amount) internal virtual returns (uint256);
     function redeemAsset(uint256 tokenId) internal virtual returns (uint256);
 
+    function getActiveCreditLines() external view returns (uint256[] memory) {
+        uint256 j;
+        uint256[] memory lines = new uint256[](creditLines.length);
+
+        for(uint256 i = 0; i < creditLines.length; i++) {
+            if(!creditLines[i].isClosed) {
+                lines[j] = penaltyInfo[i].maturity;
+                j++;
+            }
+        }
+        return lines;
+    }
+
     function getBorrowIndex(uint256 loanId) public virtual view returns (uint256);
     function getTotalBorrowBalance() public virtual view returns (uint256);
     function getPenaltyIndexAndFee(uint256 loanId) public virtual view returns (uint256, uint256);

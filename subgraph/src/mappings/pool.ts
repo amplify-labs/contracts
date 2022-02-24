@@ -18,6 +18,7 @@ export function createNewPool(event: PoolCreated): void {
 
     pool.totalDeposited = new BigInt(0);
     pool.totalBorrowed = new BigInt(0);
+    pool.isClosed = false;
 
     pool.createdAt = event.block.timestamp;
     pool.assetsLocked = [];

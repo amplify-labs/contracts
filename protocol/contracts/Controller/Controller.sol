@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 22.545 Kbytes
+/// @dev size: 23.797 Kbytes
 pragma solidity 0.8.4;
 
 import "./ControllerStorage.sol";
@@ -22,6 +22,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     address internal _poolLibrary;
 
     event PoolCreated(address indexed pool, address indexed owner, address stableCoin, string name, uint256 minDeposit, uint8 access);
+    event PoolClosed(address indexed pool);
     
     event NewProvisionPool(LossProvisionInterface oldProvisionPool, LossProvisionInterface newProvisionPool);
     event NewInterestRateModel(InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel);
@@ -136,6 +137,23 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         emit PoolCreated(pool, msg.sender, stableCoin, name, minDeposit, uint8(poolAccess));
     }
 
+    function closePool(address pool) nonZeroAddress(pool) external returns (bool success) {
+        PoolInfo storage _poolI = pools[pool];
+        require(_poolI.isActive && !_poolI.isClosed, "Pool is not active or already closed");
+
+        if (_poolI.owner == msg.sender) {
+            _poolI.isClosed = true;
+            emit PoolClosed(pool);
+            return true;
+        } else if (owner == msg.sender) {
+            require(_closePool(pool), "not meeting closing conditions");
+            _poolI.isClosed = true;
+            emit PoolClosed(pool);
+            return true;
+        }
+        return false;
+    }
+
     function getPoolUtilizationRate(address pool) external view returns (uint256) {
         uint256 totalCash = Pool(pool).getCash();
         uint256 totalBorrows = Pool(pool).getTotalBorrowBalance();
@@ -167,6 +185,35 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
     }
 
     // Admin functions
+    function _closePool(address pool) internal nonReentrant  returns (bool success){
+        Pool poolI = Pool(pool);
+
+        uint256[] memory lines = poolI.getActiveCreditLines();
+        uint256 currentTs = getBlockTimestamp();
+        uint256 defaultPeriod = interestRateModel.getDefaultGracePeriod();
+
+        if (lines.length == 0) { // not creditLines created
+            return true;
+        }
+
+        uint256 j; // index for calculating the closed credit lines
+        for (uint256 i = 0; i < lines.length; i++) {
+            if (lines[i] == 0) {
+                j++;
+            }
+
+            if (lines[i] + defaultPeriod < currentTs) {
+                return true;
+            }
+        }
+
+        if (j == lines.length) {
+            return true;
+        }
+
+        return false;
+    }
+
     function _setProvisionPool(LossProvisionInterface newProvisionPool) external onlyOwner {
         require(newProvisionPool.isLossProvision(), "marker method returned false");
 
@@ -344,7 +391,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         PoolInfo storage _pool = pools[pool];
 
         // Check if pool is active
-        if (!_pool.isActive) {
+        if (!_pool.isActive || _pool.isClosed) {
             return uint256(Error.POOL_NOT_ACTIVE);
         }
 
@@ -390,7 +437,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         PoolInfo storage _pool = pools[pool];
 
         // Check if pool is active
-        if (!_pool.isActive) {
+        if (!_pool.isActive || _pool.isClosed) {
             return uint256(Error.POOL_NOT_ACTIVE);
         }
 
@@ -450,7 +497,7 @@ contract Controller is ControllerStorage, Rewards, ControllerErrorReporter, Owna
         CreditLinesLocalVars memory vars;
 
         // Check if pool is active
-        require(_pool.isActive, toString(Error.POOL_NOT_ACTIVE));
+        require(_pool.isActive && !_pool.isClosed, toString(Error.POOL_NOT_ACTIVE));
 
         // Check if collateral asset is supported
         (vars.assetValue, vars.maturity,vars.interestRate,vars.advanceRate,, , vars.owner ,vars.redeemed) = assetsFactory.getTokenInfo(collateralAsset);

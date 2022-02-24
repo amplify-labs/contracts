@@ -60,12 +60,12 @@ module.exports = {
     strict: false,
     exclude: ['PoolHarness', 'ControllerHarness']
   },
-  docgen: {
-    // The path to the docgen config file
-    path: "./docs",
-    clear: true,
-    runOnCompile: true,
-  },
+  // docgen: {
+  //   // The path to the docgen config file
+  //   path: "./docs",
+  //   clear: true,
+  //   runOnCompile: true,
+  // },
   solidity: {
     version: "0.8.4",
     settings: {

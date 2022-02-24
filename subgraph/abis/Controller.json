@@ -335,6 +335,19 @@
                 "internalType": "address",
                 "name": "pool",
                 "type": "address"
+            }
+        ],
+        "name": "PoolClosed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "pool",
+                "type": "address"
             },
             {
                 "indexed": true,
@@ -773,6 +786,25 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "pool",
+                "type": "address"
+            }
+        ],
+        "name": "closePool",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "_stableCoin",
                 "type": "address"
             }
@@ -1196,6 +1228,11 @@
             {
                 "internalType": "bool",
                 "name": "isActive",
+                "type": "bool"
+            },
+            {
+                "internalType": "bool",
+                "name": "isClosed",
                 "type": "bool"
             }
         ],

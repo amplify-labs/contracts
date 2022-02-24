@@ -1,6 +1,7 @@
 type Pool @entity {
     id: ID!
     name: String!
+    isClosed: Boolean!
     access: PoolAccess!
     stableCoin: Bytes!
     owner: Bytes!

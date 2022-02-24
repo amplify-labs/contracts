@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
-    "docgen": "yarn run hardhat docgen",
+    "docgen": "yarn run hardhat docgen --no-compile",
     "deploy:mumbai": "npx hardhat run scripts/deploy.js --network polygon_mumbai",
     "deploy:velastest": "npx hardhat run scripts/deploy.js --network velas_testnet",
     "deploy:matic": "npx hardhat run scripts/deploy.js --network polygon_mainet",
@@ -27,6 +27,6 @@
     "ethers": "^5.4.0",
     "hardhat": "^2.7.0",
     "hardhat-contract-sizer": "^2.1.1",
-    "hardhat-docgen": "^1.2.0"
+    "hardhat-docgen": "1.2.1"
   }
 }

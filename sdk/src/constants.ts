@@ -39,8 +39,8 @@ export const address = {
     "VestingEscrow": "0x2673e2Cf4AaD5359D7961627F97E5F85A94cE497"
   },
   "polygon_mumbai": {
-    "Controller": "0x4f3000CA2bb053412a4D20C39393bEFCAb7a05d2",
-    "Asset": "0x79AB8a947B6da0191ba3FcA471c4290269cd5555",
+    "Controller": "0xd54c2030c82eE11bEf7C26F4111A022FDEcbc46e",
+    "Asset": "0xcC91E89aA32A4c76d9f9D4f24Fc8bF69eA0a70B6",
     "SmartWalletChecker": "0x46BE7f9ED7360E0782570E032b3BdCF3aD21e1f1",
     "VotingEscrow": "0x1499bf7f8309EfDE551ACC1128fA3068f053981D",
     "DAI": "0x86321ca156c655d151474a054f25970acb5b42a8",

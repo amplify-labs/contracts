@@ -1357,6 +1357,50 @@ describe("Pool", () => {
         });
     });
 
+    describe("getActiveCreditLines", () => {
+        let pool, lender, borrower, l1, l2;
+
+        const borrowAmount = ethers.utils.parseEther("1000");
+
+        beforeEach(async () => {
+            borrower = signer1;
+            lender = signer2;
+            const connectedController = await connect(controller, borrower);
+
+            // transfer AMPT tokens to the borrower
+            await send(amptToken, "transfer", [borrower.address, ethers.utils.parseEther("100")]);
+
+            // approve deposit for controller
+            let connectedAmptToken = await connect(amptToken, borrower);
+            await send(connectedAmptToken, "approve", [controller.address, ethers.utils.parseEther("100")]);
+
+            await send(connectedController, "submitBorrower");
+            await send(controller, "whitelistBorrower", [borrower.address, borrowAmount, borrowerRating]);
+
+            // create pool
+            pool = await createPool(connectedController, "TEST", minDeposit, stableCoin, PoolType.PUBLIC);
+
+            const blockNumber = 1;
+
+            [l1, _] = await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, borrower, borrowAmount, maturity);
+            await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, borrower, borrowAmount, maturity);
+            [l2, _] = await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, borrower, borrowAmount, maturity);
+            await createCreditLine(controller, stableCoin, assetsFactory, amptToken, pool, borrower, borrowAmount, maturity);
+
+        });
+
+        it("should return correct value", async () => {
+            let connectedPool = await connect(pool, borrower);
+
+            await send(connectedPool, "closeCreditLine", [l1]);
+            await send(connectedPool, "closeCreditLine", [l2]);
+
+            let activeCL = await call(pool, "getActiveCreditLines", []);
+
+            expect(activeCL.length).to.equal(4);
+        });
+    });
+
     describe("unlockAsset", () => {
         let pool, lender, borrower, tokenId, loanId;
 

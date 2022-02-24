@@ -259,6 +259,50 @@ export async function createPool(name: string, minDeposit: string | number | Big
     return eth.trx(controllerAddr, 'createPool', parameters, trxOptions);
 }
 
+/**
+ * Close a borrrowing pool
+ *
+ * @param {string} pool Pool address
+ * @param {CallOptions} [options] Call options and Ethers.js overrides for the
+ *     transaction. A passed `gasLimit` will be used in both the `approve` (if
+ *     not supressed) and `mint` transactions.
+ *
+ * @returns {object} Returns an Ethers.js transaction object of the createPool
+ *     transaction.
+ *
+ * @example
+ * ```
+ * const amplify = Amplify.createInstance(window.ethereum);
+ *
+ * (async function () {
+ *   const trx = await amplify.closePool('0x....0a');
+ *   console.log('Ethers.js transaction object', trx);
+ * })().catch(console.error);
+ * ```
+ */
+export async function closePool(pool: string, options?: CallOptions): Promise<TrxResponse> {
+    await netId(this);
+    const errorPrefix = 'Amplify [closePool] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    const controllerAddr = address[this._network.name].Controller;
+    const parameters = [pool];
+
+    const trxOptions: CallOptions = {
+        _amplifyProvider: this._provider,
+        abi: abi.Controller,
+        ...options
+    };
+
+    return eth.trx(controllerAddr, 'closePool', parameters, trxOptions);
+}
+
 
 /**
  * Claim the AMPT rewards
@@ -640,6 +684,7 @@ export type ControllerInterface = {
     withdrawLenderDeposit: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
     changeLenderStatus: (lender: string, pool: string, status: string, options?: CallOptions) => Promise<TrxResponse>;
     createPool: (name: string, minDeposit: string | number | BigNumber, stableCoin: string, poolAccess: 0 | 1, options?: CallOptions) => Promise<TrxResponse>;
+    closePool: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
     claimRewards(account: string, options?: CallOptions): Promise<TrxResponse>;
     getStableCoins(options?: CallOptions): Promise<string[]>;
     getPoolAPY(pool: string, options?: CallOptions): Promise<string>;

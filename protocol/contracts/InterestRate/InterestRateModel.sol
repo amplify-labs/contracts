@@ -40,5 +40,6 @@ abstract contract InterestRateModel {
      * @notice Returns the penalty stages array
      */
     function getGracePeriod() external virtual view returns (GracePeriod[] memory);
+    function getDefaultGracePeriod() external virtual view returns (uint256);
     function getGracePeriodSnapshot() external virtual view returns (GracePeriod[] memory, uint256);
 }

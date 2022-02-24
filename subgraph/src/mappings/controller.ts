@@ -2,6 +2,7 @@ import { Bytes, DataSourceContext, store } from '@graphprotocol/graph-ts';
 
 import {
     PoolCreated,
+    PoolClosed,
     BorrowerCreated,
     BorrowerWhitelisted,
     BorrowerBlacklisted,
@@ -24,6 +25,16 @@ export function handlePoolCreation(event: PoolCreated): void {
 
     createNewPool(event);
     handleBorrowerPool(event);
+}
+
+export function handlePoolClose(event: PoolClosed): void {
+    let pool = PoolEntity.load(event.params.pool.toHex());
+
+    if (pool != null) {
+        pool.isClosed = true;
+        pool.save();
+    }
+
 }
 
 // borrower entity
