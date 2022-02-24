@@ -41,8 +41,8 @@ module.exports = {
       chainId: 137,
       url: "https://rpc-mainnet.maticvigil.com",
       accounts: [privateKey],
-      gas: 2100000,
-      gasPrice: 8000000000
+      gas: 5600000,
+      gasPrice: 30900000000
     }
   },
   etherscan: {

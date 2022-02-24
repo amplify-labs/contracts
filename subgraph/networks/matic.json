@@ -1,9 +1,9 @@
 {
     "network": "matic",
-    "asset_address": "0xB8693262a1B4aAB40c3374Cc2A027dDBA85c9c57",
-    "asset_start_block": 24928391,
+    "asset_address": "0x9de343e728783268C5905492012Ac77f593E06B5",
+    "asset_start_block": 25300890,
     "voting_address": "",
     "voting_start_block": 0,
-    "controller_address": "0x36b5A0C7f7b38D3B8dF61478B14D3a668519Aea0",
-    "controller_start_block": 24931738
+    "controller_address": "0xCCc4Ca1a879b0eBA980ED682685619982881F321",
+    "controller_start_block": 25301140
 }
