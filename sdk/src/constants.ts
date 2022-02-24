@@ -25,8 +25,8 @@ export const address = {
     "VestingEscrow": ""
   },
   "polygon_mainet": {
-    "Controller": "0x36b5A0C7f7b38D3B8dF61478B14D3a668519Aea0",
-    "Asset": "0xB8693262a1B4aAB40c3374Cc2A027dDBA85c9c57",
+    "Controller": "0xCCc4Ca1a879b0eBA980ED682685619982881F321",
+    "Asset": "0x9de343e728783268C5905492012Ac77f593E06B5",
     "SmartWalletChecker": "",
     "VotingEscrow": "",
     "DAI": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
