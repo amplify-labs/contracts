@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @dev size: 12.267 Kbytes
+/// @dev size: 12.285 Kbytes
 pragma solidity 0.8.4;
 /*
 # Voting escrow to have time-weighted votes
@@ -88,25 +88,26 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
      * @return User voting power
     */
     function balanceOf(address addr) external view returns (uint256) {
-        uint256 _votePower = 0;
+        uint256 _votePower;
         Lock memory lock = locks[addr];
         
         // User have locked tokens
-        if(lock.amount > 0 && userOwnsTheLock(lock, addr)) {
+        if(lock.amount != 0 && userOwnsTheLock(lock, addr)) {
             _votePower = balanceOfOneLock(addr);
         }
 
         // User have delegated tokens
-        if(delegations[addr].length > 0) {
-            for(uint256 i = 0; i < delegations[addr].length; i++) {
+        uint256 delegationLegth = delegations[addr].length;
+        if(delegationLegth != 0) {
+            for(uint256 i = 0; i < delegationLegth; i++) {
                 _votePower += balanceOfOneLock(delegations[addr][i]);
             }
         }
         return _votePower;
     }
 
-    function userOwnsTheLock(Lock memory _lock, address owner) internal pure returns (bool) {
-        return _lock.owner == owner && _lock.delegator == address(0);
+    function userOwnsTheLock(Lock memory _lock, address lockOwner) internal pure returns (bool) {
+        return _lock.owner == lockOwner && _lock.delegator == address(0);
     }
 
     function balanceOfOneLock(address addr) internal view returns (uint256) {
@@ -147,7 +148,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         
         uint256 _targetEpoch = findBlockEpoch(block_, epoch);
         Point memory point = pointHistory[_targetEpoch];
-        uint256 dt = 0;
+        uint256 dt;
 
         if (epoch > _targetEpoch) {
             Point memory nextPoint = pointHistory[_targetEpoch + 1];
@@ -201,7 +202,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
      * @return Approximate timestamp for block
     */
     function findBlockEpoch(uint256 block_, uint256 epoch_) internal view returns (uint256)  {
-        uint256 _min = 0;
+        uint256 _min;
         uint256 _max = epoch_;
         for(int256 i=0; i <= 128; i++) {
             if (_min >= _max) break;
@@ -235,7 +236,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
     }
 
     function createLockInternal(address depositer, uint256 value, uint256 unlockTime) internal nonReentrant nonZeroAddress(depositer) {
-        require(value > 0, "zero value");
+        require(value != 0, "zero value");
         
         uint256 currentTime = getBlockTimestamp();
         require(unlockTime > currentTime, "unlock time is in the past");
@@ -269,7 +270,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
     }
 
     function increaseLockAmountInternal(address depositer, uint256 value) internal nonReentrant {
-        require(value > 0, "zero value");
+        require(value != 0, "zero value");
 
         Lock storage lock = locks[depositer];
         require(lock.end > getBlockTimestamp(), "lock has expired. Withdraw");
@@ -325,6 +326,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         Lock memory oldLock = lock;
         lock.amount = 0;
         lock.end = 0;
+        totalLocked -= oldLock.amount;
 
         // checkpoint for the lock here;
         checkpointInternal(depositer, oldLock, lock);
@@ -340,10 +342,10 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
      * @param value Amount to add to user's lock
     */
     function depositFor(address depositer, uint256 value) external nonReentrant nonZeroAddress(depositer) {
-        require(value > 0, "zero value");
+        require(value != 0, "zero value");
 
         Lock storage _lock = locks[depositer]; 
-        require(_lock.amount > 0, "no lock found");
+        require(_lock.amount != 0, "no lock found");
         require(_lock.end > getBlockTimestamp(), "Cannot add to expired lock. Withdraw");
 
         Lock memory oldLock = _lock;
@@ -393,7 +395,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         require(delegator != delegatee, "Cannot delegate to self");
 
         Lock storage delegatorLock = locks[delegator];
-        require(delegatorLock.amount > 0, "No existing lock found");
+        require(delegatorLock.amount != 0, "No existing lock found");
         require(delegatorLock.delegator != delegatee, "Cannot delegate to the same address");
 
         address oldDelegatee = delegatorLock.delegator;
@@ -448,12 +450,12 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         );
 
         if (addr != address(0)) {
-            if (oldLock.end > _vars.ts && oldLock.amount > 0) {
+            if (oldLock.end > _vars.ts && oldLock.amount != 0) {
                 _userPointOld.slope = int256(oldLock.amount / MAXCAP);
                 _userPointOld.bias = _userPointOld.slope * int256(oldLock.end - _vars.ts);
             }
 
-            if (newLock.end > _vars.ts && newLock.amount > 0) {
+            if (newLock.end > _vars.ts && newLock.amount != 0) {
                 _userPointNew.slope = int256(newLock.amount / MAXCAP);
                 _userPointNew.bias = _userPointNew.slope * int256(newLock.end - _vars.ts);
             }
@@ -469,13 +471,13 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         }
 
         Point memory lastPoint = Point(0, 0, _vars.ts, _vars.block);
-        if (_vars.epoch > 0) {
+        if (_vars.epoch != 0) {
             lastPoint = pointHistory[_vars.epoch];
         }
 
         uint lastCheckpoint = lastPoint.ts;
         Point memory initialLastPoint = lastPoint;
-        uint256 blockSlope = 0;
+        uint256 blockSlope;
         if (_vars.ts > lastPoint.ts) {
             blockSlope = 1e18 * (_vars.block - lastPoint.block) / (_vars.ts - lastPoint.ts);
         }

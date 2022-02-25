@@ -301,14 +301,17 @@ describe('Voting Escrow', function () {
             await send(voting, 'fastTimestamp', [10]);
 
             let connectedVoting = await connect(voting, signer1);
+            let oldTotalLocked = await call(voting, 'totalLocked');
+            let oldBalanceDelegator = await call(voting, 'locked', [signer1.address]);
 
             await send(connectedVoting, 'withdraw', []);
 
             let balanceDelegator = await call(voting, 'locked', [signer1.address]);
+            let totalLocked = await call(voting, 'totalLocked');
 
-
-            expect(balanceDelegator[0] / 1e18).to.equal(0);
-            expect(balanceDelegator[1] / 1e18).to.equal(0);
+            expect(balanceDelegator[0].toString()).to.equal("0");
+            expect(balanceDelegator[1].toString()).to.equal("0");
+            expect(totalLocked.toString()).to.equal(oldTotalLocked.sub(oldBalanceDelegator[0]).toString());
         });
     });
 
