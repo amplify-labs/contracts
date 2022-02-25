@@ -399,15 +399,12 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         require(delegatorLock.delegator != delegatee, "Cannot delegate to the same address");
 
         address oldDelegatee = delegatorLock.delegator;
+        uint256 delegateeIndex = delegationIndexInMap[oldDelegatee][delegator];
         if (delegatee == address(0)) {
-            uint256 delegateeIndex = delegationIndexInMap[oldDelegatee][delegator];
-
             delete delegations[oldDelegatee][delegateeIndex];
             delete delegationIndexInMap[oldDelegatee][delegator];
         } else {
             if(oldDelegatee != address(0)) {
-                uint256 delegateeIndex = delegationIndexInMap[oldDelegatee][delegator];
-
                 delete delegations[oldDelegatee][delegateeIndex];
                 delete delegationIndexInMap[oldDelegatee][delegator];
             }

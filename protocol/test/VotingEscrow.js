@@ -13,7 +13,7 @@ const _4years = 4 * 365 * day;
 
 
 describe('Voting Escrow', function () {
-    let root, signer1, signer2, signer3;
+    let root, signer1, signer2, signer3, signer4;
 
     beforeEach(async () => {
         const signers = await ethers.getSigners();
@@ -21,6 +21,7 @@ describe('Voting Escrow', function () {
         signer1 = signers[1];
         signer2 = signers[2];
         signer3 = signers[3];
+        signer4 = signers[4];
     })
 
     describe('constructor', () => {
@@ -387,6 +388,7 @@ describe('Voting Escrow', function () {
             await send(amptToken, 'transfer', [signer1.address, ethers.utils.parseEther('1000')]);
             await send(amptToken, 'transfer', [signer2.address, ethers.utils.parseEther('1000')]);
             await send(amptToken, 'transfer', [signer3.address, ethers.utils.parseEther('1000')]);
+            await send(amptToken, 'transfer', [signer4.address, ethers.utils.parseEther('1000')]);
 
             let connectedAmpt = await connect(amptToken, signer1);
             await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('100')]);
@@ -396,6 +398,9 @@ describe('Voting Escrow', function () {
 
             let connectedAmpt3 = await connect(amptToken, signer3);
             await send(connectedAmpt3, 'approve', [voting.address, ethers.utils.parseEther('100')]);
+
+            let connectedAmpt4 = await connect(amptToken, signer4);
+            await send(connectedAmpt4, 'approve', [voting.address, ethers.utils.parseEther('100')]);
 
             let connectedVoting = await connect(voting, signer1);
             await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
@@ -466,6 +471,32 @@ describe('Voting Escrow', function () {
                     timestamp8Days,
                     currentTs).toString()
             )
+        });
+
+        it('should break the functionality', async () => {
+            let connectedVoting = await connect(voting, signer1);
+
+            let connectedVoting4 = await connect(voting, signer4);
+            await send(connectedVoting4, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
+
+            // delegations: signer3 => [signer4]; 
+            await send(connectedVoting4, 'delegate', [signer3.address]);
+
+            // delegations: signer3 => [signer4, signer1]; 
+            await send(connectedVoting, 'delegate', [signer3.address]);
+
+            // delegations: signer2 => [signer1]; 
+            // delegations: signer3 => [signer4, 0x]; 
+            await send(connectedVoting, 'delegate', [signer2.address]);
+
+            // delegations: signer2 => [signer1]; 
+            // delegations: signer3 => [signer4, 0x]; 
+            expect(await send(connectedVoting, 'delegate', [signer2.address])).to.equal(vmError("Cannot delegate to the same address"));
+
+            let currentOldDelegator = await call(voting, 'delegations', [signer3.address, 0]);
+
+            // delegations: signer3 => [signer4, 0x]; 
+            expect(currentOldDelegator).to.equal(signer4.address);
         });
 
         it('should change delegate vote for other user', async () => {
