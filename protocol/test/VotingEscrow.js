@@ -473,7 +473,7 @@ describe('Voting Escrow', function () {
             )
         });
 
-        it('should break the functionality', async () => {
+        it('should not break the functionality', async () => {
             let connectedVoting = await connect(voting, signer1);
 
             let connectedVoting4 = await connect(voting, signer4);
@@ -485,18 +485,22 @@ describe('Voting Escrow', function () {
             // delegations: signer3 => [signer4, signer1]; 
             await send(connectedVoting, 'delegate', [signer3.address]);
 
-            // delegations: signer2 => [signer1]; 
             // delegations: signer3 => [signer4, 0x]; 
+            // delegations: signer2 => [signer1]; 
             await send(connectedVoting, 'delegate', [signer2.address]);
 
-            // delegations: signer2 => [signer1]; 
-            // delegations: signer3 => [signer4, 0x]; 
-            expect(await send(connectedVoting, 'delegate', [signer2.address])).to.equal(vmError("Cannot delegate to the same address"));
+            // delegations: signer2 => [0x]; 
+            // delegations: signer3 => [signer4, 0x, signer1]; 
+            await send(connectedVoting, 'delegate', [signer3.address]);
 
-            let currentOldDelegator = await call(voting, 'delegations', [signer3.address, 0]);
+            let currentOldDelegator1 = await call(voting, 'delegations', [signer3.address, 0]);
+            let currentOldDelegator2 = await call(voting, 'delegations', [signer3.address, 1]);
+            let currentOldDelegator3 = await call(voting, 'delegations', [signer3.address, 2]);
 
-            // delegations: signer3 => [signer4, 0x]; 
-            expect(currentOldDelegator).to.equal(signer4.address);
+            // delegations: signer3 => [signer4, 0x, signer1]; 
+            expect(currentOldDelegator1).to.equal(signer4.address);
+            expect(currentOldDelegator2).to.equal(zeroAddress);
+            expect(currentOldDelegator3).to.equal(signer1.address);
         });
 
         it('should change delegate vote for other user', async () => {
