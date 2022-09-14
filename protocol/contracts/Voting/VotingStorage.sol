@@ -16,6 +16,7 @@ abstract contract VotingStorage {
      * @dev Returns the amount of locked tokens in existence.
     */
     uint256 public totalLocked;
+    uint256 public rewardLocked;
 
     
     struct Point {
@@ -32,15 +33,33 @@ abstract contract VotingStorage {
     mapping(address => mapping(uint256 => Point)) public userPointHistory;
     mapping(address => uint256) public userPointEpoch;
 
+    struct RewardEntry {
+        uint256 start;
+        uint256 end;
+        uint256 amount;
+        uint16 rate;
+    }
 
     struct Lock {
         uint256 amount;
         uint256 end;
         address owner;
         address delegator;
+        RewardEntry[] rewardEntries;
     }
 
     mapping(address => Lock) public locks;
+    
+    /**
+     * Minimum staking period for specific rate
+     * schedules should set from longest to shortest period
+     * to meet getRateByPeriod method looping
+     */
+    struct RateSchedule {
+        uint256 period;
+        uint16 rate;
+    }
+    RateSchedule[] public rateSchedules;
 
     mapping(address => address[]) public delegations;
     mapping(address => mapping(address => uint256)) internal delegationIndexInMap;

@@ -222,7 +222,8 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
      * @notice Record global data to checkpoint
     */
     function checkpoint() external {
-        Lock memory emptyLock = Lock(0, 0, address(0), address(0));
+        RewardEntry[] memory rewardEntries;
+        Lock memory emptyLock = Lock(0, 0, address(0), address(0), rewardEntries);
         checkpointInternal(address(0), emptyLock, emptyLock);
     }
 
@@ -247,6 +248,15 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
 
         Lock memory oldLock = newLock;
 
+        uint16 rate = getRateByPeriod(unlockTime - block.timestamp);
+        RewardEntry memory rewardEntry = RewardEntry(
+            block.timestamp,
+            unlockTime,
+            value,
+            rate
+        );
+
+        newLock.rewardEntries.push(rewardEntry);
         newLock.amount = value;
         newLock.end = unlockTime;
         newLock.owner = depositer;
@@ -275,8 +285,16 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         Lock storage lock = locks[depositer];
         require(lock.end > getBlockTimestamp(), "lock has expired. Withdraw");
 
+        uint16 rate = getRateByPeriod(lock.end - block.timestamp);
+        RewardEntry memory rewardEntry = RewardEntry(
+            block.timestamp,
+            lock.end,
+            value,
+            rate
+        );
         Lock memory oldLock = lock;
         lock.amount += value;
+        lock.rewardEntries.push(rewardEntry);
         totalLocked += value;
 
         // checkpoint for the lock here;
@@ -305,6 +323,14 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         Lock memory oldLock = lock;
         lock.end = newLockTime;
 
+        // Extend the reward end time and find the new rate
+        for (uint i = 0; i < lock.rewardEntries.length; i++) {
+            RewardEntry storage entry = lock.rewardEntries[i];
+            uint16 newRate = getRateByPeriod(newLockTime - entry.start);
+            entry.end = newLockTime;
+            entry.rate = newRate;
+        }
+
         // checkpoint for the lock here;
         checkpointInternal(depositer, oldLock, lock);
 
@@ -323,16 +349,26 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         Lock storage lock = locks[depositer];
         require(lock.end <= getBlockTimestamp(), "lock has not expired yet");
 
+        uint256 rewardAmount = 0;
+        for (uint i = 0; i < lock.rewardEntries.length; i++) {
+            RewardEntry memory entry = lock.rewardEntries[i];
+            rewardAmount += entry.amount * entry.rate / 100; // TODO : check decimal
+        }
+        require(rewardLocked >= rewardAmount, "not enough reward balance");
+        
         Lock memory oldLock = lock;
         lock.amount = 0;
         lock.end = 0;
+        delete lock.rewardEntries;
+
         totalLocked -= oldLock.amount;
+        rewardLocked -= rewardAmount;
 
         // checkpoint for the lock here;
         checkpointInternal(depositer, oldLock, lock);
 
         emit Withdrawn(depositer, oldLock.amount);
-        assert(amptToken.transfer(depositer, oldLock.amount));
+        assert(amptToken.transfer(depositer, oldLock.amount + rewardAmount));
     }
 
     /**
@@ -546,6 +582,49 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
             _userPointNew.block = _vars.block;
             userPointHistory[addr][_vars.userEpoch + 1] = _userPointNew;
         }
+    }
+
+    /**
+     * @notice Seperated reward pool from lock pool by rewardLocked
+     */
+    function rewardDeposit(uint256 value) external {
+        rewardLocked += value;
+        assert(amptToken.transferFrom(msg.sender, address(this), value));
+    }
+
+    function rewardWithdraw(uint256 value) external onlyOwner {
+        require(rewardLocked >= value, "not enough reward balance");
+        rewardLocked -= value;
+        assert(amptToken.transfer(msg.sender, value));
+    }
+
+    /**
+     * @notice Reward schedule array must start from longer period
+     *         for getRateByPeriod loop to find the correct rate
+     */
+    function rewardScheduleUpdate(RateSchedule[] memory _rateSchedules)
+        external onlyOwner
+    {
+        delete rateSchedules;
+        for (uint i = 0; i < _rateSchedules.length; i++) {
+            RateSchedule memory schedule = _rateSchedules[i];
+            rateSchedules.push(schedule);
+        }
+    }
+
+    /**
+     * Search rate from user's staking period from
+     * @param stakingPeriod user's staking period
+     */
+    function getRateByPeriod(uint256 stakingPeriod) internal virtual returns (uint16) {
+        for (uint i = 0; i < rateSchedules.length; i++) {
+            RateSchedule memory schedule = rateSchedules[i];
+            if (stakingPeriod > schedule.period) {
+                return schedule.rate;
+            }
+        }
+
+        return 0;
     }
 
     function getBlockNumber() public virtual view returns (uint256) {

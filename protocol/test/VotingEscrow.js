@@ -8,6 +8,7 @@ const day = 24 * 60 * 60;
 const timestamp = Math.floor(Date.now() / 1000);
 const timestamp7Days = timestamp + 7 * day;
 const timestamp8Days = timestamp + 8 * day;
+const timestamp15Days = timestamp + 15 * day;
 const timestamp4Years = timestamp + 4 * 365 * day;
 const _4years = 4 * 365 * day;
 
@@ -738,6 +739,116 @@ describe('Voting Escrow', function () {
                     )
             );
         })
+    });
+
+    describe('reward', function () {
+        let voting, amptToken, rewardSchedules;
+
+        beforeEach(async () => {
+            [voting, amptToken] = await getVotingContract(root);
+
+            await send(voting, 'setBlockNumber', [1]);
+            await send(voting, 'setBlockTimestamp', [timestamp]);
+            await send(amptToken, 'approve', [voting.address, ethers.utils.parseEther('1000')]);
+            await send(voting, 'rewardDeposit', [ethers.utils.parseEther('100')]);
+
+            rewardSchedules = [
+                { period: 86400 * 20, rate: 5 },
+                { period: 86400 * 10, rate: 3 },
+                { period: 86400, rate: 1 },
+            ];
+            await send(voting, 'rewardScheduleUpdate', [rewardSchedules])
+
+            await send(amptToken, 'transfer', [signer1.address, ethers.utils.parseEther('1000')]);
+
+            let connectedAmpt = await connect(amptToken, signer1);
+            await send(connectedAmpt, 'approve', [voting.address, ethers.utils.parseEther('1000')]);
+        });
+
+        it("success when add reward and withdraw by owner", async () => {
+            /**
+             * Sent on beforeEach
+             */
+            const before = await call(voting, 'rewardLocked');
+            expect(before.toString()).eq(ethers.utils.parseEther('100'));
+
+            await send(voting, 'rewardWithdraw', [ethers.utils.parseEther('100')]);
+
+            const after = await call(voting, 'rewardLocked');
+            expect(after.toString()).eq('0');
+
+            expect(
+                await send(voting, 'rewardWithdraw', [ethers.utils.parseEther('100')])
+            ).to.equal(vmError('not enough reward balance'));
+
+            let connectedVoting = await connect(voting, signer1);
+            expect(
+                await send(connectedVoting, 'rewardWithdraw', [ethers.utils.parseEther('100')])
+            ).to.equal(vmError('Only owner can call this function'));
+        });
+
+        it("succeeds when update reward schedule by owner", async () => {
+            const newRewardSchedules = [
+                { period: 86400 * 20, rate: 50 },
+                { period: 86400 * 10, rate: 30 },
+                { period: 86400, rate: 10 },
+            ];
+
+            let connectedVoting = await connect(voting, signer1);
+            expect(
+                await send(connectedVoting, 'rewardScheduleUpdate', [newRewardSchedules])
+            ).to.equal(vmError('Only owner can call this function'));
+
+            await send(voting, 'rewardScheduleUpdate', [newRewardSchedules])
+            const schedule0 = await call(connectedVoting, 'rateSchedules', [0]);
+            expect(schedule0.rate).equal(newRewardSchedules[0].rate);
+            expect(schedule0.period).equal(newRewardSchedules[0].period);
+        });
+
+        it("should set the correct reward schedule on lock", async () => {
+            let connectedVoting = await connect(voting, signer1);
+            await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
+            let locked = await call(voting, 'locked', [signer1.address]);
+            expect(locked.rewardEntries[0].rate.toString()).eq('1');
+        });
+
+        it("should set the correct reward schedule on increase amount or time", async () => {
+            let connectedVoting = await connect(voting, signer1);
+            
+            await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
+            await send(connectedVoting, 'increaseLockAmount', [ethers.utils.parseEther('10')]);
+            await send(connectedVoting, 'increaseLockTime', [timestamp15Days]);
+
+            let balance = await call(voting, 'locked', [signer1.address]);
+            expect(balance.rewardEntries[0].rate.toString()).eq('3');
+            expect(balance.rewardEntries[1].rate.toString()).eq('3');
+        });
+
+        it('should withdraw the locked tokens', async () => {
+            let connectedAmpt = await connect(amptToken, signer1);
+            let balInitial = await call(connectedAmpt, 'balanceOf', [signer1.address]);
+
+            let connectedVoting = await connect(voting, signer1);
+            await send(connectedVoting, 'createLock', [ethers.utils.parseEther('100'), timestamp8Days]);
+            await send(connectedVoting, 'increaseLockAmount', [ethers.utils.parseEther('100')]);
+            await send(connectedVoting, 'increaseLockTime', [timestamp15Days]);
+            let balAfterStake = await call(connectedAmpt, 'balanceOf', [signer1.address]);
+            expect(balInitial.sub(balAfterStake).toString()).equal(ethers.utils.parseEther('200'));
+
+            await send(voting, 'fastTimestamp', [16]);
+
+            await send(connectedVoting, 'withdraw', []);
+
+            let balanceDelegator = await call(voting, 'locked', [signer1.address]);
+            let totalLocked = await call(voting, 'totalLocked');
+            let balAfterReward = await call(connectedAmpt, 'balanceOf', [signer1.address]);
+            expect(balAfterReward.sub(balInitial)).equal(ethers.utils.parseEther('6'));
+            expect(balanceDelegator[0].toString()).to.equal("0");
+            expect(totalLocked.toString()).to.equal('0');
+
+            let rewardLocked = await call(voting, 'rewardLocked');
+            expect(rewardLocked).equal(ethers.utils.parseEther('94'));
+        });
     });
 });
 
