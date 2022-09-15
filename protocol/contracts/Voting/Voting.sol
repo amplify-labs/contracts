@@ -352,7 +352,7 @@ contract VotingEscrow is VotingStorage, Ownable, ReentrancyGuard, NonZeroAddress
         uint256 rewardAmount = 0;
         for (uint i = 0; i < lock.rewardEntries.length; i++) {
             RewardEntry memory entry = lock.rewardEntries[i];
-            rewardAmount += entry.amount * entry.rate / 100; // TODO : check decimal
+            rewardAmount += entry.amount * entry.rate / 10000;
         }
         require(rewardLocked >= rewardAmount, "not enough reward balance");
         

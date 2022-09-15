@@ -753,9 +753,9 @@ describe('Voting Escrow', function () {
             await send(voting, 'rewardDeposit', [ethers.utils.parseEther('100')]);
 
             rewardSchedules = [
-                { period: 86400 * 20, rate: 5 },
-                { period: 86400 * 10, rate: 3 },
-                { period: 86400, rate: 1 },
+                { period: 86400 * 20, rate: 500 },
+                { period: 86400 * 10, rate: 300 },
+                { period: 86400, rate: 100 },
             ];
             await send(voting, 'rewardScheduleUpdate', [rewardSchedules])
 
@@ -809,7 +809,7 @@ describe('Voting Escrow', function () {
             let connectedVoting = await connect(voting, signer1);
             await send(connectedVoting, 'createLock', [ethers.utils.parseEther('10'), timestamp8Days]);
             let locked = await call(voting, 'locked', [signer1.address]);
-            expect(locked.rewardEntries[0].rate.toString()).eq('1');
+            expect(locked.rewardEntries[0].rate.toString()).eq('100');
         });
 
         it("should set the correct reward schedule on increase amount or time", async () => {
@@ -820,8 +820,8 @@ describe('Voting Escrow', function () {
             await send(connectedVoting, 'increaseLockTime', [timestamp15Days]);
 
             let balance = await call(voting, 'locked', [signer1.address]);
-            expect(balance.rewardEntries[0].rate.toString()).eq('3');
-            expect(balance.rewardEntries[1].rate.toString()).eq('3');
+            expect(balance.rewardEntries[0].rate.toString()).eq('300');
+            expect(balance.rewardEntries[1].rate.toString()).eq('300');
         });
 
         it('should withdraw the locked tokens', async () => {

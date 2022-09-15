@@ -52,8 +52,11 @@ abstract contract VotingStorage {
     
     /**
      * Minimum staking period for specific rate
-     * schedules should set from longest to shortest period
+     * schedules should be set from longest to the shortest period
      * to meet getRateByPeriod method looping
+     * 
+     * Rate will be divided by 10000 to represent 2 decimal places
+     * in integer. 600 = 6.00%
      */
     struct RateSchedule {
         uint256 period;
