@@ -1226,6 +1226,11 @@ export const abi = [
                 "type": "address"
             },
             {
+                "internalType": "uint256",
+                "name": "tokenDecimals",
+                "type": "uint256"
+            },
+            {
                 "internalType": "bool",
                 "name": "isActive",
                 "type": "bool"

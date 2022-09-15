@@ -25,8 +25,9 @@ export const address = {
     "VestingEscrow": ""
   },
   "polygon_mainet": {
-    "Controller": "0xCCc4Ca1a879b0eBA980ED682685619982881F321",
-    "Asset": "0x9de343e728783268C5905492012Ac77f593E06B5",
+    "LossProvisionPool": "0x27A9735746eb7a2B048Aad41E5eB2c39986000D2",
+    "Controller": "0x46e90D9331958678A3872004dD35785A38c68952",
+    "Asset": "0x35D244DFbA76eb56b4Cd42245Df0C90d6cfa262a",
     "SmartWalletChecker": "0x4eAbd9d0E72E706957Bf77eA0534E5Eed0BEbCB0",
     "VotingEscrow": "0xa40FB01e1Df44bc0cbD05348B423C06095790453",
     "DAI": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
@@ -39,18 +40,19 @@ export const address = {
     "VestingEscrow": "0x2673e2Cf4AaD5359D7961627F97E5F85A94cE497"
   },
   "polygon_mumbai": {
-    "Controller": "0xd54c2030c82eE11bEf7C26F4111A022FDEcbc46e",
-    "Asset": "0xcC91E89aA32A4c76d9f9D4f24Fc8bF69eA0a70B6",
+    "LossProvisionPool": "0x7E84465305ED8234661cdaD5e0e947635ba6E396",
+    "Controller": "0xA9B27ed20A1C4e8683B7BacA3007Dd4D4074D40d",
+    "Asset": "0xbA67AEc3de810D7b81D1E5FE88bD46102066b011",
     "SmartWalletChecker": "0x46BE7f9ED7360E0782570E032b3BdCF3aD21e1f1",
-    "VotingEscrow": "0x1499bf7f8309EfDE551ACC1128fA3068f053981D",
-    "DAI": "0x86321ca156c655d151474a054f25970acb5b42a8",
-    "USDC": "0xeb80b946d57902d92c5b90bd8f4968ce3c8c4f9e",
-    "USDT": "0x6861fa406ff83036fb127c7f462a1906f776c3c1",
+    "VotingEscrow": "0x55c53c9798A5975Da836c648D6211c27012c01b0",
+    "DAI": "0xA9d5017985B90A4C4c5a22bd24Cd643f703167f6",
+    "USDC": "0x35D244DFbA76eb56b4Cd42245Df0C90d6cfa262a",
+    "USDT": "0xc139A04E3f69b1A6BEfbe1261A17B9bf2fb0e23C",
     "AMPT": "0x5224EDEE5eeB2A22a319BB9D0D9610fD925FD44f",
     "Faucet": "0xAA2138959B314298A065dF2ed5F9cC83b6F4d9d9",
-    "VestingFactory": "0x100dE7c586f9B0932487426F208bd8B8E8eD8994",
-    "VestingLibrary": "0x0D654d6C51DA05F1AF530223D58bb301f1894B96",
-    "VestingEscrow": "0xEEa8Eb9ba32aFE59bD28880935A760E73E790a29"
+    "VestingFactory": "0x7A175967D387b34BE4B45398ccD6a38303b09898",
+    "VestingLibrary": "0x4910A54D9fd00069B50959FC9839f23460341e27",
+    "VestingEscrow": "0xa02BAeb03D7bb788daC3EE512De65f20607BF547"
   },
   "velas_testnet": {
     "Asset": "0xb8A7E3Ac3010eF846e9cAC18895AA82D35b50865",
@@ -75,13 +77,13 @@ export const supportedStableCoins = {
   },
   USDC: {
     symbol: "USDC",
-    decimals: 18,
+    decimals: 6,
     logoUrl: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=002",
   },
   USDT: {
     symbol: "USDT",
-    decimals: 18,
-    logoUrl: "https://cryptologos.cc/logos/tether-usdt-logo.png?v=002",
+    decimals: 6,
+    logoUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
   },
   AMPT: {
     symbol: "AMPT",

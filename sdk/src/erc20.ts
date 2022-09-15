@@ -10,12 +10,15 @@ import { netId } from './helpers';
 import { abi } from './constants';
 import { CallOptions, TrxResponse } from './types';
 
+import { coins } from "./stablecoins";
+
 /**
  * Approve tokens transfer
  *
  * @param {string} tokenAddress ERC20 token address.
  * @param {string} spender Spender address.
  * @param {string | BigNumber} amount Amount to transfer.
+ * @param {number} decimals Token decimals.
 * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *  transaction. A passed `gasLimit` will be used in both the `approve` (if
  *  not supressed) and `mint` transactions.
@@ -32,19 +35,11 @@ export async function approveTransfer(
     tokenAddress: string,
     spender: string,
     amount: string | BigNumber,
+    decimals = 18,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [approve] | ';
-
-
-    if (
-        typeof amount !== 'string' &&
-        !ethers.BigNumber.isBigNumber(amount)
-    ) {
-        throw Error(errorPrefix + 'Argument `amount` must be a string, or BigNumber.');
-    }
-    amount = ethers.utils.parseEther(amount.toString());
 
     if (
         typeof spender !== 'string' &&
@@ -58,6 +53,19 @@ export async function approveTransfer(
         !ethers.utils.isAddress(tokenAddress)
     ) {
         throw Error(errorPrefix + 'Argument `tokenAddress` must be an address');
+    }
+
+    if (
+        typeof amount !== 'string' &&
+        !ethers.BigNumber.isBigNumber(amount)
+    ) {
+        throw Error(errorPrefix + 'Argument `amount` must be a string, or BigNumber.');
+    }
+    const stableCoinInfo = coins(this._network.id)[tokenAddress.toLowerCase()];
+    if (!stableCoinInfo) {
+        amount = ethers.utils.parseUnits(amount.toString(), decimals);
+    } else {
+        amount = ethers.utils.parseUnits(amount.toString(), stableCoinInfo.decimals);
     }
 
     const trxOptions: CallOptions = {
@@ -168,5 +176,5 @@ export async function getBalance(tokenAddress: string, addr: string, options?: C
 export type Erc20Interface = {
     getBalance(tokenAddress: string, account: string, options?: CallOptions): Promise<string>;
     checkAllowance(tokenAddress: string, spender: string, options?: CallOptions): Promise<string>;
-    approveTransfer(tokenAddress: string, spender: string, amount: string | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    approveTransfer(tokenAddress: string, spender: string, amount: string | BigNumber, decimals?: number, options?: CallOptions): Promise<TrxResponse>;
 }

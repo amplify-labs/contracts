@@ -10,11 +10,14 @@ import { netId } from './helpers';
 import { address, abi } from './constants';
 import { CallOptions, TrxResponse } from './types';
 
+import { coins } from "./stablecoins";
+
 /**
  * Submit the lender application
  *
  * @param {string} pool Pool contract address
  * @param {string | number | BigNumber} depositAmount Amount of tokens intended to be deposited
+ * @param {string} poolToken Pool stablecoin address
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
  *     not supressed) and `mint` transactions.
@@ -27,14 +30,28 @@ import { CallOptions, TrxResponse } from './types';
  * const amplify = Amplify.createInstance(window.ethereum);
  *
  * (async function () {
- *   const trx = await amplify.submitLenderApplication('0x....0a', 100);
+ *   const trx = await amplify.submitLenderApplication('0x....0a', 100, '0x....0a');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
  */
-export async function submitLenderApplication(pool: string, depositAmount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse> {
+export async function submitLenderApplication(pool: string, depositAmount: string | number | BigNumber, poolToken: string, options?: CallOptions): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [requestPoolWhitelist] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    if (
+        typeof poolToken !== 'string' &&
+        !ethers.utils.isAddress(poolToken)
+    ) {
+        throw Error(errorPrefix + 'Argument `poolToken` must be an address');
+    }
 
     if (
         typeof depositAmount !== 'number' &&
@@ -43,14 +60,8 @@ export async function submitLenderApplication(pool: string, depositAmount: strin
     ) {
         throw Error(errorPrefix + 'Argument `depositAmount` must be a string, number, or BigNumber.');
     }
-    depositAmount = ethers.utils.parseEther(depositAmount.toString());
-
-    if (
-        typeof pool !== 'string' &&
-        !ethers.utils.isAddress(pool)
-    ) {
-        throw Error(errorPrefix + 'Argument `pool` must be an address');
-    }
+    const stableCoinInfo = coins(this._network.id)[poolToken.toLowerCase()];
+    depositAmount = ethers.utils.parseUnits(depositAmount.toString(), stableCoinInfo.decimals);
 
     const controllerAddr = address[this._network.name].Controller;
     const parameters = [pool, depositAmount];
@@ -97,7 +108,6 @@ export async function submitBorrowerApplication(options?: CallOptions): Promise<
 
     return eth.trx(controllerAddr, 'submitBorrower', [], trxOptions);
 }
-
 
 /**
  * Withdraw tokens deposited during application
@@ -232,20 +242,21 @@ export async function createPool(name: string, minDeposit: string | number | Big
     const errorPrefix = 'Amplify [createPool] | ';
 
     if (
+        typeof stableCoin !== 'string' &&
+        !ethers.utils.isAddress(stableCoin)
+    ) {
+        throw Error(errorPrefix + 'Argument `stableCoin` must be an address');
+    }
+
+    if (
         typeof minDeposit !== 'number' &&
         typeof minDeposit !== 'string' &&
         !ethers.BigNumber.isBigNumber(minDeposit)
     ) {
         throw Error(errorPrefix + 'Argument `minDeposit` must be a string, number, or BigNumber.');
     }
-    minDeposit = ethers.utils.parseEther(minDeposit.toString());
-
-    if (
-        typeof stableCoin !== 'string' &&
-        !ethers.utils.isAddress(stableCoin)
-    ) {
-        throw Error(errorPrefix + 'Argument `stableCoin` must be an address');
-    }
+    const stableCoinInfo = coins(this._network.id)[stableCoin.toLowerCase()];
+    minDeposit = ethers.utils.parseUnits(minDeposit.toString(), stableCoinInfo.decimals);
 
     const controllerAddr = address[this._network.name].Controller;
     const parameters = [name, minDeposit, stableCoin, poolAccess];
@@ -492,18 +503,27 @@ export async function getTotalBorrowedBalance(
     let loanIds = {};
     for (let i = 0; i < borrowerPools.length; i++) {
         const _loanIds = await eth.read(borrowerPools[i], "getBorrowerLoans", [account], poolOptions);
+        const poolToken = await eth.read(borrowerPools[i], "stableCoin", [], poolOptions);
+
         loanIds = Object.assign(loanIds, {
-            [borrowerPools[i]]: _loanIds
+            [borrowerPools[i]]: {
+                loans: _loanIds,
+                token: poolToken
+            }
         });
     }
 
     const promises: Array<Promise<Array<string>>> = [];
+    const decimals: Array<number> = [];
     for (let i = 0; i < Object.keys(loanIds).length; i++) {
-        const key = Object.keys(loanIds)[i];
-        const values = loanIds[key];
+        const pool = Object.keys(loanIds)[i];
+        const values = loanIds[pool];
 
-        values.forEach((loan: BigNumber) => {
-            promises.push(eth.read(key, "borrowerSnapshot", [loan], poolOptions))
+        const stableCoinInfo = coins(this._network.id)[values.token.toLowerCase()];
+
+        values.loans.forEach((loan: BigNumber) => {
+            promises.push(eth.read(pool, "borrowerSnapshot", [loan], poolOptions))
+            decimals.push(stableCoinInfo.decimals);
         });
     }
 
@@ -511,12 +531,16 @@ export async function getTotalBorrowedBalance(
     let totalPenalties = BigNumber.from(0);
 
     const values = await Promise.all(promises);
-    values.forEach(([t, p]) => {
-        totalBorrowedBalance = totalBorrowedBalance.add(t);
-        totalPenalties = totalPenalties.add(p);
+    values.forEach(([t, p], i) => {
+        totalBorrowedBalance = totalBorrowedBalance.add(toWei(t, decimals[i]));
+        totalPenalties = totalPenalties.add(toWei(p, decimals[i]));
     });
 
     return [totalBorrowedBalance.toString(), totalPenalties.toString()];
+}
+
+function toWei(amount: string, decimals: number): BigNumber {
+    return BigNumber.from(amount).mul(BigNumber.from("10").pow(18 - decimals));
 }
 
 /**
@@ -679,7 +703,7 @@ export async function getEarnestAmount(options: CallOptions = {}): Promise<strin
 }
 
 export type ControllerInterface = {
-    submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, options?: CallOptions) => Promise<TrxResponse>;
+    submitLenderApplication: (pool: string, depositAmount: string | number | BigNumber, poolToken: string, options?: CallOptions) => Promise<TrxResponse>;
     submitBorrowerApplication: (options?: CallOptions) => Promise<TrxResponse>;
     withdrawLenderDeposit: (pool: string, options?: CallOptions) => Promise<TrxResponse>;
     changeLenderStatus: (lender: string, pool: string, status: string, options?: CallOptions) => Promise<TrxResponse>;

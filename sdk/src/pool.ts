@@ -10,10 +10,13 @@ import { netId } from './helpers';
 import { abi } from './constants';
 import { CallOptions, TrxResponse } from './types';
 
+import { coins } from "./stablecoins";
+
 /**
  * Lend tokens in the Pool.
  * @param {string} pool Pool address.
  * @param {string | number | BigNumber} amount Value of the asset in USD.
+ * @param {string} poolToken Pool stablecoin address.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the 
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if 
  *     not supressed) and `mint` transactions.
@@ -26,7 +29,7 @@ import { CallOptions, TrxResponse } from './types';
  * const amplify = Amplify.createInstance(window.ethereum);
  * 
  * (async function () {
- *   const trx = await amplify.lend('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const trx = await amplify.lend('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100', '0x..');
  *   console.log('Ethers.js transaction object', trx);
  * })().catch(console.error);
  * ```
@@ -34,10 +37,25 @@ import { CallOptions, TrxResponse } from './types';
 export async function lend(
     pool: string,
     amount: string | number | BigNumber,
+    poolToken: string,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [lend] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    if (
+        typeof poolToken !== 'string' &&
+        !ethers.utils.isAddress(poolToken)
+    ) {
+        throw Error(errorPrefix + 'Argument `poolToken` must be an address');
+    }
 
     if (
         typeof amount !== 'number' &&
@@ -46,14 +64,8 @@ export async function lend(
     ) {
         throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    amount = ethers.utils.parseEther(amount.toString());
-
-    if (
-        typeof pool !== 'string' &&
-        !ethers.utils.isAddress(pool)
-    ) {
-        throw Error(errorPrefix + 'Argument `pool` must be an address');
-    }
+    const stableCoinInfo = coins(this._network.id)[poolToken.toLowerCase()];
+    amount = ethers.utils.parseUnits(amount.toString(), stableCoinInfo.decimals);
 
 
     const parameters = [amount];
@@ -70,6 +82,7 @@ export async function lend(
  * Redeem tokens from the Pool deposit.
  * @param {string} pool Pool address.
  * @param {string | number | BigNumber} amount Amount of tokens available in the balance.
+ * @param {string} poolToken Pool stablecoin address.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
  *     not supressed) and `mint` transactions.
@@ -79,7 +92,7 @@ export async function lend(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.redeem('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const tx = await amplify.redeem('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100', '0x..');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
@@ -87,10 +100,25 @@ export async function lend(
 export async function redeem(
     pool: string,
     amount: string | number | BigNumber,
+    poolToken: string,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [redeem] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    if (
+        typeof poolToken !== 'string' &&
+        !ethers.utils.isAddress(poolToken)
+    ) {
+        throw Error(errorPrefix + 'Argument `poolToken` must be an address');
+    }
 
     if (
         typeof amount !== 'number' &&
@@ -99,14 +127,8 @@ export async function redeem(
     ) {
         throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    amount = ethers.utils.parseEther(amount.toString());
-
-    if (
-        typeof pool !== 'string' &&
-        !ethers.utils.isAddress(pool)
-    ) {
-        throw Error(errorPrefix + 'Argument `pool` must be an address');
-    }
+    const stableCoinInfo = coins(this._network.id)[poolToken.toLowerCase()];
+    amount = ethers.utils.parseUnits(amount.toString(), stableCoinInfo.decimals);
 
     const trxOptions: CallOptions = {
         _amplifyProvider: this._provider,
@@ -190,6 +212,7 @@ export async function closeCreditLine(loanId: string, pool: string, options: Cal
  * @param {string} pool Pool address.
  * @param {string} loanId Loan ID.
  * @param {string | number | BigNumber} amount Amount tokens to borrow.
+ * @param {string} poolToken Pool stablecoin address.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
  *     not supressed) and `mint` transactions.
@@ -199,7 +222,7 @@ export async function closeCreditLine(loanId: string, pool: string, options: Cal
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.borrow('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1', '100');
+ *   const tx = await amplify.borrow('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '1', '100', '0x..');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
@@ -208,10 +231,25 @@ export async function borrow(
     pool: string,
     loanId: string,
     amount: string | number | BigNumber,
+    poolToken: string,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [borrow] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    if (
+        typeof poolToken !== 'string' &&
+        !ethers.utils.isAddress(poolToken)
+    ) {
+        throw Error(errorPrefix + 'Argument `poolToken` must be an address');
+    }
 
     if (
         typeof amount !== 'number' &&
@@ -220,14 +258,8 @@ export async function borrow(
     ) {
         throw Error(errorPrefix + 'Argument `amount` must be a string, number, or BigNumber.');
     }
-    amount = ethers.utils.parseEther(amount.toString());
-
-    if (
-        typeof pool !== 'string' &&
-        !ethers.utils.isAddress(pool)
-    ) {
-        throw Error(errorPrefix + 'Argument `pool` must be an address');
-    }
+    const stableCoinInfo = coins(this._network.id)[poolToken.toLowerCase()];
+    amount = ethers.utils.parseUnits(amount.toString(), stableCoinInfo.decimals);
 
     const trxOptions: CallOptions = {
         _amplifyProvider: this._provider,
@@ -243,6 +275,7 @@ export async function borrow(
  * @param {string} pool Pool address.
  * @param {string} loanId Loan ID.
  * @param {string | number | BigNumber} amount Amount tokens to repay.
+ * @param {string} poolToken Pool stablecoin address.
  * @param {CallOptions} [options] Call options and Ethers.js overrides for the
  *     transaction. A passed `gasLimit` will be used in both the `approve` (if
  *     not supressed) and `mint` transactions.
@@ -252,7 +285,7 @@ export async function borrow(
  * @example
  * ```
  * (async function () {
- *   const tx = await amplify.repay('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100');
+ *   const tx = await amplify.repay('0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '0x916cCC0963dEB7BEA170AF7822242A884d52d4c7', '100', '0x..');
  *   console.log('Transaction:', tx);
  * })().catch(console.error);
  * ```
@@ -261,10 +294,25 @@ export async function repay(
     pool: string,
     loanId: string,
     amount: string | number | BigNumber,
+    poolToken: string,
     options: CallOptions = {}
 ): Promise<TrxResponse> {
     await netId(this);
     const errorPrefix = 'Amplify [repay] | ';
+
+    if (
+        typeof pool !== 'string' &&
+        !ethers.utils.isAddress(pool)
+    ) {
+        throw Error(errorPrefix + 'Argument `pool` must be an address');
+    }
+
+    if (
+        typeof poolToken !== 'string' &&
+        !ethers.utils.isAddress(poolToken)
+    ) {
+        throw Error(errorPrefix + 'Argument `poolToken` must be an address');
+    }
 
     if (
         typeof amount !== 'number' &&
@@ -275,14 +323,8 @@ export async function repay(
     }
 
     if (!BigNumber.from(amount).eq(ethers.constants.MaxUint256)) {
-        amount = ethers.utils.parseEther(amount.toString());
-    }
-
-    if (
-        typeof pool !== 'string' &&
-        !ethers.utils.isAddress(pool)
-    ) {
-        throw Error(errorPrefix + 'Argument `pool` must be an address');
+        const stableCoinInfo = coins(this._network.id)[poolToken.toLowerCase()];
+        amount = ethers.utils.parseUnits(amount.toString(), stableCoinInfo.decimals);
     }
 
     const trxOptions: CallOptions = {
@@ -455,14 +497,14 @@ export async function poolLpToken(
 }
 
 export interface PoolInterface {
-    lend(pool: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
-    redeem(pool: string, tokenAmount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    lend(pool: string, amount: string | number | BigNumber, poolToken: string, options?: CallOptions): Promise<TrxResponse>;
+    redeem(pool: string, tokenAmount: string | number | BigNumber, poolToken: string, options?: CallOptions): Promise<TrxResponse>;
 
     createCreditLine(tokenId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
     closeCreditLine(loanId: string, pool: string, options?: CallOptions): Promise<TrxResponse>;
 
-    borrow(pool: string, loanId: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
-    repay(pool: string, loanId: string, amount: string | number | BigNumber, options?: CallOptions): Promise<TrxResponse>;
+    borrow(pool: string, loanId: string, amount: string | number | BigNumber, poolToken: string, options?: CallOptions): Promise<TrxResponse>;
+    repay(pool: string, loanId: string, amount: string | number | BigNumber, poolToken: string, options?: CallOptions): Promise<TrxResponse>;
     unlockAsset(pool: string, loanId: string, options?: CallOptions): Promise<TrxResponse>;
 
     getLenderBalance(lender: string, pool: string): Promise<string>;
