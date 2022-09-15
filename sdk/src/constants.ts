@@ -27,8 +27,8 @@ export const address = {
   "polygon_mainet": {
     "Controller": "0xCCc4Ca1a879b0eBA980ED682685619982881F321",
     "Asset": "0x9de343e728783268C5905492012Ac77f593E06B5",
-    "SmartWalletChecker": "",
-    "VotingEscrow": "",
+    "SmartWalletChecker": "0x4eAbd9d0E72E706957Bf77eA0534E5Eed0BEbCB0",
+    "VotingEscrow": "0xa40FB01e1Df44bc0cbD05348B423C06095790453",
     "DAI": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
     "USDC": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
     "USDT": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
